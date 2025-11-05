@@ -1,0 +1,5 @@
+--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app_proc -I ..\cli -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\libraries\drivers\inc -I ..\mesh -I ..\usb\usbd_class\cdc -I ..\usb\usbd_drivers\inc -I ..\peripherals -I ..\radio_func -I ..\radio_interface -I ..\radio_proc -I ..\..\radiodriver\llcc68 -I ..\..\radiodriver\lr11xx -I ..\..\radiodriver\lr20xx -I ..\..\radiodriver\pan3029 -I ..\..\radiodriver\sx126x -I ..\..\radiodriver\sx127x -I ..\..\radiodriver\sx128x
+-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include
+-IC:\Keil_v535\ARM\CMSIS\Include
+-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER
+-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d "..\app_proc\main.c"
