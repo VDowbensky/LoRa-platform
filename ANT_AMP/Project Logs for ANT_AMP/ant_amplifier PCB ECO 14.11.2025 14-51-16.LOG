@@ -1,0 +1,16 @@
+Removed Pin From Net: NetName=NetC5_1 Pin=D1-1
+Removed Pin From Net: NetName=NetC4_2 Pin=D1-2
+Removed Pin From Net: NetName=GND Pin=D1-3
+Added Component: Designator=D?(SOT-23)
+Add component (AddParameter): Name = "Voltage"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Вид"; Value = "Діод"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Виробник"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Примітки"; Value = ""; VariantName = "[No Variations]"
+Added Component: Designator=D?(SOT-23)
+Add component (AddParameter): Name = "Voltage"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Вид"; Value = "Діод"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Виробник"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Примітки"; Value = ""; VariantName = "[No Variations]"
+Added Pin To Net: NetName=GND Pin=D?-1
+Added Pin To Net: NetName=NetC4_2 Pin=D?-2
+Added Pin To Net: NetName=NetC5_1 Pin=D?-3
