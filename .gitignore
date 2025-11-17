@@ -56,3 +56,4 @@ dkms.conf
 *.SchDocPreview
 /ANT_AMP/History
 /node/History
+*.PrjPcbStructure
