@@ -57,3 +57,5 @@ dkms.conf
 /ANT_AMP/History
 /node/History
 *.PrjPcbStructure
+/node_e77/History
+/node_rp2040/History
