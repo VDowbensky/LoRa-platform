@@ -1,0 +1,18 @@
+Removed Pin From Net: NetName=PA12 Pin=JP3-1
+Removed Pin From Net: NetName=PA11 Pin=JP3-2
+Removed Pin From Net: NetName=PA8 Pin=JP3-3
+Change component parameters: Designator = "JP2" ("JP2"); Footprint = "PLS1-12"; UniqueID = "\MAZIIRKU" ("\MAZIIRKU")
+Change component parameters (AddParameter): Name = ""; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Voltage"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Вид"; Value = "Роз'єм"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Виробник"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Примітки"; Value = ""; VariantName = "[No Variations]"
+Change component parameters: Designator = "JP3" ("JP3"); Footprint = "PLS1-12"; UniqueID = "\BJFMJOPI" ("\BJFMJOPI")
+Change component parameters (AddParameter): Name = ""; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Voltage"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Вид"; Value = "Роз'єм"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Виробник"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Примітки"; Value = ""; VariantName = "[No Variations]"
+Added Pin To Net: NetName=PA8 Pin=JP3-1
+Added Pin To Net: NetName=PA12 Pin=JP3-2
+Added Pin To Net: NetName=PA11 Pin=JP3-3

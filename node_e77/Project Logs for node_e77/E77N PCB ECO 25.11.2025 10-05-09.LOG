@@ -1,0 +1,9 @@
+Change component parameters: Designator = "JP1" ("JP1"); Footprint = "PLS1-5"; UniqueID = "\ZSNQZCYM" ("\ZSNQZCYM")
+Change component parameters (AddParameter): Name = ""; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Voltage"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Вид"; Value = "Роз'єм"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Виробник"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Примітки"; Value = ""; VariantName = "[No Variations]"
+Added Pin To Net: NetName=VCC Pin=C2-2
+Added Pin To Net: NetName=VCC Pin=U2-7
+Added Pin To Net: NetName=VCC Pin=U2-10
