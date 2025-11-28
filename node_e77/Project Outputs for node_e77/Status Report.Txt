@@ -1,0 +1,13 @@
+Output: NC Drill Files
+Type  : NC Drill
+From  : Project [node_e77.PrjPcb]
+   Generated File[E77N-RoundHoles.TXT]
+   Generated File[E77N-SlotHoles.TXT]
+   Generated File[E77N.LDP]
+   Generated File[E77N.DRR]
+
+
+Files Generated   : 4
+Documents Printed : 0
+
+Finished Output Generation At 11:33:07 On 28.11.2025
