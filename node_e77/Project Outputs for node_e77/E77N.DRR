@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------------------------------------------------------------
-NCDrill File Report For: E77N.PcbDoc   28.11.2025  11:33:07
+NCDrill File Report For: E77N.PcbDoc   01.12.2025  10:22:00
 ----------------------------------------------------------------------------------------------------------------------------------
 
 Layer Pair : Top Layer to Bottom Layer
@@ -8,12 +8,12 @@ ASCII SlotHoles File : E77N-SlotHoles.TXT
 
 Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
 ----------------------------------------------------------------------------------------------------------------------------------
-T1      0.3mm (12mil)                                             Round             199       PTH        377.47mm (14.86inch)
+T1      0.3mm (12mil)                                             Round             78        PTH        244.06mm (9.61inch)
 T2      0.8mm (31mil)                                             Slot              4         PTH        36.82mm (1.45inch)
 T3      1.14mm (45mil)                                            Round             24        PTH        77.47mm (3.05inch)
 T4      2.1mm (83mil)                                             Round             4         PTH        92.00mm (3.62inch)
 T5      0.75mm (30mil)                                            Round             2         NPTH       5.77mm (0.23inch)
 ----------------------------------------------------------------------------------------------------------------------------------
-Totals                                                                              233
+Totals                                                                              112
 
 Total Processing Time (hh:mm:ss) : 00:00:00
