@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <fileVersion>4</fileVersion>
+    <fileChecksum>2872171689</fileChecksum>
+    <configuration>
+        <name>Release</name>
+        <outputs>
+            <file>$PROJ_DIR$\..\..\usb_lib\ctl_drv\usb_core.c</file>
+            <file>$PROJ_DIR$\..\..\usb_lib\device_core\usbd_ioreq.c</file>
+            <file>$PROJ_DIR$\..\source\usbd_cdc_com.c</file>
+            <file>$PROJ_DIR$\..\source\usb_bsp.c</file>
+            <file>$PROJ_DIR$\..\..\usb_lib\ctl_drv\usb_dcd.c</file>
+            <file>$PROJ_DIR$\..\source\usbd_desc.c</file>
+            <file>$PROJ_DIR$\..\..\usb_lib\device_class\cdc\src\usbd_cdc_core.c</file>
+            <file>$PROJ_DIR$\..\..\usb_lib\device_core\usbd_core.c</file>
+            <file>$PROJ_DIR$\..\..\usb_lib\ctl_drv\usb_dcd_int.c</file>
+            <file>$PROJ_DIR$\..\..\usb_lib\device_core\usbd_req.c</file>
+            <file>$PROJ_DIR$\..\source\usbd_urs.c</file>
+            <file>$PROJ_DIR$\startup_hc32l176.s</file>
+            <file>$PROJ_DIR$\..\source\main.c</file>
+            <file>$PROJ_DIR$\..\..\common\system_hc32l176.c</file>
+            <file>$PROJ_DIR$\..\..\Readme.txt</file>
+        </outputs>
+    </configuration>
+    <configuration>
+        <name>debug</name>
+        <outputs />
+        <forcedrebuild>
+            <name>[MULTI_TOOL]</name>
+            <tool>ILINK</tool>
+        </forcedrebuild>
+    </configuration>
+</project>

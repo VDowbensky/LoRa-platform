@@ -1,0 +1,13 @@
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\bin\armproc.dll" 
+
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\bin\armjlink2.dll" 
+
+"D:\USB相关\USB_OF_L008\usb_virsual_com_slave\usb_cdc_single_vcp\usb_sigle_virtual_com_slave_v0.2\example\EWARM\output\release\Exe\hc32l176.out" 
+
+--plugin="C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\bin\armbat.dll" 
+
+--flash_loader="D:\USB相关\USB_OF_L008\usb_virsual_com_slave\usb_cdc_single_vcp\usb_sigle_virtual_com_slave_v0.2\example\EWARM\config\flashloader\HC32L176.board" 
+
+
+
+

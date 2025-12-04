@@ -1,0 +1,227 @@
+Dependencies for Project 'HC32L176', Target 'HC32L176_Release': (DO NOT MODIFY !)
+CompilerVersion: 5060960::V5.06 update 7 (build 960)::.\ARMCC
+F (.\startup_hc32l176.s)(0x682179CD)(--cpu Cortex-M0+ --li -g --apcs=interwork --pd "__MICROLIB SETA 1"-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include--pd "__UVISION_VERSION SETA 543" --pd "ARMCM0P SETA 1" --pd "_RTE_ SETA 1"-o .\output\release\startup_hc32l176.o --depend .\output\release\startup_hc32l176.d)
+F (..\..\common\system_hc32l176.c)(0x682179CC)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\system_hc32l176.o --omf_browse .\output\release\system_hc32l176.crf --depend .\output\release\system_hc32l176.d)
+I (..\..\common\base_types.h)(0x682179CC)
+I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
+I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
+I (C:\Keil_v535\ARM\ARMCC\include\stddef.h)(0x602569CE)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Keil_v535\ARM\ARMCC\include\assert.h)(0x602569C8)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\..\common\system_hc32l176.h)(0x682179CC)
+F (..\source\main.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\main.o --omf_browse .\output\release\main.crf --depend .\output\release\main.d)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\source\usbd_usr.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_core.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_dcd.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_def.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_conf.h)(0x682179CD)
+I (..\source\usbd_desc.h)(0x682179CD)
+I (..\source\usb_bsp.h)(0x682179CD)
+I (..\..\usb_lib\device_class\cdc\inc\usbd_cdc_core.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_ioreq.h)(0x682179CD)
+I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
+I (..\source\usbd_cdc_com.h)(0x682179CD)
+F (..\..\usb_lib\device_core\usbd_core.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\usbd_core.o --omf_browse .\output\release\usbd_core.crf --depend .\output\release\usbd_core.d)
+I (..\..\usb_lib\device_core\usbd_core.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_dcd.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_def.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_conf.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_req.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_ioreq.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_dcd_int.h)(0x682179CD)
+I (..\source\usb_bsp.h)(0x682179CD)
+F (..\..\usb_lib\device_core\usbd_ioreq.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\usbd_ioreq.o --omf_browse .\output\release\usbd_ioreq.crf --depend .\output\release\usbd_ioreq.d)
+I (..\..\usb_lib\device_core\usbd_ioreq.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_def.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_conf.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\..\usb_lib\device_core\usbd_core.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_dcd.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+F (..\..\usb_lib\device_core\usbd_req.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\usbd_req.o --omf_browse .\output\release\usbd_req.crf --depend .\output\release\usbd_req.d)
+I (..\..\usb_lib\device_core\usbd_req.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_core.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_dcd.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_def.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_conf.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_ioreq.h)(0x682179CD)
+I (..\source\usbd_desc.h)(0x682179CD)
+F (..\..\usb_lib\device_class\cdc\src\usbd_cdc_core.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\usbd_cdc_core.o --omf_browse .\output\release\usbd_cdc_core.crf --depend .\output\release\usbd_cdc_core.d)
+I (..\..\usb_lib\device_class\cdc\inc\usbd_cdc_core.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_ioreq.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_def.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_conf.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\..\usb_lib\device_core\usbd_core.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_dcd.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
+I (..\source\usbd_desc.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_req.h)(0x682179CD)
+F (..\source\usbd_desc.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\usbd_desc.o --omf_browse .\output\release\usbd_desc.crf --depend .\output\release\usbd_desc.d)
+I (..\..\usb_lib\device_core\usbd_core.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_dcd.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_def.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_conf.h)(0x682179CD)
+I (..\source\usbd_desc.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_req.h)(0x682179CD)
+F (..\source\usbd_urs.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\usbd_urs.o --omf_browse .\output\release\usbd_urs.crf --depend .\output\release\usbd_urs.d)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\source\usbd_usr.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_core.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_dcd.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_def.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_conf.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_ioreq.h)(0x682179CD)
+I (..\source\usb_bsp.h)(0x682179CD)
+F (..\source\usb_bsp.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\usb_bsp.o --omf_browse .\output\release\usb_bsp.crf --depend .\output\release\usb_bsp.d)
+I (..\source\usb_bsp.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+F (..\source\usbd_cdc_com.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\usbd_cdc_com.o --omf_browse .\output\release\usbd_cdc_com.crf --depend .\output\release\usbd_cdc_com.d)
+I (..\source\usbd_cdc_com.h)(0x682179CD)
+I (..\..\usb_lib\device_class\cdc\inc\usbd_cdc_core.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_ioreq.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_def.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_conf.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\..\usb_lib\device_core\usbd_core.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_dcd.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
+I (C:\Keil_v535\ARM\ARMCC\include\stdarg.h)(0x602569C6)
+I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
+F (..\..\usb_lib\ctl_drv\usb_core.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\usb_core.o --omf_browse .\output\release\usb_core.crf --depend .\output\release\usb_core.d)
+I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+I (..\source\usb_bsp.h)(0x682179CD)
+F (..\..\usb_lib\ctl_drv\usb_dcd.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\usb_dcd.o --omf_browse .\output\release\usb_dcd.crf --depend .\output\release\usb_dcd.d)
+I (..\..\usb_lib\ctl_drv\usb_dcd.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+I (..\source\usb_bsp.h)(0x682179CD)
+F (..\..\usb_lib\ctl_drv\usb_dcd_int.c)(0x682179CD)(-c --cpu Cortex-M0+ -D__MICROLIB --li -g -O0 -Otime --apcs=interwork --split_sections -I ..\..\common -I ..\source -I ..\..\usb_lib\ctl_drv -I ..\..\usb_lib\device_core -I ..\source -I ..\source\other -I ..\..\hardware_driver\inc -I ..\..\fat -I ..\..\usb_lib\device_class\cdc\inc-I.\RTE\_HC32L176_Release-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include-IC:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\Device\ARM\ARMCM0plus\Include-D__UVISION_VERSION="543" -DARMCM0P -D_RTE_-o .\output\release\usb_dcd_int.o --omf_browse .\output\release\usb_dcd_int.crf --depend .\output\release\usb_dcd_int.d)
+I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
+I (..\..\usb_lib\ctl_drv\usb_dcd_int.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_dcd.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_core.h)(0x682179CD)
+I (..\source\usb_conf.h)(0x682179CD)
+I (..\..\common\hc32l176.h)(0x682179CC)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\core_cm0plus.h)(0x626F912E)
+I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_version.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_compiler.h)(0x626F912E)
+I (C:\Users\Admin\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include\cmsis_armcc.h)(0x626F912E)
+I (..\..\usb_lib\ctl_drv\usb_otg_regs.h)(0x682179CD)
+I (..\..\usb_lib\ctl_drv\usb_defines.h)(0x682179CD)
+I (..\source\usb_bsp.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_conf.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_core.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_def.h)(0x682179CD)
+I (..\..\usb_lib\device_class\cdc\inc\usbd_cdc_core.h)(0x682179CD)
+I (..\..\usb_lib\device_core\usbd_ioreq.h)(0x682179CD)
+I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
+F (..\..\Readme.txt)(0x682179CC)()

@@ -1,0 +1,15 @@
+Change component parameters: Designator = "JP3" ("JP3"); Footprint = "PLS1-2"; UniqueID = "\DTCZQKBJ" ("\DTCZQKBJ")
+Change component parameters (AddParameter): Name = ""; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Voltage"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Вид"; Value = "Роз'єм"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Виробник"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Примітки"; Value = ""; VariantName = "[No Variations]"
+Change component parameters: Designator = "S1" ("S1"); Footprint = "SK-12D07VG5"; UniqueID = "\JVIBTWIN" ("\JVIBTWIN")
+Change component parameters (AddParameter): Name = ""; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Вид"; Value = "Перемикач"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Виробник"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Робоча напруга"; Value = ""; VariantName = "[No Variations]"
+Add Pin To Net: Unknown Pin: Pin D1-1
+Add Pin To Net: Unknown Pin: Pin D1-2
+Add Pin To Net: Unknown Pin: Pin D2-1
+Add Pin To Net: Unknown Pin: Pin D2-2

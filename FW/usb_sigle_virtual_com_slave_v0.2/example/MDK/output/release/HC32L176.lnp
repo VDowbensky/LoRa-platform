@@ -1,0 +1,19 @@
+--cpu Cortex-M0+
+".\output\release\startup_hc32l176.o"
+".\output\release\system_hc32l176.o"
+".\output\release\main.o"
+".\output\release\usbd_core.o"
+".\output\release\usbd_ioreq.o"
+".\output\release\usbd_req.o"
+".\output\release\usbd_cdc_core.o"
+".\output\release\usbd_desc.o"
+".\output\release\usbd_urs.o"
+".\output\release\usb_bsp.o"
+".\output\release\usbd_cdc_com.o"
+".\output\release\usb_core.o"
+".\output\release\usb_dcd.o"
+".\output\release\usb_dcd_int.o"
+--library_type=microlib --strict --scatter ".\output\release\HC32L176.sct"
+--keep=*Handler --summary_stderr --info summarysizes --map --load_addr_map_info --symbols
+--info sizes --info totals
+--list ".\output\release\HC32L176.map" -o .\output\release\HC32L176.axf
