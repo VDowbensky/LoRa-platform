@@ -62,12 +62,12 @@
 
 USB_OTG_CORE_HANDLE  USB_OTG_dev;
 char buf[]="(c) 2025 Gibel Co.\r\n";
-uint16_t tt;
+//uint16_t tt;
 int32_t main(void)
 {
     uint16_t tmp_1;
     tmp_1 = strlen(buf);
-    tt=tmp_1;
+    //tt=tmp_1;
 	USBD_Init(&USB_OTG_dev, USB_OTG_FS_CORE_ID, &USR_desc, &USBD_CDC_cb, &USR_cb);    
     while(1)
     {

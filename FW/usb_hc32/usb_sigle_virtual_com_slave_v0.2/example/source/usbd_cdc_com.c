@@ -190,11 +190,11 @@ uint16_t VCP_DataRx (uint8_t* Buf, uint32_t Len)
 		{
 			if(USB_USART_RX_STA&0x4000)			//接收到了0x0d
 			{
-				if(res!=0x0a)USB_USART_RX_STA=0;//接收错误,重新开始
-				else USB_USART_RX_STA|=0x8000;	//接收完成了 
+				//if(res!=0x0a)USB_USART_RX_STA=0;//接收错误,重新开始
+				//else USB_USART_RX_STA|=0x8000;	//接收完成了 
 			}else //还没收到0X0D
 			{	
-				if(res==0x0d)USB_USART_RX_STA|=0x4000;
+				if((res==0x0d) ||(res==0x0a)) USB_USART_RX_STA|=0x4000;
 				else
 				{
 					USB_USART_RX_BUF[USB_USART_RX_STA&0X3FFF]=res;
@@ -206,31 +206,3 @@ uint16_t VCP_DataRx (uint8_t* Buf, uint32_t Len)
 	}  
 	return USBD_OK;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
