@@ -64,3 +64,6 @@ dkms.conf
 /node_e77/History
 /node_e77/Project Logs for node_e77
 /node_ht62/History
+*.Admin
+*.crf
+*.htm
