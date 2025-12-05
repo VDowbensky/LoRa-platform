@@ -67,3 +67,16 @@ dkms.conf
 *.Admin
 *.crf
 *.htm
+FW/mesh_sniffer/FW_E77_UART2/JLinkSettings.ini
+FW/mesh_sniffer/FW_E77_UART2/JLinkLog.txt
+*.dep
+*.iex
+*.ini
+*.lnp
+*.TMP
+*.dbgdt
+*.dni
+*.ps1
+/FW/usb_hc32/usb_sigle_virtual_com_slave_v0.2/example/EWARM/settings
+/FW/usb_hc32/usb_sigle_virtual_com_slave_v0.2/example/EWARM/output/release/Obj
+/FW/usb_hc32/usb_sigle_virtual_com_slave_v0.2/example/EWARM

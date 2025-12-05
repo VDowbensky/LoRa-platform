@@ -1,0 +1,7 @@
+J-Link V5.12g Log File
+DLL Compiled: May 27 2016 16:57:47
+Logging started @ 2019-03-07 13:18
+
+T2588 000:000 JLINK_Close() (0000ms, 0000ms total)
+T2588 000:000  (0000ms, 0000ms total)
+T2588 000:000 Closed (0000ms, 0000ms total)
