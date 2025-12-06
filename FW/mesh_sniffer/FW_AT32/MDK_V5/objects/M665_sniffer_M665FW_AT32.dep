@@ -38,12 +38,13 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\app\usb_app.h)(0x68EF993C)
 I (..\radioproc\radio_proc.h)(0x690B57FB)
 I (..\radiofunc\radio_func.h)(0x690C6CE3)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\stdbool.h)(0x602569CC)
 I (..\periph\wk_system.h)(0x68F0AC0A)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -68,7 +69,6 @@ I (C:\Keil_v535\ARM\ARMCC\include\math.h)(0x602569C8)
 I (..\radiointerface\pan_interface.h)(0x68FF0620)
 I (..\radiodriver\pan_proc.h)(0x690B4946)
 I (..\mesh\mesh_packet.h)(0x68F8DEA2)
-I (..\periph\wk_adc.h)(0x69317270)
 F (..\periph\at32f413_wk_config.c)(0x68F22BF2)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\at32f413_wk_config.o --omf_browse .\objects\at32f413_wk_config.crf --depend .\objects\at32f413_wk_config.d)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
@@ -1491,7 +1491,7 @@ I (..\middlewares\usbd_class\cdc\cdc_class.h)(0x68B19281)
 F (..\cli\command_interpreter.c)(0x674D4984)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\command_interpreter.o --omf_browse .\objects\command_interpreter.crf --depend .\objects\command_interpreter.d)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdlib.h)(0x602569C4)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\stdbool.h)(0x602569CC)
@@ -1531,6 +1531,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -1541,7 +1542,7 @@ F (..\app\app_cli.c)(0x69316FC9)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROL
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (..\app\app_cli.h)(0x68F8D0B3)
 I (..\cli\command_interpreter.h)(0x674D4984)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\stdbool.h)(0x602569CC)
@@ -1581,6 +1582,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -1612,13 +1614,12 @@ I (C:\Keil_v535\ARM\ARMCC\include\math.h)(0x602569C8)
 I (..\radiointerface\pan_interface.h)(0x68FF0620)
 I (..\radiodriver\pan_proc.h)(0x690B4946)
 I (..\mesh\mesh_packet.h)(0x68F8DEA2)
-I (..\periph\wk_adc.h)(0x69317270)
 F (..\app\retarget.c)(0x692D99CC)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\retarget.o --omf_browse .\objects\retarget.crf --depend .\objects\retarget.d)
 I (..\app\retarget.h)(0x692FDE4D)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\stdbool.h)(0x602569CC)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
 I (..\periph\wk_system.h)(0x68F0AC0A)
 I (..\libraries\cmsis\cm4\device_support\at32f413.h)(0x68B19280)
@@ -1656,6 +1657,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -1665,7 +1667,7 @@ I (..\middlewares\usbd_drivers\inc\usb_std.h)(0x68B19281)
 I (..\periph\usb_conf.h)(0x68EF993C)
 I (..\middlewares\usbd_drivers\inc\usbd_core.h)(0x68B19281)
 F (..\app\bsp.c)(0x692FE28C)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\bsp.o --omf_browse .\objects\bsp.crf --depend .\objects\bsp.d)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -1706,13 +1708,14 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
 I (..\SSD1306\test.h)(0x674D4984)
 F (..\app\flash.c)(0x68E7A8F7)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\flash.o --omf_browse .\objects\flash.crf --depend .\objects\flash.d)
 I (..\app\flash.h)(0x68F8BA87)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -1753,6 +1756,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -1778,9 +1782,9 @@ I (C:\Keil_v535\ARM\ARMCC\include\math.h)(0x602569C8)
 I (..\radiointerface\pan_interface.h)(0x68FF0620)
 I (..\radiodriver\pan_proc.h)(0x690B4946)
 I (..\mesh\mesh_packet.h)(0x68F8DEA2)
-F (..\mesh\mesh_packet.c)(0x6930399B)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\mesh_packet.o --omf_browse .\objects\mesh_packet.crf --depend .\objects\mesh_packet.d)
+F (..\mesh\mesh_packet.c)(0x693281A6)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\mesh_packet.o --omf_browse .\objects\mesh_packet.crf --depend .\objects\mesh_packet.d)
 I (..\mesh\mesh_packet.h)(0x68F8DEA2)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -1821,6 +1825,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -1849,7 +1854,7 @@ I (..\radiodriver\pan_proc.h)(0x690B4946)
 F (..\radioproc\radio_proc.c)(0x6911D134)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\radio_proc.o --omf_browse .\objects\radio_proc.crf --depend .\objects\radio_proc.d)
 I (..\radioproc\radio_proc.h)(0x690B57FB)
 I (..\radiofunc\radio_func.h)(0x690C6CE3)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -1890,6 +1895,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -1963,7 +1969,7 @@ I (..\app\usb_app.h)(0x68EF993C)
 I (..\periph\wk_system.h)(0x68F0AC0A)
 I (..\app\app_cli.h)(0x68F8D0B3)
 I (..\cli\command_interpreter.h)(0x674D4984)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\stdbool.h)(0x602569CC)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
@@ -2042,17 +2048,18 @@ I (..\middlewares\usbd_class\cdc\cdc_desc.h)(0x68B19281)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
 I (..\app\retarget.h)(0x692FDE4D)
 I (C:\Keil_v535\ARM\ARMCC\include\stdbool.h)(0x602569CC)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
 I (..\SSD1306\test.h)(0x674D4984)
 F (..\radiofunc\radio_func.c)(0x6930343B)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\radio_func.o --omf_browse .\objects\radio_func.crf --depend .\objects\radio_func.d)
 I (..\radiofunc\radio_func.h)(0x690C6CE3)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2093,6 +2100,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2120,7 +2128,7 @@ I (..\radiointerface\pan_interface.h)(0x68FF0620)
 I (..\radiodriver\pan_proc.h)(0x690B4946)
 F (..\radiodriver\sx126x.c)(0x68FB20C0)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\sx126x.o --omf_browse .\objects\sx126x.crf --depend .\objects\sx126x.d)
 I (..\radiodriver\sx126x.h)(0x68FB1207)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2161,6 +2169,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2188,7 +2197,7 @@ I (..\radiodriver\pan_proc.h)(0x690B4946)
 I (..\mesh\mesh_packet.h)(0x68F8DEA2)
 F (..\radiodriver\sx126x_proc.c)(0x68FB11F8)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\sx126x_proc.o --omf_browse .\objects\sx126x_proc.crf --depend .\objects\sx126x_proc.d)
 I (..\radiodriver\sx126x_proc.h)(0x68F8C5A1)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2229,6 +2238,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2256,7 +2266,7 @@ I (..\radiodriver\pan_proc.h)(0x690B4946)
 I (..\mesh\mesh_packet.h)(0x68F8DEA2)
 F (..\radiointerface\sx126x_interface.c)(0x68F8C2AD)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\sx126x_interface.o --omf_browse .\objects\sx126x_interface.crf --depend .\objects\sx126x_interface.d)
 I (..\radiointerface\sx126x_interface.h)(0x68F8C2AD)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2297,6 +2307,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2305,7 +2316,7 @@ I (..\periph\wk_spi.h)(0x68EF993C)
 I (..\radiodriver\sx126x.h)(0x68FB1207)
 F (..\radiofunc\userdata_defs.c)(0x692E98EE)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\userdata_defs.o --omf_browse .\objects\userdata_defs.crf --depend .\objects\userdata_defs.d)
 I (..\radiofunc\userdata_defs.h)(0x690A0642)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2346,6 +2357,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2362,7 +2374,7 @@ I (..\radiodriver\lr112x_defs.h)(0x68FF7532)
 I (..\radiodriver\common_defs.h)(0x674D4982)
 F (..\radiodriver\sx128x.c)(0x6909C31C)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\sx128x.o --omf_browse .\objects\sx128x.crf --depend .\objects\sx128x.d)
 I (..\radiodriver\sx128x.h)(0x68FB2EBE)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2403,6 +2415,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2412,7 +2425,7 @@ I (..\radiodriver\sx128x_defs.h)(0x674D4983)
 I (..\periph\wk_spi.h)(0x68EF993C)
 F (..\radiodriver\sx128x_proc.c)(0x68FF885E)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\sx128x_proc.o --omf_browse .\objects\sx128x_proc.crf --depend .\objects\sx128x_proc.d)
 I (..\radiodriver\SX128X_proc.h)(0x68FB13D8)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2453,6 +2466,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2480,7 +2494,7 @@ I (..\radiodriver\pan_proc.h)(0x690B4946)
 I (..\mesh\mesh_packet.h)(0x68F8DEA2)
 F (..\radiodriver\lr112x.c)(0x6911B7B5)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\lr112x.o --omf_browse .\objects\lr112x.crf --depend .\objects\lr112x.d)
 I (..\radiodriver\lr112x.h)(0x6911AE59)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2521,6 +2535,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2531,7 +2546,7 @@ I (..\radiodriver\common_defs.h)(0x674D4982)
 I (..\periph\wk_spi.h)(0x68EF993C)
 F (..\radiodriver\lr112x_proc.c)(0x6900D3C6)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\lr112x_proc.o --omf_browse .\objects\lr112x_proc.crf --depend .\objects\lr112x_proc.d)
 I (..\radiodriver\lr112x_proc.h)(0x68FF0620)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2572,6 +2587,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2605,7 +2621,7 @@ I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (..\radiodriver\pan_rf.h)(0x69314B4D)
 I (C:\Keil_v535\ARM\ARMCC\include\math.h)(0x602569C8)
 I (..\radiointerface\pan_interface.h)(0x68FF0620)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdbool.h)(0x602569CC)
 I (..\periph\wk_system.h)(0x68F0AC0A)
 I (..\libraries\cmsis\cm4\device_support\at32f413.h)(0x68B19280)
@@ -2643,6 +2659,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2650,7 +2667,7 @@ I (..\SSD1306\test.h)(0x674D4984)
 I (..\periph\wk_spi.h)(0x68EF993C)
 F (..\radiodriver\pan_proc.c)(0x69314BA8)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\pan_proc.o --omf_browse .\objects\pan_proc.crf --depend .\objects\pan_proc.d)
 I (..\radiodriver\pan_proc.h)(0x690B4946)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2691,6 +2708,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2718,7 +2736,7 @@ I (..\radiodriver\sx128x_proc.h)(0x68FB13D8)
 I (..\radiodriver\lr112x_proc.h)(0x68FF0620)
 F (..\radiointerface\lr112x_interface.c)(0x6911C9B6)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\lr112x_interface.o --omf_browse .\objects\lr112x_interface.crf --depend .\objects\lr112x_interface.d)
 I (..\radiointerface\lr112x_interface.h)(0x6909F2D7)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2759,6 +2777,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2768,7 +2787,7 @@ I (..\radiodriver\common_defs.h)(0x674D4982)
 I (..\periph\wk_spi.h)(0x68EF993C)
 F (..\radiointerface\pan_interface.c)(0x68FB7CB3)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\pan_interface.o --omf_browse .\objects\pan_interface.crf --depend .\objects\pan_interface.d)
 I (..\radiointerface\pan_interface.h)(0x68FF0620)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2809,6 +2828,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2818,7 +2838,7 @@ I (C:\Keil_v535\ARM\ARMCC\include\math.h)(0x602569C8)
 I (..\periph\wk_spi.h)(0x68EF993C)
 F (..\radiointerface\sx128x_interface.c)(0x68FB0BAE)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\sx128x_interface.o --omf_browse .\objects\sx128x_interface.crf --depend .\objects\sx128x_interface.d)
 I (..\radiointerface\sx128x_interface.h)(0x68FB0B49)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2859,6 +2879,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
@@ -2869,7 +2890,7 @@ F (..\SSD1306\gui.c)(0x674D4984)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROL
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
 I (..\SSD1306\oledfont.h)(0x674D4984)
 I (..\SSD1306\gui.h)(0x674D4984)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\stdbool.h)(0x602569CC)
@@ -2909,13 +2930,14 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\test.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
 I (..\periph\wk_spi.h)(0x68EF993C)
 F (..\SSD1306\ssd1306.c)(0x674D4984)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\ssd1306.o --omf_browse .\objects\ssd1306.crf --depend .\objects\ssd1306.d)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -2956,13 +2978,14 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\test.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
 I (..\periph\wk_spi.h)(0x68EF993C)
 F (..\SSD1306\ssd1306_interface.c)(0x692FF4C0)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ..\app -I ..\cli -I ..\libraries\drivers\inc -I ..\libraries\cmsis\cm4\core_support -I ..\libraries\cmsis\cm4\device_support -I ..\mesh -I ..\middlewares\usbd_class\cdc -I ..\middlewares\usbd_drivers\inc -I ..\periph -I ..\radiodriver -I ..\radiofunc -I ..\radiointerface -I ..\radioproc -I ..\SSD1306-IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\Include-IC:\Keil_v535\ARM\CMSIS\Include-D__UVISION_VERSION="543" -DAT32F413CBT7 -DAT32F413CBT7 -DUSE_STDPERIPH_DRIVER-o .\objects\ssd1306_interface.o --omf_browse .\objects\ssd1306_interface.crf --depend .\objects\ssd1306_interface.d)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
@@ -3003,6 +3026,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\gui.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\test.h)(0x674D4984)
@@ -3011,7 +3035,7 @@ F (..\SSD1306\test.c)(0x674D4984)(--c99 --gnu -c --cpu Cortex-M4.fp.sp -D__MICRO
 I (C:\Keil_v535\ARM\ARMCC\include\stdlib.h)(0x602569C4)
 I (C:\Keil_v535\ARM\ARMCC\include\stdio.h)(0x602569C4)
 I (..\SSD1306\gui.h)(0x674D4984)
-I (..\app\bsp.h)(0x69315B83)
+I (..\app\bsp.h)(0x69327DE3)
 I (C:\Keil_v535\ARM\ARMCC\include\stdint.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\string.h)(0x602569CE)
 I (C:\Keil_v535\ARM\ARMCC\include\stdbool.h)(0x602569CC)
@@ -3051,6 +3075,7 @@ I (..\libraries\drivers\inc\at32f413_wwdt.h)(0x68B19280)
 I (..\periph\at32f413_wk_config.h)(0x692FF3F9)
 I (..\periph\at32f413_int.h)(0x68F0A87C)
 I (..\app\usb_app.h)(0x68EF993C)
+I (..\periph\wk_adc.h)(0x69317270)
 I (..\SSD1306\test.h)(0x674D4984)
 I (..\SSD1306\ssd1306.h)(0x674D4984)
 I (..\SSD1306\ssd1306_interface.h)(0x692FF3F9)

@@ -9,7 +9,7 @@
 #include "at32f413_wk_config.h"
 #include "at32f413_int.h"
 #include "usb_app.h"
-
+#include "wk_adc.h"
 #include "gui.h"
 #include "test.h"
 

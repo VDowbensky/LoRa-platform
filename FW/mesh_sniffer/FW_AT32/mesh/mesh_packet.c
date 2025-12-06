@@ -54,9 +54,14 @@ void print_meshtastic_packet(void)
   printf("\r\n");
 #if OLED_ENABLED
 	SSD1306_Clear(0);
-	if(crc_error) sprintf(strbuffer,"FERR:SNR:%.1f",pktstatus.snr_pkt);
-	else sprintf(strbuffer,"RPCK:SNR:%.1f",pktstatus.snr_pkt);
+	//sprintf(strbuffer,"BATT: %.3fV",Vbatt);
+	//GUI_ShowString(0,0,strbuffer,8,1);
+	if(crc_error) sprintf(strbuffer,"FERR:%.1f",pktstatus.snr_pkt);
+	else sprintf(strbuffer,"RPCK:%.1f",pktstatus.snr_pkt);
 	GUI_ShowString(0,0,strbuffer,8,1);
+	sprintf(strbuffer," %.3fV",Vbatt);
+	GUI_ShowString(80,0,strbuffer,8,1);
+	
 	sprintf(strbuffer,"RSSI:%.1f,%.1f",pktstatus.rssi_pkt,pktstatus.signal_rssi_pkt);
 	GUI_ShowString(0,8,strbuffer,8,1);
 	
@@ -66,11 +71,12 @@ void print_meshtastic_packet(void)
 	GUI_ShowString(0,24,strbuffer,8,1);
 	sprintf(strbuffer,"PKT:0x%08X",rxmessage.packet_id);
 	GUI_ShowString(0,32,strbuffer,8,1);
-	sprintf(strbuffer,"Start:%d,Limit:%d",hop_start,hop_limit);
+	sprintf(strbuffer,"S:%d,L:%d,H:0x%02X,R:0x%02X",hop_start,hop_limit,rxmessage.channel_hash,rxmessage.relay_node);
 	GUI_ShowString(0,40,strbuffer,8,1);
-	sprintf(strbuffer,"Hash:0x%02X,Relay:0x%02X",rxmessage.channel_hash,rxmessage.relay_node);
-	GUI_ShowString(0,48,strbuffer,8,1);
+	//sprintf(strbuffer,"Hash:0x%02X,Relay:0x%02X",rxmessage.channel_hash,rxmessage.relay_node);
 	sprintf(strbuffer,"WantAck:%d,MQTT:%d",want_ack,mqtt);
+	GUI_ShowString(0,48,strbuffer,8,1);
+	sprintf(strbuffer,"Payload: %d",rxlen - 16);
 	GUI_ShowString(0,56,strbuffer,8,1);
 	
 	
