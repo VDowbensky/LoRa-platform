@@ -326,8 +326,8 @@
             <wLevel>0</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
-            <uGnu>0</uGnu>
+            <uC99>1</uC99>
+            <uGnu>1</uGnu>
             <useXO>0</useXO>
             <v6Lang>1</v6Lang>
             <v6LangP>3</v6LangP>
@@ -403,6 +403,16 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\source\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_cli.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\app_cli.c</FilePath>
+            </File>
+            <File>
+              <FileName>retarget.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\retarget.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -483,6 +493,16 @@
               <FileName>Readme.txt</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\Readme.txt</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>cli</GroupName>
+          <Files>
+            <File>
+              <FileName>command_interpreter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\cli\command_interpreter.c</FilePath>
             </File>
           </Files>
         </Group>

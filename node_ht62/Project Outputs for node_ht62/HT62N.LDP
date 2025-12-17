@@ -1,0 +1,3 @@
+Layer Pairs Export File for PCB: D:\RFprojects\LoRa-platform\node_ht62\HT62N.PcbDoc
+LayersSetName=Top_Bot_Thru_Holes|DrillFile=ht62n-roundholes.txt|DrillLayers=gtl,gbl
+LayersSetName=Top_Bot_Slot_Holes|DrillFile=ht62n-slotholes.txt|DrillLayers=gtl,gbl
