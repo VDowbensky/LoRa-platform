@@ -476,6 +476,10 @@ int8_t PAN_ConfigDefaultParams(void)
   {
     PAN_WritePageReg(g_RfDefaultConfig[i].Page, g_RfDefaultConfig[i].Addr, g_RfDefaultConfig[i].Value);
   }
+	//added for SX126x compatibility - testing needed!!!
+	uint8_t tempreg = PAN_ReadPageReg(3,0x12);
+	PAN_WritePageReg(1,0x25,0x48);
+	PAN_WritePageReg(3,0x12,(0x02 | (tempreg & 0x08)));
   return PAN_OK;
 }
 

@@ -122,7 +122,8 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     radioconfig.prelen = 16;
     radioconfig.header = 0;
     radioconfig.paylen = 255; //???
-    radioconfig.crc = 1;
+    //radioconfig.crc = 1;
+		radioconfig.crc = 0; //mandatory for SX126x compatibility
     radioconfig.invertiq = 0;
     //params[64]; //maybe different
 //		if(tcxo) 
@@ -282,7 +283,7 @@ int8_t radio_init(void)
 		PAN_SetBW(PAN_bw[radioconfig.bw_index]);              /* Set the bandwidth */
 		PAN_SetSF(radioconfig.sf);              /* Set the spreading factor */
 		PAN_SetCR(radioconfig.cr);              /* Set the channel coding rate */
-		PAN_SetCRC(radioconfig.crc);            /* Set the CRC check */
+		PAN_SetCRC(radioconfig.crc);            /* Set the CRC check. Disable for regular LoRa compatibility! */
 		PAN_SetLDR(radioconfig.ldropt);            /* Set the low-rate mode */
 		PAN_SetPreamLen(radioconfig.prelen);  /* Set the preamble length */
 		PAN_SetInvertIQ(radioconfig.invertiq); /* Set IQ to non-inverted */
