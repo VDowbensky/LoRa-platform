@@ -96,3 +96,4 @@ FW/usb_hc32/usb_sigle_virtual_com_slave_v0.2/example/MDK/JLinkLog.txt
 *.dep
 *.crf
 *.Admin
+FW/mesh_sniffer/FW_RA08/tremo_mesh.uvguix.Admin
