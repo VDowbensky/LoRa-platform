@@ -90,3 +90,9 @@ FW/usb_hc32/usb_sigle_virtual_com_slave_v0.2/example/MDK/JLinkLog.txt
 /ANT_AMP/History
 *.drc
 *.html
+*.dep
+*.htm
+*.odt#
+*.dep
+*.crf
+*.Admin

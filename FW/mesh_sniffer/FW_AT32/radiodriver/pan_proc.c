@@ -72,7 +72,7 @@ void PAN_irq_handler(void)
     uint8_t Flags;
 
     Flags = PAN_GetIRQFlag();    /* Get interrupt flags */
-		//printf("Flags:0x%02X\r\n",Flags);
+		printf("Flags:0x%02X\r\n",Flags);
     if (Flags & PAN_IRQ_TX_DONE) /* Transmit complete interrupt */
     {
       PAN_TurnoffPA();                /* Turn off PA after transmission completes */

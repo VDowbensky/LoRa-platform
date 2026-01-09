@@ -289,10 +289,11 @@ int8_t radio_init(void)
 		PAN_SetInvertIQ(radioconfig.invertiq); /* Set IQ to non-inverted */
 		PAN_SetSyncWord(radioconfig.sync & 0xff);
 		PAN_SetRegulatorMode(USE_LDO);         /* Set the chip to LDO power mode */
-		PAN_SetChipMode(CHIPMODE_MODE0);       /* Set the chip mode to MODE0 */
+		//PAN_SetChipMode(CHIPMODE_MODE0);
+		//PAN_SetChipMode(CHIPMODE_MODE1);       /* Set the chip mode to MODE1 */
 		//enable interrupts
-		//PAN_SetPageRegBits(0,0x58,PAN_IRQ_TX_DONE | PAN_IRQ_RX_DONE | PAN_IRQ_CRC_ERR);
-		PAN_SetPageRegBits(0,0x58,0xff);
+		PAN_SetPageRegBits(0,0x58,PAN_IRQ_TX_DONE | PAN_IRQ_RX_DONE | PAN_IRQ_CRC_ERR);
+		//PAN_SetPageRegBits(0,0x58,0xff);
 		//STB3 now
 		radio_rx();
 		return RADIO_OK;
