@@ -169,14 +169,14 @@ void cli_getver(int argc, char **argv)
 
 void cli_getdevid(int argc, char **argv)
 {
-  printf("GET_DEVID: 0x%04X\r\n", radioconfig.id);
+  printf("GET_DEVID: 0x%08X\r\n", radioconfig.id);
 }
 
 void cli_setdevid(int argc, char **argv)
 {
   radioconfig.id = ciGetUnsigned(argv[1]);
   writeconfig();
-  printf("SET_DEVID: 0x%04X\r\n", radioconfig.id);
+  printf("SET_DEVID: 0x%08X\r\n", radioconfig.id);
 }
 
 void cli_getfreq(int argc, char **argv)
@@ -360,7 +360,7 @@ void cli_setpacketparams(int argc, char **argv)
 	printf("SET_PACKETPARAMS: ");
 	if(err == RADIO_OK) 
 	{
-		printf("SET_PACKETPARAMS:\r\nSYNC=0x%04X,PRE_LEN=%d\r\nPAY_LEN=%d\r\nHEADER:",radioconfig.sync,radioconfig.prelen,radioconfig.paylen);
+		printf("\r\nSYNC=0x%04X,PRE_LEN=%d\r\nPAY_LEN=%d\r\nHEADER:",radioconfig.sync,radioconfig.prelen,radioconfig.paylen);
     if(radioconfig.header == 1) printf("IMPLICIT\r\n");
     else printf("EXPLICIT\r\n");
     printf("CRC:");

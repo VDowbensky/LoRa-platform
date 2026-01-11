@@ -192,14 +192,14 @@ void cli_getver(int argc, char **argv)
 
 void cli_getdevid(int argc, char **argv)
 {
-  printf("GET_DEVID: 0x%04X\r\n", radioconfig.id);
+  printf("GET_DEVID: 0x%08X\r\n", radioconfig.id);
 }
 
 void cli_setdevid(int argc, char **argv)
 {
   radioconfig.id = ciGetUnsigned(argv[1]);
   writeconfig();
-  printf("SET_DEVID: 0x%04X\r\n", radioconfig.id);
+  printf("SET_DEVID: 0x%08X\r\n", radioconfig.id);
 }
 
 void cli_getfreq(int argc, char **argv)
