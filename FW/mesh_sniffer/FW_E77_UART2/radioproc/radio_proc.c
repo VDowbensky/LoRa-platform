@@ -44,23 +44,23 @@ void radio_proc(void)
   {
     tx_request = false;
     prepareTxPacket();
-    //led_on();
+    led_on();
     radio_sendpacket(radio_txbuffer);
   }
 
   if(packet_received)
   {
     packet_received = false;
-		//led_on();
+		led_on();
 		process_rx_packet();
-		//led_off();
+		led_off();
     radio_rx();
   }
 
   if(packet_sent)
   {
     packet_sent = false;
-    //led_off();
+    led_off();
     radio_rx();
   }
 	
@@ -161,7 +161,7 @@ int8_t radio_txsweep(uint32_t start,uint32_t stop,uint32_t step,uint32_t interva
 		sweeptx = false;
 		currfreq = prevfreq;
 		radio_set_freq(currfreq);
-		//led_off();
+		led_off();
 		radio_rx();
 		return RADIO_OK;
 	}
@@ -174,7 +174,7 @@ int8_t radio_txsweep(uint32_t start,uint32_t stop,uint32_t step,uint32_t interva
 		txmode = stream;
 		currfreq = startfreq;
 		radio_set_freq(currfreq);
-		//led_on();
+		led_on();
 		int8_t err = radio_stream(stream);
 		if(err != 0) return err;
 		sweeptime = interval;

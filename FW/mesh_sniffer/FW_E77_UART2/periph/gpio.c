@@ -8,6 +8,15 @@ void mygpio_init(void)
 	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
 	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
 	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOH);
+
+//LED
+	gpio_init_structure.Mode  = LL_GPIO_MODE_OUTPUT;
+	gpio_init_structure.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+  gpio_init_structure.Pull  = LL_GPIO_PULL_NO;
+  gpio_init_structure.Speed = LL_GPIO_SPEED_FREQ_LOW;
+	gpio_init_structure.Pin   = LED_PIN;
+  LL_GPIO_Init(LED_PORT, &gpio_init_structure);
+	LL_GPIO_ResetOutputPin(LED_PORT,LED_PIN);
 	
 	//Keys
 //  gpio_init_structure.Mode  = LL_GPIO_MODE_INPUT;

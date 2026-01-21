@@ -58,13 +58,13 @@ void init_radio_specific(void)
 {
 	subghz_interface_init(); //main
 	delay_ms(10);
-	readconfig();
-	if(radioconfig.chip == 0xff) 
-	{
-		radio_initconfig(1262,1);
-		printf("INIT CONFIG: OK\r\n");
-	}
-	radio_init();
+//	readconfig();
+//	if(radioconfig.chip == 0xff) 
+//	{
+//		radio_initconfig(1262,1);
+//		printf("INIT CONFIG: OK\r\n");
+//	}
+//	radio_init();
 }
 
 void bsp_reset_proc(void)
@@ -72,6 +72,17 @@ void bsp_reset_proc(void)
 	delay_ms(100);
 	NVIC_SystemReset();
 }
+
+void led_on(void)
+{
+	LL_GPIO_SetOutputPin(LED_PORT,LED_PIN);
+}
+
+void led_off(void)
+{
+	LL_GPIO_ResetOutputPin(LED_PORT,LED_PIN);
+}
+
 
 
 

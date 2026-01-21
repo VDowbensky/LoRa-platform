@@ -68,6 +68,7 @@ int8_t radio_init(void)
 	if(sx126x_tcxo != 0)
 	{
 		SX126X_SetDIO3AsTCXOCtrl(sx126x_tcxo_voltage,1000);
+		SX126X_Calibrate(true,true,true,true,true,true,true);
 	}
 	SX126X_SetPacketType(SX126X_MODEM_LORA);
 	SX126X_SetRfFrequency((uint32_t)(radioconfig.freq / SX126X_SYNTH_STEP));

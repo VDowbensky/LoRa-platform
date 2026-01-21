@@ -63,6 +63,10 @@
 #define VBATT_PIN						LL_GPIO_PIN_15
 #define VBATT_ADC_CHANNEL		ADC_SAMPLE_CHAN_1//PA11
 
+//LED
+#define LED_PORT						GPIOB
+#define LED_PIN							LL_GPIO_PIN_4
+
 //Buzzer
 //#define BUZZER_PORT					GPIOB
 //#define BUZZER_PIN					LL_GPIO_PIN_8
@@ -120,5 +124,8 @@ void init_peripherals(void);
 void init_radio_specific(void);
 
 void bsp_reset_proc(void);
+
+void led_on(void);
+void led_off(void);
 
 #endif

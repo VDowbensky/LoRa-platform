@@ -552,9 +552,9 @@ ARM Macro Assembler    Page 9
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp.sp --apcs=
 interwork --depend=.\objects\startup_at32f413.d -o.\objects\startup_at32f413.o 
 -IC:\Users\Admin\AppData\Local\Arm\Packs\ArteryTek\AT32F413_DFP\2.1.3\Device\In
-clude -IC:\Keil_v5\ARM\CMSIS\Include --predefine="__MICROLIB SETA 1" --predefin
-e="__UVISION_VERSION SETA 542" --predefine="AT32F413CBT7 SETA 1" --list=.\listi
-ngs\startup_at32f413.lst startup_at32f413.s
+clude -IC:\Keil_v535\ARM\CMSIS\Include --predefine="__MICROLIB SETA 1" --predef
+ine="__UVISION_VERSION SETA 543" --predefine="AT32F413CBT7 SETA 1" --list=.\lis
+tings\startup_at32f413.lst startup_at32f413.s
 
 
 

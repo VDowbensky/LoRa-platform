@@ -586,12 +586,12 @@ void cli_sweeptx(int argc, char **argv)
 		//check result, on or off
 		if(txmode == 0) 
 		{
-			//led_off();
+			led_off();
 			printf("STOP\r\n");
 		}
 		else 
 		{
-			//led_on();
+			led_on();
 			printf("START\r\n");
 		}
 	}
@@ -612,12 +612,12 @@ void cli_sweeprx(int argc, char **argv)
 		//check result, on or off
 		if(sweeprx == false) 
 		{
-			//led_off();
+			led_off();
 			printf("STOP\r\n");
 		}
 		else 
 		{
-			//led_on();
+			led_on();
 			printf("START\r\n");
 		}
 	}

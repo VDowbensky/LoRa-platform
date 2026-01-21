@@ -61,13 +61,16 @@ int8_t radio_init(void)
 
 	SX126X_reset();
 	SX126X_Wakeup();
-	delay_ms(10);
+	delay_ms(100);
 	SX126X_setopmode(RADIO_OPMODE_STBYRC);
 	SX126X_SetRegulatorMode(true);
+	delay_ms(100);
 	//set TCXO here if needed
 	if(sx126x_tcxo != 0)
 	{
-		SX126X_SetDIO3AsTCXOCtrl(sx126x_tcxo_voltage,1000);
+		SX126X_SetDIO3AsTCXOCtrl(sx126x_tcxo_voltage,5000);
+		//SX126X_Calibrate(true,true,true,true,true,true,true);
+		SX126X_ClearDeviceErrors();
 	}
 	SX126X_SetPacketType(SX126X_MODEM_LORA);
 	SX126X_SetRfFrequency((uint32_t)(radioconfig.freq / SX126X_SYNTH_STEP));
@@ -76,15 +79,17 @@ int8_t radio_init(void)
 	SX126X_SetLoRaPacketParams(radioconfig.prelen,radioconfig.header,radioconfig.paylen,radioconfig.crc,radioconfig.invertiq);
 	SX126X_writeReg(SX126X_REG_LRSYNC_H,(radioconfig.sync & 0xff00) >> 8);
 	SX126X_writeReg(SX126X_REG_LRSYNC_L,radioconfig.sync & 0xff);
-	SX126X_SetRx(0xffffff);
-	//SX126X_setopmode(OPMODE_STBYXOSC);
-	SX126X_CalibrateIR();
+	SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
 	if(sx126x_tcxo == 0) //TCXO off
 	{
-		SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
+		//SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
 		SX126X_writeReg(SX126X_REG_XTATRIM,sx126x_xtatrim);
 		SX126X_writeReg(SX126X_REG_XTBTRIM,sx126x_xtbtrim);
 	}
+	delay_ms(100); //??? without this delay tx amp not activated
+	SX126X_CalibrateIR();
+	SX126X_ClearDeviceErrors();
+	//delay_ms(100); //??? without this delay tx amp not activated
 	SX126X_SetTxParams();
 	SX126X_LNAboost(true);
 	//SX126X_SetDIO2AsRfSwitchCtrl(true); //for E77 not needed!
@@ -111,7 +116,8 @@ int8_t radio_set_power(int8_t dbm)
 {
 	if((dbm < -9) || (dbm > 22)) return RADIO_INVALID_PARAMETER;
 	prevopmode = opmode;
-	SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
+	//SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
+	SX126X_setopmode(RADIO_OPMODE_STBYRC);
 	radioconfig.txpower = dbm;
 	SX126X_SetTxParams();
 	SX126X_setopmode(prevopmode);
@@ -266,7 +272,7 @@ int8_t radio_stream(uint8_t stream)
   if(stream == 0) 
 	{
 		txmode = 0;
-		//led_off();
+		led_off();
 		return radio_rx();
 	}
 	if(stream > 2) return RADIO_INVALID_PARAMETER;
@@ -282,7 +288,7 @@ int8_t radio_stream(uint8_t stream)
 		SX126X_SetTxInfinitePreamble();
 		txmode = 2;
 	}
-	//led_on();
+	led_on();
 	return RADIO_OK;
 }
 

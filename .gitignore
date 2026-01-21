@@ -102,3 +102,4 @@ FW/mesh_sniffer/FW_RA08/tremo_mesh.uvguix.Admin
 FW/mesh_sniffer/FW_AT32/MDK_V5/JLinkLog.txt
 *.htm
 *.Admin
+/FW/mesh_sniffer/FW_AT32/MDK_V5/objects

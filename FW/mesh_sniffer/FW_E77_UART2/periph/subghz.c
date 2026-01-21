@@ -7,7 +7,7 @@ void subghz_interface_init(void)
   //LL_AHB2_GRP1_EnableClock(RF_SW_CTRL1_GPIO);//(LL_AHB2_GRP1_PERIPH_GPIOA)
   //LL_AHB2_GRP1_EnableClock(RF_SW_CTRL2_GPIO);
   /* Configure the Radio Switch pin */
-  gpio_init_structure.Pin   = RFSW_TX_PIN;
+   gpio_init_structure.Pin   = RFSW_TX_PIN;
   gpio_init_structure.Mode  = LL_GPIO_MODE_OUTPUT;
 	gpio_init_structure.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
   gpio_init_structure.Pull  = LL_GPIO_PULL_NO;
@@ -28,7 +28,7 @@ void subghz_interface_init(void)
   //LL_PWR_SetRadioBusyTrigger(LL_PWR_RADIO_BUSY_TRIGGER_WU_IT); //???
   /* Clear Pending Flag */
   LL_PWR_ClearFlag_RFBUSY();
-	SUBGHZSPI_Init(SUBGHZSPI_BAUDRATEPRESCALER_4);
+	SUBGHZSPI_Init(SUBGHZSPI_BAUDRATEPRESCALER_8);
 	NVIC_SetPriority(SUBGHZ_Radio_IRQn, 0);
 	NVIC_ClearPendingIRQ(SUBGHZ_Radio_IRQn);
   NVIC_EnableIRQ(SUBGHZ_Radio_IRQn);
