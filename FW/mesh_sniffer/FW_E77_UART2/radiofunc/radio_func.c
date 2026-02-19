@@ -89,7 +89,6 @@ int8_t radio_init(void)
 	delay_ms(100); //??? without this delay tx amp not activated
 	SX126X_CalibrateIR();
 	SX126X_ClearDeviceErrors();
-	//delay_ms(100); //??? without this delay tx amp not activated
 	SX126X_SetTxParams();
 	SX126X_LNAboost(true);
 	//SX126X_SetDIO2AsRfSwitchCtrl(true); //for E77 not needed!
@@ -304,6 +303,7 @@ int8_t radio_wakeup(uint8_t mode)
 
 int8_t radio_setxotrim(uint8_t trim)
 {
+	if(sx126x_tcxo != 0) return FEATURE_NOT_SUPPORTED;
 	if(trim > 94) return RADIO_INVALID_PARAMETER;
 	sx126x_xtatrim = trim / 2;
 	sx126x_xtbtrim = trim - sx126x_xtatrim;
