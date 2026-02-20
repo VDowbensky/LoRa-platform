@@ -107,6 +107,33 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     //return RADIO_OK;
 		break;
 		
+    case 2021:
+    radioconfig.chip = 2021;
+    radioconfig.id = 0;
+    radioconfig.freq = 433125000;
+    radioconfig.txpower = 10;
+    //modulation
+    radioconfig.sf = LORA_SF_11;
+    radioconfig.bw_index = 8; //LORA_BW_250;
+    radioconfig.cr = LORA_CR_4_5;
+    radioconfig.ldropt = 0;
+    //packet
+    radioconfig.sync = 0x24b4;
+    radioconfig.prelen = 16;
+    radioconfig.header = 0;
+    radioconfig.paylen = 0;
+    radioconfig.crc = 1;
+    radioconfig.invertiq = 0;
+    //params[64]; //maybe different
+//		if(tcxo) 
+//		{
+//			lr112x_tcxo = 1;
+//			lr112x_tcxo_voltage = 2; //1.8V
+//		}
+//		else lr112x_tcxo = 0;
+    //return RADIO_OK;
+		break;
+		
     case 3029:
     radioconfig.chip = 3029;
     radioconfig.id = 0;
@@ -134,7 +161,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 //		else sx126x_tcxo = 0;
     //return RADIO_OK;
 		break;
-    
+
     default:
     return INVALID_CHIP;
   }
@@ -276,6 +303,11 @@ int8_t radio_init(void)
 			return RADIO_OK;
 		}
 		
+		case 2021:
+		{
+			return RADIO_TODO;
+		}
+				
 		case 3029:
 		if(PAN_Init(radioconfig.freq) != PAN_OK) return RADIO_INVALID_MODE; //in STB3 state
 		//PAN_SetTxPower(radioconfig.txpower);                    /* Set the power level */

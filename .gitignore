@@ -106,3 +106,7 @@ FW/mesh_sniffer/FW_AT32/MDK_V5/JLinkLog.txt
 /RA08B/History
 *.LOG
 /RFM6505B/History
+*.Admin
+*.dep
+*.crf
+FW/mesh_sniffer/FW_AT32/MDK_V5/JLinkLog.txt
