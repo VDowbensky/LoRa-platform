@@ -5,7 +5,7 @@
 #include "sx128x_defs.h"
 #include "wk_spi.h"
 
-#define SX128X_BUSY_TIMEOUT   1000000UL;
+#define SX128X_BUSY_TIMEOUT   1000000UL
 
 void SX128X_reset(void);
 void SX128X_select(void);

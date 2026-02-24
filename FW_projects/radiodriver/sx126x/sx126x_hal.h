@@ -1,7 +1,7 @@
-/*!
- * @file      lr1110_hal.h
+/**
+ * @file      sx126x_hal.h
  *
- * @brief     Hardware Abstraction Layer (HAL) interface for LR1110
+ * @brief     Hardware Abstraction Layer for SX126x
  *
  * The Clear BSD License
  * Copyright Semtech Corporation 2021. All rights reserved.
@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LR1110_HAL_H
-#define LR1110_HAL_H
+#ifndef SX126X_HAL_H
+#define SX126X_HAL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,29 +60,28 @@ extern "C" {
 /**
  * @brief Write this to SPI bus while reading data, or as a dummy/placeholder
  */
-#define LR1110_NOP ( 0x00 )
+#define SX126X_NOP ( 0x00 )
 
 /*
  * -----------------------------------------------------------------------------
  * --- PUBLIC TYPES ------------------------------------------------------------
  */
 
-/*!
- * @brief LR1110 HAL status
- */
-typedef enum lr1110_hal_status_e
+typedef enum sx126x_hal_status_e
 {
-    LR1110_HAL_STATUS_OK    = 0,
-    LR1110_HAL_STATUS_ERROR = 3,
-} lr1110_hal_status_t;
+    SX126X_HAL_STATUS_OK    = 0,
+    SX126X_HAL_STATUS_ERROR = 3,
+} sx126x_hal_status_t;
 
 /*
  * -----------------------------------------------------------------------------
  * --- PUBLIC FUNCTIONS PROTOTYPES ---------------------------------------------
  */
 
-/*!
- * @brief Radio data transfer - write
+/**
+ * Radio data transfer - write
+ *
+ * @remark Shall be implemented by the user
  *
  * @param [in] context          Radio implementation parameters
  * @param [in] command          Pointer to the buffer to be transmitted
@@ -92,107 +91,56 @@ typedef enum lr1110_hal_status_e
  *
  * @returns Operation status
  */
-lr1110_hal_status_t lr1110_hal_write( const void* context, const uint8_t* command, const uint16_t command_length,
+sx126x_hal_status_t sx126x_hal_write( const void* context, const uint8_t* command, const uint16_t command_length,
                                       const uint8_t* data, const uint16_t data_length );
 
-/*!
- * @brief Radio data transfer - read
+/**
+ * Radio data transfer - read
  *
- * @remark This is a two-step radio read operation. It consists of writing the command, releasing then re-asserting the
- * NSS line, then reading a discarded dummy byte followed by data_length bytes of response data from the transceiver.
- * While reading the dummy bytes and the response data, the implementation of this function must ensure that only zero
- * bytes (NOP) are written to the SPI bus.
+ * @remark Shall be implemented by the user
  *
  * @param [in] context          Radio implementation parameters
  * @param [in] command          Pointer to the buffer to be transmitted
  * @param [in] command_length   Buffer size to be transmitted
- * @param [out] data            Pointer to the buffer to be received
+ * @param [in] data             Pointer to the buffer to be received
  * @param [in] data_length      Buffer size to be received
  *
  * @returns Operation status
- *
- * @remark Some hardware SPI implementations write arbitary values on the MOSI line while reading. If this is done on
- * the LR1110, non-zero values may be interpreted as commands. This driver does not exploit this functionality, and
- * expects that zeros be sent on the MOSI line when this command is reading the command response data.
  */
-lr1110_hal_status_t lr1110_hal_read( const void* context, const uint8_t* command, const uint16_t command_length,
+sx126x_hal_status_t sx126x_hal_read( const void* context, const uint8_t* command, const uint16_t command_length,
                                      uint8_t* data, const uint16_t data_length );
 
-/*!
- * @brief  Direct read from the SPI bus
+/**
+ * Reset the radio
  *
- * @remark Unlike @ref lr1110_hal_read, this is a simple direct SPI bus SS/read/nSS operation. While reading the
- * response data, the implementation of this function must ensure that only zero bytes (NOP) are written to the SPI bus.
- *
- * @remark Formerly, that function depended on a lr1110_hal_write_read API function, which required bidirectional SPI
- * communication. Given that all other radio functionality can be implemented with unidirectional SPI, it has been
- * decided to make this HAL API change to simplify implementation requirements.
- *
- * @remark Only required by the @ref lr1110_system_get_status and @ref lr1110_bootloader_get_status commands
- *
- * @param [in]  context      Radio implementation parameters
- * @param [out] data         Pointer to the buffer to be received
- * @param [in]  data_length  Buffer size to be received
- *
- * @returns Operation status
- */
-lr1110_hal_status_t lr1110_hal_direct_read( const void* context, uint8_t* data, const uint16_t data_length );
-
-/*!
- * @brief Reset the radio
+ * @remark Shall be implemented by the user
  *
  * @param [in] context Radio implementation parameters
  *
  * @returns Operation status
  */
-lr1110_hal_status_t lr1110_hal_reset( const void* context );
+sx126x_hal_status_t sx126x_hal_reset( const void* context );
 
-/*!
- * @brief Wake the radio up.
+/**
+ * Wake the radio up.
+ *
+ * @remark Shall be implemented by the user
  *
  * @param [in] context Radio implementation parameters
  *
  * @returns Operation status
  */
-lr1110_hal_status_t lr1110_hal_wakeup( const void* context );
+sx126x_hal_status_t sx126x_hal_wakeup( const void* context );
 
-/*!
- * @brief Return the computed CRC
- *
- * @param [in] initial_value initial value of the CRC
- * @param [in] buffer Buffer containing data used to compute the CRC
- * @param [in] length Length of buffer
- *
- * @returns CRC value
- */
-inline static uint8_t lr1110_hal_compute_crc( const uint8_t initial_value, const uint8_t* buffer, uint16_t length )
-{
-    uint8_t crc = initial_value;
-
-    for( uint16_t i = 0; i < length; i++ )
-    {
-        uint8_t extract = buffer[i];
-        uint8_t sum;
-
-        for( uint8_t j = 8; j > 0; j-- )
-        {
-            sum = ( crc ^ extract ) & 0x01;
-            crc >>= 1;
-
-            if( sum != 0 )
-            {
-                crc ^= 0x65;
-            }
-
-            extract >>= 1;
-        }
-    }
-
-    return crc;
-}
+sx126x_hal_status_t sx126x_hal_wait_on_busy(const void* context);
+void sx126x_select(const void* context);
+void sx126x_deselect(const void* context);
+uint8_t sx126x_spi_transfer(const void* context,uint8_t b);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // LR1110_HAL_H
+#endif  // SX126X_HAL_H
+
+/* --- EOF ------------------------------------------------------------------ */

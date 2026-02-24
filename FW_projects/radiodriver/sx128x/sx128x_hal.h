@@ -1,10 +1,10 @@
 /**
- * @file      sx126x_hal.h
+ * @file      sx128x_hal.h
  *
- * @brief     Hardware Abstraction Layer for SX126x
+ * @brief     Hardware Abstraction Layer for SX128X
  *
  * The Clear BSD License
- * Copyright Semtech Corporation 2021. All rights reserved.
+ * Copyright Semtech Corporation 2022. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted (subject to the limitations in the disclaimer
@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SX126X_HAL_H
-#define SX126X_HAL_H
+#ifndef SX128X_HAL_H
+#define SX128X_HAL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,18 +60,24 @@ extern "C" {
 /**
  * @brief Write this to SPI bus while reading data, or as a dummy/placeholder
  */
-#define SX126X_NOP ( 0x00 )
+#define SX128X_NOP ( 0x00 )
 
 /*
  * -----------------------------------------------------------------------------
  * --- PUBLIC TYPES ------------------------------------------------------------
  */
 
-typedef enum sx126x_hal_status_e
+/**
+ * @brief HAL status return codes
+ *
+ * The status is to be returned by the HAL functions to indicate to the driver the correct or incorrect completion of a
+ * communication with the chip
+ */
+typedef enum sx128x_hal_status_e
 {
-    SX126X_HAL_STATUS_OK    = 0,
-    SX126X_HAL_STATUS_ERROR = 3,
-} sx126x_hal_status_t;
+    SX128X_HAL_STATUS_OK    = 0,
+    SX128X_HAL_STATUS_ERROR = 3,
+} sx128x_hal_status_t;
 
 /*
  * -----------------------------------------------------------------------------
@@ -79,9 +85,11 @@ typedef enum sx126x_hal_status_e
  */
 
 /**
- * Radio data transfer - write
+ * @brief Radio data transfer - write
  *
- * @remark Shall be implemented by the user
+ * @remark Must be implemented by the upper layer
+ * @remark Do not forget to call \ref sx128x_hal_wakeup function at the very
+ * beginning of the implementation.
  *
  * @param [in] context          Radio implementation parameters
  * @param [in] command          Pointer to the buffer to be transmitted
@@ -89,15 +97,17 @@ typedef enum sx126x_hal_status_e
  * @param [in] data             Pointer to the buffer to be transmitted
  * @param [in] data_length      Buffer size to be transmitted
  *
- * @returns Operation status
+ * @retval status     Operation status
  */
-sx126x_hal_status_t sx126x_hal_write( const void* context, const uint8_t* command, const uint16_t command_length,
+sx128x_hal_status_t sx128x_hal_write( const void* context, const uint8_t* command, const uint16_t command_length,
                                       const uint8_t* data, const uint16_t data_length );
 
 /**
- * Radio data transfer - read
+ * @brief Radio data transfer - read
  *
- * @remark Shall be implemented by the user
+ * @remark Must be implemented by the upper layer
+ * @remark Do not forget to call \ref sx128x_hal_wakeup function at the very
+ * beginning of the implementation.
  *
  * @param [in] context          Radio implementation parameters
  * @param [in] command          Pointer to the buffer to be transmitted
@@ -105,37 +115,42 @@ sx126x_hal_status_t sx126x_hal_write( const void* context, const uint8_t* comman
  * @param [in] data             Pointer to the buffer to be received
  * @param [in] data_length      Buffer size to be received
  *
- * @returns Operation status
+ * @retval status     Operation status
  */
-sx126x_hal_status_t sx126x_hal_read( const void* context, const uint8_t* command, const uint16_t command_length,
+sx128x_hal_status_t sx128x_hal_read( const void* context, const uint8_t* command, const uint16_t command_length,
                                      uint8_t* data, const uint16_t data_length );
 
 /**
- * Reset the radio
+ * @brief Reset the radio
  *
- * @remark Shall be implemented by the user
+ * @remark Must be implemented by the upper layer
  *
  * @param [in] context Radio implementation parameters
  *
- * @returns Operation status
+ * @retval status    Operation status
  */
-sx126x_hal_status_t sx126x_hal_reset( const void* context );
+sx128x_hal_status_t sx128x_hal_reset( const void* context );
 
 /**
- * Wake the radio up.
+ * @brief Wake the radio up.
  *
- * @remark Shall be implemented by the user
+ * @remark Must be implemented by the upper layer
  *
  * @param [in] context Radio implementation parameters
- *
- * @returns Operation status
+
+ * @retval status    Operation status
  */
-sx126x_hal_status_t sx126x_hal_wakeup( const void* context );
+sx128x_hal_status_t sx128x_hal_wakeup( const void* context );
+
+sx128x_hal_status_t sx128x_hal_wait_on_busy(const void* context);
+void sx128x_select(const void* context);
+void sx128x_deselect(const void* context);
+uint8_t sx128x_spi_transfer(const void* context,uint8_t b);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // SX126X_HAL_H
+#endif  // SX128X_HAL_H
 
 /* --- EOF ------------------------------------------------------------------ */
