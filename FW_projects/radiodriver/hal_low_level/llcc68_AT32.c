@@ -1,7 +1,7 @@
 #include "llcc68_hal.h"
 #include "bsp.h"
 
-define SX126X_BUSY_TIMEOUT  1000000UL
+#define SX126X_BUSY_TIMEOUT  1000000UL
 
 llcc68_hal_status_t llcc68_hal_reset(const void* context)
 {

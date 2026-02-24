@@ -1,7 +1,7 @@
 #include "lr1110_hal.h"
 #include "bsp.h"
 
-define LR1110_BUSY_TIMEOUT  1000000UL
+#define LR1110_BUSY_TIMEOUT  1000000UL
 
 lr1110_hal_status_t lr1110_hal_reset(const void* context)
 {

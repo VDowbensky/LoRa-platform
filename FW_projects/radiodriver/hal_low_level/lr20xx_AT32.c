@@ -1,7 +1,7 @@
 #include "lr20xx_hal.h"
 #include "bsp.h"
 
-define LR20XX_BUSY_TIMEOUT  1000000UL
+#define LR20XX_BUSY_TIMEOUT  1000000UL
 
 lr20xx_hal_status_t lr20xx_hal_reset(const void* context)
 {	

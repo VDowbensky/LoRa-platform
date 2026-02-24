@@ -1,7 +1,7 @@
 #include "sx128x_hal.h"
 #include "bsp.h"
 
-define SX128X_BUSY_TIMEOUT  1000000UL
+#define SX128X_BUSY_TIMEOUT  1000000UL
 
 sx128x_hal_status_t sx128x_hal_reset(const void* context)
 {
