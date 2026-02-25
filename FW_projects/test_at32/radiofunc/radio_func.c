@@ -37,7 +37,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     radioconfig.cr = SX126X_LORA_CR_4_5;
     radioconfig.ldropt = 0;
     //packet
-    radioconfig.sync = 0x24b4;
+    radioconfig.sync = 0x2b; //0x24b4;
     radioconfig.prelen = 16;
     radioconfig.header = 0;
     radioconfig.paylen = 0;
@@ -64,7 +64,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     radioconfig.cr = SX128X_LORA_RANGING_CR_4_5;
     radioconfig.ldropt = 0; //not used in 1280
     //packet
-    radioconfig.sync = 0x24b4;
+    radioconfig.sync = 0x2b; //0x24b4;
     radioconfig.prelen = 0x23; //len = 12. mant = 3, exp = 2
     radioconfig.header = 0;
     radioconfig.paylen = 0;
@@ -91,7 +91,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     radioconfig.cr = LR11XX_RADIO_LORA_CR_4_5;
     radioconfig.ldropt = 0;
     //packet
-    radioconfig.sync = 0x24b4;
+    radioconfig.sync = 0x2b; //0x24b4;
     radioconfig.prelen = 16;
     radioconfig.header = 0;
     radioconfig.paylen = 0;
@@ -118,7 +118,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     radioconfig.cr = LR20XX_RADIO_LORA_CR_4_5;
     radioconfig.ldropt = 0;
     //packet
-    radioconfig.sync = 0x24b4;
+    radioconfig.sync = 0x2b; //0x24b4;
     radioconfig.prelen = 16;
     radioconfig.header = 0;
     radioconfig.paylen = 0;
@@ -191,6 +191,12 @@ int8_t radio_init(void)
 			pktparams.crc_is_on = radioconfig.crc;
 			pktparams.invert_iq_is_on = radioconfig.invertiq;
 			
+			sx126x_pa_cfg_params_t paconfig;
+			paconfig.device_sel = 0;
+			paconfig.pa_duty_cycle = 4;
+			paconfig.hp_max = 7;
+			paconfig.pa_lut = 1;
+			
 			sx126x_reset(NULL);
 			sx126x_wakeup(NULL);
 			delay_ms(10);
@@ -207,109 +213,125 @@ int8_t radio_init(void)
 			sx126x_set_buffer_base_address(NULL,0,0);
 			sx126x_set_lora_mod_params(NULL,&modparams);
 			sx126x_set_lora_pkt_params(NULL,&pktparams);
-			sx126x_set_lora_sync_word(NULL,radioconfig.sync);
+			sx126x_set_lora_sync_word(NULL,radioconfig.sync & 0xff);
 			//sx126x_write_register(NULL,SX126X_REG_LR_SYNCWORD,(radioconfig.sync & 0xff00) >> 8);
 			//sx126x_write_register(NULL,SX126X_REG_LRSYNC_L,radioconfig.sync & 0xff);
 			sx126x_set_rx(NULL,0xffffff);
 			//SX126X_setopmode(OPMODE_STBYXOSC);
-			sx126x_cal_img_in_mhz(NULL,radioconfig.freq,radioconfig.freq+4);//to be checked
+			SX126X_CalibrateIR();
 			if(sx126x_tcxo == 0) //TCXO off
 			{
 				SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
 				sx126x_set_trimming_capacitor_values(NULL,sx126x_xtatrim,sx126x_xtbtrim);
 			}
-    SX126X_SetTxParams();
+    //SX126X_SetTxParams();
+		sx126x_set_tx_params(NULL,radioconfig.txpower,SX126X_RAMP_10_US);
+		sx126x_set_pa_cfg(NULL,&paconfig);
     sx126x_cfg_rx_boosted(NULL,true);
     sx126x_set_dio2_as_rf_sw_ctrl(NULL,true);
-    SX126X_SetDioIrqParams(SX126X_TXDONE_IRQMSK | SX126X_RXDONE_IRQMSK | SX126X_CRCERR_IRQMSK, SX126X_TXDONE_IRQMSK | SX126X_RXDONE_IRQMSK, 0, 0);
-    //SX126X_SetDioIrqParams(SX126X_ALL_IRQMSK,SX126X_ALL_IRQMSK, 0, 0);
+    sx126x_set_dio_irq_params(NULL,SX126X_IRQ_TX_DONE | SX126X_IRQ_RX_DONE | SX126X_IRQ_CRC_ERROR,SX126X_IRQ_TX_DONE | SX126X_IRQ_RX_DONE,SX126X_IRQ_NONE,SX126X_IRQ_NONE);
+    //sx126x_set_dio_irq_params(NULL,SX126X_IRQ_ALL,SX126X_IRQ_ALL,SX126X_IRQ_NONE,SX126X_IRQ_NONE);
 		SX126X_setopmode(RADIO_OPMODE_RX);
     return RADIO_OK;
 		}
 		
 		case 1280:
 		{
+			sx128x_mod_params_lora_t modparams;
+			modparams.bw = SX128X_bw[radioconfig.bw_index];
+			modparams.sf = radioconfig.sf << 4;
+			modparams.cr = radioconfig.cr;
+			
+			sx128x_pkt_params_lora_t pktparams;
+			uint8_t m,e;
+			SX128X_CalcPreamble(radioconfig.prelen,&m,&e);
+			pktparams.preamble_len.mant = m;
+			pktparams.preamble_len.exp = e;
+			pktparams.pld_len_in_bytes = radioconfig.paylen;
+			if(radioconfig.header == false) pktparams.header_type = SX128X_LORA_RANGING_PKT_EXPLICIT;
+			else pktparams.header_type = SX128X_LORA_RANGING_PKT_IMPLICIT;
+			pktparams.crc_is_on = radioconfig.crc;
+			pktparams.invert_iq_is_on = radioconfig.invertiq;
+			
+			sx128x_reset(NULL);
+			sx128x_wakeup(NULL);
 			//SX128X_setopmode(SX128X_OPMODE_STBYRC);
-			SX128X_SetRegulatorMode(1);
-			SX128X_SetPacketType(SX128X_MODEM_LORA);
-			uint8_t buf[2];
-			uint8_t header;
-			//uint8_t prelen;
-			uint8_t crc;
-			uint8_t invertiq;
-			//uint8_t tmp;
-
-			SX128X_LORA_SetModulationParams(radioconfig.sf << 4,SX128X_bw[radioconfig.bw_index],radioconfig.cr); //index!!!
-			//calculate preamble length patameter from config->loraprelen
-			if(radioconfig.header == false) header = SX128X_HEADER_EXPLICIT;
-			else header = SX128X_HEADER_IMPLICIT;
-			if(radioconfig.crc == true) crc = SX128X_CRC_ENABLE;
-			else crc = SX128X_CRC_DISABLE;
-			if(radioconfig.invertiq == true) invertiq = SX128X_IQ_INVERTED;
-			else invertiq = SX128X_IQ_STD;
-			SX128X_LORA_SetPacketParams(radioconfig.prelen, header,radioconfig.paylen,crc,invertiq); //check!!!
+			sx128x_set_reg_mode(NULL,SX128X_REG_MODE_DCDC);
+			sx128x_set_pkt_type(NULL,SX128X_PKT_TYPE_LORA);
+			sx128x_set_lora_mod_params(NULL,&modparams);
+			sx128x_set_lora_pkt_params(NULL,&pktparams);
 			//set sync
-			//It is also possible to configure the LoRa SyncWord. With the 1 byte SynchWord taking the format 0xXY, it is written across the MSB of two registers as described below:
-			//write X in the register@0x944, in position [7:4] without modifying [3:0] (using a Read / Modify / Write operation)
-			//write Y in the register@0x945, in position [7:4] without modifying [3:0] (using a Read / Modify / Write operation
-			//SX128X_readRegs(sx,SX128X_REG_LR_SYNC_1,buf,2);
-			//buf[0] &= 0x0f;
-			//buf[1] &= 0x0f;
-			//tmp = config->lorasync & 0xf0;
-			//buf[0] |= tmp;
-			//tmp = (config->lorasync & 0x0f) << 4;
-			//buf[1] |= tmp;
-			buf[0] = radioconfig.sync >> 8;
-			buf[1] = radioconfig.sync & 0xff;
-			SX128X_writeRegs(SX128X_REG_LR_SYNC_1, buf,2);
-			SX128X_SetRfFrequency(radioconfig.freq / SX128X_SYNTH_STEP);
-			SX128X_SetBufferBaseAddress(0, 0x00);
-			SX128X_SetTxParams(radioconfig.txpower + 18,0); //set correct ramptime here
+			sx128x_set_lora_sync_word(NULL,radioconfig.sync & 0xff);
+			sx128x_set_rf_freq(NULL,radioconfig.freq);
+			sx128x_set_buffer_base_address(NULL,0,0);
+			sx128x_set_tx_params(NULL,radioconfig.txpower,SX128X_RAMP_02_US);
 			//SX128X_CalibrateIR();
-			//SX128X_LNAboost(true); //???
-			SX128X_SetDioIrqParams(SX128X_IRQ_TX_DONE | SX128X_IRQ_RX_DONE | SX128X_IRQ_CRC_ERROR,SX128X_IRQ_TX_DONE | SX128X_IRQ_RX_DONE,0,0);
+			sx128x_set_lna_settings(NULL,SX128X_LNA_HIGH_SENSITIVITY_MODE); //SX128X_LNA_LOW_POWER_MODE
+			sx128x_set_dio_irq_params(NULL,SX128X_IRQ_TX_DONE | SX128X_IRQ_RX_DONE | SX128X_IRQ_CRC_ERROR,SX128X_IRQ_TX_DONE | SX128X_IRQ_RX_DONE,SX128X_IRQ_NONE,SX128X_IRQ_NONE);
 			return RADIO_OK;
 		}
 		
 		case 1121:
 		{
-			LR112X_reset();
+			lr11xx_system_rfswitch_cfg_t rfsw_cfg;
+			rfsw_cfg.enable = LR112X_RFSW_ENABLE;
+			rfsw_cfg.standby = LR112X_RFSW_STBY;
+			rfsw_cfg.rx = LR112X_RFSW_RX;
+			rfsw_cfg.tx = LR112X_RFSW_SUBG_TX;
+			rfsw_cfg.tx_hp = LR112X_RFSW_SUBG_TX_HP;
+			rfsw_cfg.tx_hf = LR112X_RFSW_HF_TX;
+			rfsw_cfg.gnss = LR112X_RFSW_GNSS;
+			rfsw_cfg.wifi = LR112X_RFSW_HF_RX; //check
+			
+			lr11xx_radio_mod_params_lora_t modparams;
+			modparams.bw = LR112X_bw[radioconfig.bw_index];
+			modparams.sf = radioconfig.sf;
+			modparams.cr = radioconfig.cr;
+			modparams.ldro = radioconfig.ldropt;
+			
+			lr11xx_radio_pkt_params_lora_t pktparams;
+			pktparams.preamble_len_in_symb = radioconfig.prelen;
+			pktparams.pld_len_in_bytes = radioconfig.paylen;
+			pktparams.header_type = radioconfig.header;
+			pktparams.crc = radioconfig.crc;
+			pktparams.iq = radioconfig.invertiq;
+			
+			lr11xx_system_reset(NULL);
 			delay_ms(500);
-			LR112X_Wakeup();
+			lr11xx_system_wakeup(NULL);
 			//delay_ms(500);
-			LR112X_SetRegMode(false);
+			lr11xx_system_set_reg_mode(NULL,LR11XX_SYSTEM_REG_MODE_DCDC);
 			//LR112X_SetStandby(0);
 			//disable SPI CRC
-			//LR112X_EnableSpiCrc(false);
-			LR112X_SetDioAsRfSwitch(LR112X_RFSW_ENABLE,LR112X_RFSW_STBY,LR112X_RFSW_RX,LR112X_RFSW_SUBG_TX,LR112X_RFSW_SUBG_TX_HP,LR112X_RFSW_HF_TX,LR112X_RFSW_GNSS,LR112X_RFSW_HF_RX); //for E80 - different
+			lr11xx_system_enable_spi_crc(NULL,false);
+			lr11xx_system_set_dio_as_rf_switch(NULL,&rfsw_cfg); //for E80 - different
 			//LR112X_printstatus();
-			LR112X_ClearErrors();
-			if(lr112x_tcxo) LR112X_SetTcxoMode(TCXO_1V8,320);
+			lr11xx_system_clear_errors(NULL);
+			if(lr112x_tcxo) lr11xx_system_set_tcxo_mode(NULL,LR11XX_SYSTEM_TCXO_CTRL_1_8V,320);
 			delay_ms(10);
-			//LR112X_ConfigLfClock(LR112X_LF_CLK_XOSC,true);
-			LR112X_ConfigLfClock(LR112X_LF_CLK_RC,true);
-			LR112X_ClearIrq(LR112X_IRQMASK_ALL);
-			LR112X_SetStandby(1);
+			lr11xx_system_cfg_lfclk(NULL,LR11XX_SYSTEM_LFCLK_RC,true); //false
+			lr11xx_system_clear_irq_status(NULL,LR11XX_SYSTEM_IRQ_ALL_MASK);
+			lr11xx_system_set_standby(NULL,LR11XX_SYSTEM_STANDBY_CFG_XOSC);
 			delay_ms(10);
-			LR112X_ClearErrors();
-			LR112X_Calibrate(0x3f);
-			LR112X_ClearErrors();
-			LR112X_ClearIrq(LR112X_IRQMASK_ALL);
+			lr11xx_system_clear_errors(NULL);
+			lr11xx_system_calibrate(NULL,0x3f);
+			lr11xx_system_clear_errors(NULL);
+			lr11xx_system_clear_irq_status(NULL,LR11XX_SYSTEM_IRQ_ALL_MASK);
 			//lr11xx_system_get_version(NULL, &version);
-			LR112X_SetPacketType(LR112X_PACKET_TYPE_LORA);
-			LR112X_SetLoRaModulationParams(radioconfig.sf,LR112X_bw[radioconfig.bw_index],radioconfig.cr,radioconfig.ldropt);
-			LR112X_SetLoRaPacketParams(radioconfig.prelen,radioconfig.header,radioconfig.paylen,radioconfig.crc,radioconfig.invertiq);
-			LR112X_SetLoRaSyncWord(radioconfig.sync);
-			LR112X_SetRfFrequency(radioconfig.freq);
+			lr11xx_radio_set_pkt_type(NULL,LR11XX_RADIO_PKT_TYPE_LORA);
+			lr11xx_radio_set_lora_mod_params(NULL,&modparams);
+			lr11xx_radio_set_lora_pkt_params(NULL,&pktparams);
+			lr11xx_radio_set_lora_sync_word(NULL,radioconfig.sync);
+			lr11xx_radio_set_rf_freq(NULL,radioconfig.freq);
 			radio_set_power(radioconfig.txpower);
 			//LR112X_SetTxParams(radioconfig.txpower,LR112X_PA_RAMP_48U);
 			//calibrate image here
-			LR112X_CalibImage(radioconfig.freq / 4000000, radioconfig.freq / 4000000 + 2);
+			lr11xx_system_calibrate_image(NULL,radioconfig.freq / 4000000, radioconfig.freq / 4000000 + 2); //must be rewritted
 			//calibrate RSSI
 			LR112X_RssiCal(radioconfig.freq);
-			LR112X_SetDioIrqParams(LR112X_TX_DONE | LR112X_RX_DONE | LR112X_CRC_ERROR,0);
-			LR112X_SetRxTxFallbackMode(LR112X_FALLBACK_STBY_XOSC);
-			LR112X_SetRxBoosted(false);
+			lr11xx_system_set_dio_irq_params(NULL,LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR,LR11XX_SYSTEM_IRQ_NONE);
+			lr11xx_radio_set_rx_tx_fallback_mode(NULL,LR11XX_RADIO_FALLBACK_STDBY_XOSC);
+			lr11xx_radio_cfg_rx_boosted(NULL,true); //false
 			radio_rx();
 			//The workaround is to set the bit 4 in the register 0x00F30024 when the chip ends a reception in the 2.4GHz band before launching a GNSS scan. - ???
 			//LR112X_ReadRegMem32(lr,0x00f30024,buf,1);
@@ -362,7 +384,7 @@ int8_t radio_set_freq(uint32_t khz)
 		radioconfig.freq = khz * 1000;
 		prevopmode = opmode;
 		SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
-    SX126X_SetRfFrequency((uint32_t)(radioconfig.freq / SX126X_SYNTH_STEP));
+		sx126x_set_rf_freq(NULL,radioconfig.freq);
 		SX126X_setopmode(prevopmode);
     return RADIO_OK;
 		
@@ -370,26 +392,44 @@ int8_t radio_set_freq(uint32_t khz)
 		radioconfig.freq = khz * 1000;
 		prevopmode = opmode;
 		SX128X_setopmode(RADIO_OPMODE_STBYXOSC);
-		SX128X_SetRfFrequency((uint32_t)(radioconfig.freq / SX128X_SYNTH_STEP));
+		sx128x_set_rf_freq(NULL,radioconfig.freq);
 		SX128X_setopmode(prevopmode);
 		return RADIO_OK;
 		
 		case 1121:
-		radioconfig.freq = khz * 1000;
-		prevopmode = opmode;
-		LR112X_setopmode(RADIO_OPMODE_STBYXOSC);
- 		if(radioconfig.freq > LR112X_SEPARATION_FREQ)
 		{
-			LR112X_SetPaConfig(LR11XX_PA_SEL_HF,LR11XX_PA_REG_SUPPLY_VREG,LR11XX_PA_DUTYCYCLE_HF,LR11XX_PA_HPSEL_HF);
+			lr11xx_radio_pa_cfg_t pa_cfg;
+			
+			radioconfig.freq = khz * 1000;
+			prevopmode = opmode;
+			LR112X_setopmode(RADIO_OPMODE_STBYXOSC);
+//#define LR11XX_PA_DUTYCYCLE_SUBG		0x04
+//#define LR11XX_PA_HPSEL_SUBG				0x07
+
+//#define LR11XX_PA_DUTYCYCLE_HF			0x04
+//#define LR11XX_PA_HPSEL_HF					0x00
+			if(radioconfig.freq > LR112X_SEPARATION_FREQ)
+			{
+				pa_cfg.pa_sel = LR11XX_RADIO_PA_SEL_HF;
+				pa_cfg.pa_reg_supply = LR11XX_RADIO_PA_REG_SUPPLY_VREG;
+				pa_cfg.pa_duty_cycle = 4;
+				pa_cfg.pa_hp_sel = 0;
+			}
+			else
+			{
+				pa_cfg.pa_sel = LR11XX_RADIO_PA_SEL_LP; //LR11XX_RADIO_PA_SEL_HP
+				pa_cfg.pa_reg_supply = LR11XX_RADIO_PA_REG_SUPPLY_VREG; //LR11XX_RADIO_PA_REG_SUPPLY_VBAT
+				pa_cfg.pa_duty_cycle = 4;
+				pa_cfg.pa_hp_sel = 7;
+			}
+			lr11xx_radio_set_pa_cfg(NULL,&pa_cfg);
+			lr11xx_radio_set_rf_freq(NULL,radioconfig.freq);
+			LR112X_setopmode(prevopmode);
+			return RADIO_OK;
 		}
-		else
-		{
-			//LR112X_SetPaConfig(LR11XX_PA_SEL_SUBG_HP,LR11XX_PA_REG_SUPPLY_VBAT,LR11XX_PA_DUTYCYCLE_SUBG,LR11XX_PA_HPSEL_SUBG);
-			LR112X_SetPaConfig(LR11XX_PA_SEL_SUBG_LP,LR11XX_PA_REG_SUPPLY_VREG,LR11XX_PA_DUTYCYCLE_SUBG,LR11XX_PA_HPSEL_SUBG);
-		}
-		LR112X_SetRfFrequency(radioconfig.freq);
-		LR112X_setopmode(prevopmode);
-		return RADIO_OK;
+		
+		case 2021:
+		return RADIO_TODO;
 		
 		case 3029:
 		//prevopmode = opmode;
@@ -412,7 +452,7 @@ int8_t radio_set_power(int8_t dbm)
 		prevopmode = opmode;
 		SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
 		radioconfig.txpower = dbm;
-    SX126X_SetTxParams();
+		sx126x_set_tx_params(NULL,radioconfig.txpower,SX126X_RAMP_10_US);
 		SX126X_setopmode(prevopmode);
     return RADIO_OK;
 		
@@ -425,34 +465,44 @@ int8_t radio_set_power(int8_t dbm)
 			radioconfig.txpower = dbm;
 			pwr = dbm + 18;
 			printf("dbm=%d,pwr=%d\r\n",dbm,pwr);
-			SX128X_SetTxParams(pwr,SX128X_RAMP_02_US); //temporary
+			sx128x_set_tx_params(NULL,radioconfig.txpower,SX128X_RAMP_02_US);
 			//SX128X_setopmode(prevopmode);
 			return RADIO_OK;
 		}
 		
 		case 1121:
-		//prevopmode = opmode;
-		//LR112X_setopmode(RADIO_OPMODE_STBYXOSC);
- 		if(radioconfig.freq > LR112X_SEPARATION_FREQ)
 		{
-			LR112X_SetPaConfig(LR11XX_PA_SEL_HF,LR11XX_PA_REG_SUPPLY_VREG,LR11XX_PA_DUTYCYCLE_HF,LR11XX_PA_HPSEL_HF);
-			//check value
-			if((dbm < -18) || (dbm > 13)) return RADIO_INVALID_PARAMETER;
-			radioconfig.txpower = dbm;
-			LR112X_SetTxParams(dbm,LR112X_PA_RAMP_48U);
+			lr11xx_radio_pa_cfg_t pa_cfg;
+			//prevopmode = opmode;
+			//LR112X_setopmode(RADIO_OPMODE_STBYXOSC);
+			if(radioconfig.freq > LR112X_SEPARATION_FREQ)
+			{
+				//check value
+				if((dbm < -18) || (dbm > 13)) return RADIO_INVALID_PARAMETER;
+				radioconfig.txpower = dbm;
+				pa_cfg.pa_sel = LR11XX_RADIO_PA_SEL_HF;
+				pa_cfg.pa_reg_supply = LR11XX_RADIO_PA_REG_SUPPLY_VREG;
+				pa_cfg.pa_duty_cycle = 4;
+				pa_cfg.pa_hp_sel = 0;
+			}
+			else
+			{
+				//check value
+				if((dbm < -9) || (dbm > 22)) return RADIO_INVALID_PARAMETER;
+				pa_cfg.pa_sel = LR11XX_RADIO_PA_SEL_LP; //LR11XX_RADIO_PA_SEL_HP
+				pa_cfg.pa_reg_supply = LR11XX_RADIO_PA_REG_SUPPLY_VREG; //LR11XX_RADIO_PA_REG_SUPPLY_VBAT
+				pa_cfg.pa_duty_cycle = 4;
+				pa_cfg.pa_hp_sel = 7;
+				radioconfig.txpower = dbm;
+			}
+			lr11xx_radio_set_pa_cfg(NULL,&pa_cfg);
+			lr11xx_radio_set_tx_params(NULL,dbm,LR11XX_RADIO_RAMP_16_US);
 			//LR112X_setopmode(prevopmode);
 			return RADIO_OK;
 		}
-		else
-		{
-			LR112X_SetPaConfig(LR11XX_PA_SEL_SUBG_HP,LR11XX_PA_REG_SUPPLY_VBAT,LR11XX_PA_DUTYCYCLE_SUBG,LR11XX_PA_HPSEL_SUBG);
-			//check value
-			if((dbm < -9) || (dbm > 22)) return RADIO_INVALID_PARAMETER;
-			radioconfig.txpower = dbm;
-			LR112X_SetTxParams(dbm,LR112X_PA_RAMP_48U);
-			//LR112X_setopmode(prevopmode);
-			return RADIO_OK;
-		}
+		
+		case 2021:
+		return RADIO_TODO;
 		
 		case 3029:
 		if(dbm < 0) return RADIO_INVALID_PARAMETER;
@@ -460,7 +510,7 @@ int8_t radio_set_power(int8_t dbm)
 		radioconfig.txpower = dbm;
 		PAN_setpower(dbm);
 		return RADIO_OK;
-	
+		
     default:
     return INVALID_CHIP;
   }
@@ -474,6 +524,7 @@ int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
     case 1262:
 		{
 			uint8_t bw_index;
+			sx126x_mod_params_lora_t modparams;
 			//BW in kHz
 			if((bw_khz < 7) || (bw_khz > 500)) return RADIO_INVALID_PARAMETER;
 			if((sf < 5) || (sf > 12)) return RADIO_INVALID_PARAMETER;
@@ -495,7 +546,11 @@ int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
 			radioconfig.ldropt = ldropt;
 			prevopmode = opmode;
 			SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
-			SX126X_SetLoRaModParams(sf,SX126X_bw[bw_index],cr,ldropt); //
+			modparams.bw = SX126X_bw[radioconfig.bw_index];
+			modparams.cr = radioconfig.cr;
+			modparams.sf = radioconfig.sf;
+			modparams.ldro = radioconfig.ldropt;
+			sx126x_set_lora_mod_params(NULL,&modparams);
 			SX126X_setopmode(prevopmode);
 			return RADIO_OK;
 		}
@@ -503,6 +558,7 @@ int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
     case 1280:
 		{
 			uint8_t bw_index;
+			sx128x_mod_params_lora_t modparams;
 			//BW in kHz
 			if((bw_khz < 7) || (bw_khz > 500)) return RADIO_INVALID_PARAMETER;
 			if((sf < 5) || (sf > 12)) return RADIO_INVALID_PARAMETER;
@@ -518,7 +574,10 @@ int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
 			//radioconfig.ldropt = ldropt;
 			prevopmode = opmode;
 			SX128X_setopmode(RADIO_OPMODE_STBYXOSC);
-			SX128X_LORA_SetModulationParams(sf,SX128X_bw[bw_index],cr); //
+			modparams.bw = SX128X_bw[radioconfig.bw_index];
+			modparams.sf = radioconfig.sf << 4;
+			modparams.cr = radioconfig.cr;
+			sx128x_set_lora_mod_params(NULL,&modparams);
 			SX128X_setopmode(prevopmode);
 			return RADIO_OK;
 		}
@@ -526,6 +585,7 @@ int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
     case 1121:
 		{
 			uint8_t bw_index;
+			lr11xx_radio_mod_params_lora_t modparams;
 			//BW in kHz
 			if((bw_khz < 200) || (bw_khz > 1625)) return RADIO_INVALID_PARAMETER;
 			if((sf < 5) || (sf > 12)) return RADIO_INVALID_PARAMETER;
@@ -550,10 +610,17 @@ int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
 			radioconfig.ldropt = ldropt;
 			prevopmode = opmode;
 			LR112X_setopmode(RADIO_OPMODE_STBYXOSC);
-			LR112X_SetLoRaModulationParams(sf,LR112X_bw[bw_index],cr,(bool)ldropt); //
+			modparams.bw = LR112X_bw[radioconfig.bw_index];
+			modparams.sf = radioconfig.sf;
+			modparams.cr = radioconfig.cr;
+			modparams.ldro = radioconfig.ldropt;
+			lr11xx_radio_set_lora_mod_params(NULL,&modparams);
 			LR112X_setopmode(prevopmode);
 			return RADIO_OK;
 		}
+		
+		case 2021:
+		return RADIO_TODO;
 		
 		case 3029:
 		{
@@ -618,14 +685,17 @@ int8_t radio_getmodparams(uint16_t *bw_khz,uint8_t *sf,uint8_t *cr,uint8_t *ldro
 		*ldropt = radioconfig.ldropt;
 		return RADIO_OK;
 		
+		case 2021:
+		return RADIO_TODO;
+		
 		case 3029:
 		*sf = radioconfig.sf;
 		*bw_khz = PAN_bw_kHz[radioconfig.bw_index];
 		*cr = radioconfig.cr;
 		*ldropt = radioconfig.ldropt;
 		return RADIO_OK;
-    
-    default:
+		
+		default:
     return INVALID_CHIP;
   }
 }
@@ -636,57 +706,86 @@ int8_t radio_setpktparams(uint16_t sync,uint16_t prelen,uint8_t paylen,uint8_t h
   switch(radioconfig.chip)
   {
     case 1262:
-		if(header > 1) return RADIO_INVALID_PARAMETER;
-		if(crc > 1) return RADIO_INVALID_PARAMETER;
-		if(invertiq > 1) return RADIO_INVALID_PARAMETER;
-		radioconfig.sync = sync;
-		radioconfig.prelen = prelen;
-		radioconfig.paylen = paylen;
-		radioconfig.header = header;
-		radioconfig.crc = crc;
-		radioconfig.invertiq = invertiq;
-		prevopmode = opmode;
-		SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
-    SX126X_SetLoRaPacketParams(prelen,paylen,(bool)header,(bool)crc,(bool)invertiq);
-    SX126X_writeReg(SX126X_REG_LRSYNC_H,(sync & 0xff00) >> 8);
-    SX126X_writeReg(SX126X_REG_LRSYNC_L,sync & 0xff);
-		SX126X_setopmode(prevopmode);
-    return RADIO_OK;
-		
+		{
+			sx126x_pkt_params_lora_t pktparams;
+			if(header > 1) return RADIO_INVALID_PARAMETER;
+			if(crc > 1) return RADIO_INVALID_PARAMETER;
+			if(invertiq > 1) return RADIO_INVALID_PARAMETER;
+			radioconfig.sync = sync;
+			radioconfig.prelen = prelen;
+			radioconfig.paylen = paylen;
+			radioconfig.header = header;
+			radioconfig.crc = crc;
+			radioconfig.invertiq = invertiq;
+			prevopmode = opmode;
+			SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
+			pktparams.header_type = radioconfig.header;
+			pktparams.preamble_len_in_symb = radioconfig.prelen;
+			pktparams.pld_len_in_bytes = radioconfig.paylen;
+			pktparams.crc_is_on = radioconfig.crc;
+			pktparams.invert_iq_is_on = radioconfig.invertiq;
+			sx126x_set_lora_pkt_params(NULL,&pktparams);
+			sx126x_set_lora_sync_word(NULL,radioconfig.sync & 0xff);
+			SX126X_setopmode(prevopmode);
+			return RADIO_OK;
+		}
     case 1280:
-		if(header > 1) return RADIO_INVALID_PARAMETER;
-		if(crc > 1) return RADIO_INVALID_PARAMETER;
-		if(invertiq > 1) return RADIO_INVALID_PARAMETER;
-		radioconfig.sync = sync;
-		radioconfig.prelen = prelen;
-		radioconfig.paylen = paylen;
-		radioconfig.header = header;
-		radioconfig.crc = crc;
-		radioconfig.invertiq = invertiq;
-		prevopmode = opmode;
-		SX128X_setopmode(RADIO_OPMODE_STBYXOSC);
-    SX128X_LORA_SetPacketParams(prelen,header,paylen,crc,invertiq);
-    SX128X_writeReg(SX128X_REG_LR_SYNC_1,(sync & 0xff00) >> 8);
-    SX128X_writeReg(SX128X_REG_LR_SYNC_0,sync & 0xff);
-		SX128X_setopmode(prevopmode);
-    return RADIO_OK;
+		{
+			sx128x_pkt_params_lora_t pktparams;
+			uint8_t m,e;
+			if(header > 1) return RADIO_INVALID_PARAMETER;
+			if(crc > 1) return RADIO_INVALID_PARAMETER;
+			if(invertiq > 1) return RADIO_INVALID_PARAMETER;
+			radioconfig.sync = sync;
+			radioconfig.prelen = prelen;
+			radioconfig.paylen = paylen;
+			radioconfig.header = header;
+			radioconfig.crc = crc;
+			radioconfig.invertiq = invertiq;
+			prevopmode = opmode;
+			SX128X_setopmode(RADIO_OPMODE_STBYXOSC);
+			SX128X_CalcPreamble(radioconfig.prelen,&m,&e);
+			pktparams.preamble_len.mant = m;
+			pktparams.preamble_len.exp = e;
+			pktparams.pld_len_in_bytes = radioconfig.paylen;
+			if(radioconfig.header == false) pktparams.header_type = SX128X_LORA_RANGING_PKT_EXPLICIT;
+			else pktparams.header_type = SX128X_LORA_RANGING_PKT_IMPLICIT;
+			pktparams.crc_is_on = radioconfig.crc;
+			pktparams.invert_iq_is_on = radioconfig.invertiq;
+			sx128x_set_lora_pkt_params(NULL,&pktparams);
+			//set sync
+			sx128x_set_lora_sync_word(NULL,radioconfig.sync & 0xff);
+			SX128X_setopmode(prevopmode);
+			return RADIO_OK;
+		}
 		
     case 1121:
-		if(header > 1) return RADIO_INVALID_PARAMETER;
-		if(crc > 1) return RADIO_INVALID_PARAMETER;
-		if(invertiq > 1) return RADIO_INVALID_PARAMETER;
-		radioconfig.sync = sync;
-		radioconfig.prelen = prelen;
-		radioconfig.paylen = paylen;
-		radioconfig.header = header;
-		radioconfig.crc = crc;
-		radioconfig.invertiq = invertiq;
-		prevopmode = opmode;
-		LR112X_setopmode(RADIO_OPMODE_STBYXOSC);
-		LR112X_SetLoRaPacketParams(prelen,header,paylen,crc,invertiq);
-		LR112X_SetLoRaSyncWord(radioconfig.sync);
-		SX126X_setopmode(prevopmode);
-    return RADIO_OK;
+		{
+			lr11xx_radio_pkt_params_lora_t pktparams;
+			if(header > 1) return RADIO_INVALID_PARAMETER;
+			if(crc > 1) return RADIO_INVALID_PARAMETER;
+			if(invertiq > 1) return RADIO_INVALID_PARAMETER;
+			radioconfig.sync = sync;
+			radioconfig.prelen = prelen;
+			radioconfig.paylen = paylen;
+			radioconfig.header = header;
+			radioconfig.crc = crc;
+			radioconfig.invertiq = invertiq;
+			prevopmode = opmode;
+			LR112X_setopmode(RADIO_OPMODE_STBYXOSC);
+			pktparams.preamble_len_in_symb = radioconfig.prelen;
+			pktparams.pld_len_in_bytes = radioconfig.paylen;
+			pktparams.header_type = radioconfig.header;
+			pktparams.crc = radioconfig.crc;
+			pktparams.iq = radioconfig.invertiq;
+			lr11xx_radio_set_lora_pkt_params(NULL,&pktparams);
+			lr11xx_radio_set_lora_sync_word(NULL,radioconfig.sync & 0xff);
+			LR112X_setopmode(prevopmode);
+			return RADIO_OK;
+		}
+		
+		case 2021:
+		return RADIO_TODO;
 		
 		case 3029:
 		if(header > 1) return RADIO_INVALID_PARAMETER;
@@ -720,22 +819,53 @@ int8_t radio_sendpacket(uint8_t *buf)
   switch(radioconfig.chip)
   {
     case 1262:
-    SX126X_SetLoRaPacketParams(radioconfig.prelen,txlen,radioconfig.header,radioconfig.crc,radioconfig.invertiq);
-    SX126X_writeBuffer(0,buf,txlen);
-    SX126X_setopmode(RADIO_OPMODE_TX);
-    return RADIO_OK;
+		{
+			sx126x_pkt_params_lora_t pktparams;
+			pktparams.preamble_len_in_symb = radioconfig.prelen;
+			pktparams.pld_len_in_bytes = txlen;
+			pktparams.header_type = radioconfig.header;
+			pktparams.crc_is_on = radioconfig.crc;
+			pktparams.invert_iq_is_on = radioconfig.invertiq;
+			sx126x_set_lora_pkt_params(NULL,&pktparams);
+			sx126x_write_buffer(NULL,0,buf,txlen);
+			SX126X_setopmode(RADIO_OPMODE_TX);
+			return RADIO_OK;
+		}
 		
     case 1280:
-    SX128X_LORA_SetPacketParams(radioconfig.prelen,radioconfig.header,txlen,radioconfig.crc,radioconfig.invertiq);
-    SX128X_writeBuffer(0,buf,txlen);
-    SX126X_setopmode(RADIO_OPMODE_TX);
-    return RADIO_OK;
+		{
+			sx128x_pkt_params_lora_t pktparams;
+			uint8_t m,e;
+			SX128X_CalcPreamble(radioconfig.prelen,&m,&e);
+			pktparams.preamble_len.mant = m;
+			pktparams.preamble_len.exp = e;
+			pktparams.pld_len_in_bytes = txlen;
+			if(radioconfig.header == false) pktparams.header_type = SX128X_LORA_RANGING_PKT_EXPLICIT;
+			else pktparams.header_type = SX128X_LORA_RANGING_PKT_IMPLICIT;
+			pktparams.crc_is_on = radioconfig.crc;
+			pktparams.invert_iq_is_on = radioconfig.invertiq;
+			sx128x_set_lora_pkt_params(NULL,&pktparams);
+			sx128x_write_buffer(NULL,0,buf,txlen);
+			SX128X_setopmode(RADIO_OPMODE_TX);
+			return RADIO_OK;
+		}
 		
     case 1121:
-		LR112X_SetLoRaPacketParams(radioconfig.prelen,radioconfig.header,txlen,radioconfig.crc,radioconfig.invertiq);
-    LR112X_writeBuffer8(buf,txlen);
-    LR112X_setopmode(RADIO_OPMODE_TX);
-    return RADIO_OK;
+		{
+			lr11xx_radio_pkt_params_lora_t pktparams;
+			pktparams.preamble_len_in_symb = radioconfig.prelen;
+			pktparams.pld_len_in_bytes = txlen;
+			pktparams.header_type = radioconfig.header;
+			pktparams.crc = radioconfig.crc;
+			pktparams.iq = radioconfig.invertiq;
+			lr11xx_radio_set_lora_pkt_params(NULL,&pktparams);
+			lr11xx_regmem_write_buffer8(NULL,buf,txlen);
+			LR112X_setopmode(RADIO_OPMODE_TX);
+			return RADIO_OK;
+		}
+		
+		case 2021:
+		return RADIO_TODO;
 		
 		case 3029:
 		//PAN_setopmode(RADIO_OPMODE_STBYXOSC);
@@ -753,37 +883,36 @@ int8_t radio_getpktstatus(rxpacketstatus_t *status)
   {
     case 1262:
 		{
-			uint8_t dummy;
-			uint8_t rssipkt;
-			int16_t snrpkt;
-			uint8_t signalrssi;
-		
-			SX126X_GetLoRaPacketStatus(&dummy,&rssipkt,&snrpkt,&signalrssi);
-			status->rssi_pkt = -((float)rssipkt/2);
-			if(snrpkt < 128) status->snr_pkt = ((float)snrpkt)/4;
-			else status->snr_pkt = (float)(snrpkt - 256)/4;
-			status->signal_rssi_pkt = -((float)signalrssi/2);
+			sx126x_pkt_status_lora_t pktstatus;
+			sx126x_get_lora_pkt_status(NULL,&pktstatus);
+			status->rssi_pkt = pktstatus.rssi_pkt_in_dbm;
+			status->snr_pkt = pktstatus.snr_pkt_in_db; 
+			status->signal_rssi_pkt = pktstatus.signal_rssi_pkt_in_dbm;
 			return RADIO_OK;
 		}
 		
     case 1280:
 		{
-			uint8_t rssi_sync;
-			int16_t snrpkt;
-
-			SX128X_LORA_GetPacketStatus(&rssi_sync,&snrpkt);
-			status->rssi_pkt = -((float)rssi_sync/2);
-			if(snrpkt < 128) status->snr_pkt = ((float)snrpkt)/4;
-			else status->snr_pkt = (float)(snrpkt - 256)/4;
+			sx128x_pkt_status_lora_t pktstatus;
+			sx128x_get_lora_pkt_status(NULL,&pktstatus);
+			status->rssi_pkt = pktstatus.rssi; 
+			status->snr_pkt = pktstatus.snr;
 			status->signal_rssi_pkt = status->rssi_pkt + status->snr_pkt; //???
 			return RADIO_OK;
 		}
 		
     case 1121:
 		{
-			LR112X_GetLoRaPacketStatus(&status->rssi_pkt,&status->snr_pkt,&status->signal_rssi_pkt);
+			lr11xx_radio_pkt_status_lora_t pktstatus;
+			lr11xx_radio_get_lora_pkt_status(NULL,&pktstatus);
+			status->rssi_pkt = pktstatus.rssi_pkt_in_dbm;
+			status->snr_pkt = pktstatus.snr_pkt_in_db;
+			status->signal_rssi_pkt = pktstatus.signal_rssi_pkt_in_dbm;
 			return RADIO_OK;
 		}
+		
+		case 2021:
+		return RADIO_TODO;
 		
 		case 3029:
 		status->rssi_pkt = g_RfRxPkt.Rssi; //recompute
@@ -803,29 +932,34 @@ int8_t radio_getpacket(uint8_t *buf)
   {
     case 1262:
 		{
-			uint8_t dummy;
-			uint8_t rxpointer;
-			SX126X_GetRxBufferStatus(&dummy,&rxlen,&rxpointer);
-			SX126X_readBuffer(rxpointer,buf,rxlen);
+			sx126x_rx_buffer_status_t status;
+			sx126x_get_rx_buffer_status(NULL,&status);
+			rxlen = status.pld_len_in_bytes;
+			sx126x_read_buffer(NULL,status.buffer_start_pointer,buf,rxlen);
 			return RADIO_OK;
 		}
 		
     case 1280:
 		{
-			uint8_t rxpointer;
-			SX128X_GetRxBufferStatus(&rxlen,&rxpointer);
-			SX128X_readBuffer(rxpointer,buf,rxlen);
+			sx128x_rx_buffer_status_t status;
+			sx128x_get_rx_buffer_status(NULL,&status);
+			rxlen = status.pld_len_in_bytes;
+			sx128x_read_buffer(NULL,status.buffer_start_pointer,buf,rxlen);
 			return RADIO_OK;
 		}
 		
     case 1121:
 		{
-			uint8_t rxpointer;
-			LR112X_GetRxBufferStatus(&rxlen,&rxpointer);
-			LR112X_readBuffer8(rxpointer,buf,rxlen);
-			LR112X_ClearRxBuffer();
+			lr11xx_radio_rx_buffer_status_t status;
+			lr11xx_radio_get_rx_buffer_status(NULL,&status);
+			rxlen = status.pld_len_in_bytes;
+			lr11xx_regmem_read_buffer8(NULL,buf,status.buffer_start_pointer,rxlen);
+			lr11xx_regmem_clear_rxbuffer(NULL); //???
 			return RADIO_OK;
 		}
+		
+		case 2021:
+		return RADIO_TODO;
 		
 		case 3029:
 		rxlen = g_RfRxPkt.RxLen;
@@ -845,7 +979,11 @@ int8_t radio_getstats(rxstats_t *stats)
     case 1262:
 		{
 			uint8_t dummy;
-			SX126X_LoRaGetStats(&dummy,&stats->pkt_received,&stats->crc_error,&stats->header_error);
+			sx126x_stats_lora_t lora_stats;
+			sx126x_get_lora_stats(NULL,&lora_stats);
+			stats->pkt_received = lora_stats.nb_pkt_received;
+			stats->crc_error = lora_stats.nb_pkt_crc_error;
+			stats->header_error = lora_stats.nb_pkt_header_error;
 			stats->false_sync = 0;
 		}
     return RADIO_OK;
@@ -854,8 +992,17 @@ int8_t radio_getstats(rxstats_t *stats)
     return FEATURE_NOT_SUPPORTED;
 		
     case 1121:
-		LR112X_GetStats(&stats->pkt_received,&stats->crc_error,&stats->header_error,&stats->false_sync);
-    return RADIO_OK;
+		{
+			lr11xx_radio_stats_lora_t lora_stats;
+			lr11xx_radio_get_lora_stats(NULL,&lora_stats);
+			stats->pkt_received = lora_stats.nb_pkt_received;
+			stats->crc_error = lora_stats.nb_pkt_crc_error;
+			stats->header_error = lora_stats.nb_pkt_falsesync;
+			return RADIO_OK;
+		}
+		
+		case 2021:
+		return RADIO_TODO;
 		
 		case 3029:
 		return RADIO_TODO;
@@ -870,14 +1017,14 @@ int8_t radio_clearstats(void)
   switch(radioconfig.chip)
   {
     case 1262:
-    SX126X_ResetStats();
+		sx126x_reset_stats(NULL);
     return RADIO_OK;
 		
     case 1280:
     return FEATURE_NOT_SUPPORTED;
 		
     case 1121:
-    LR112X_ResetStats();
+    lr11xx_radio_reset_stats(NULL);
     return RADIO_OK;
 		
 		case 3029:
@@ -896,28 +1043,30 @@ void radio_irq_handler(void)
     case 1262:
 		{
 			//read SX126x status
-			uint16_t irqstatus = SX126X_GetIrqStatus();
-			SX126X_ClearIrqStatus(SX126X_ALL_IRQMSK);
+			uint16_t irqstatus;
+			sx126x_get_irq_status(NULL,&irqstatus);
+			sx126x_clear_irq_status(NULL,SX126X_IRQ_ALL);
 			//printf("Flags:0x%02X\r\n",irqstatus);
-			if(irqstatus & SX126X_TXDONE_IRQMSK) packet_sent = true;
-			if(irqstatus & SX126X_RXDONE_IRQMSK) packet_received = true;
-			if(irqstatus & SX126X_CRCERR_IRQMSK) crc_error = true;
-//			if(irqstatus & SX126X_RPEDET_IRQMSK) {};
-//			if(irqstatus & SX126X_SYNCDET_IRQMSK) {};
-//			if(irqstatus & SX126X_HEADERDET_IRQMSK) {};
-//			if(irqstatus & SX126X_HEADERERR_IRQMSK) {};
-//			if(irqstatus & SX126X_CADDONE_IRQMSK) {};
-//			if(irqstatus & SX126X_CADDET_IRQMSK) {};
-//			if(irqstatus & SX126X_TIMEOUT_IRQMSK) {};
-//			if(irqstatus & SX126X_LRFHSSHOP_IRQMSK) {};
+			if(irqstatus & SX126X_IRQ_TX_DONE) packet_sent = true;
+			if(irqstatus & SX126X_IRQ_RX_DONE) packet_received = true;
+			if(irqstatus & SX126X_IRQ_CRC_ERROR) crc_error = true;
+//			if(irqstatus & SX126X_IRQ_PREAMBLE_DETECTED) {};
+//			if(irqstatus & SX126X_IRQ_SYNC_WORD_VALID) {};
+//			if(irqstatus & SX126X_IRQ_HEADER_VALID) {};
+//			if(irqstatus & SX126X_IRQ_HEADER_ERROR) {};
+//			if(irqstatus & SX126X_IRQ_CAD_DONE) {};
+//			if(irqstatus & SX126X_IRQ_CAD_DETECTED) {};
+//			if(irqstatus & SX126X_IRQ_TIMEOUT) {};
+//			if(irqstatus & SX126X_IRQ_LR_FHSS_HOP) {};
 			break;   
 		}
 		
     case 1280:
 		{
 			//read status
-			uint16_t irqstatus = SX128X_GetIrqStatus();
-			SX128X_ClearIrqStatus(SX128X_IRQ_ALL);
+			uint16_t irqstatus;
+			sx128x_get_irq_status(NULL,&irqstatus);
+			sx128x_clear_irq_status(NULL,SX128X_IRQ_ALL);
 			if(irqstatus & SX128X_IRQ_TX_DONE) packet_sent = true;
 			if(irqstatus & SX128X_IRQ_RX_DONE) packet_received = true;
 			if(irqstatus & SX128X_IRQ_CRC_ERROR) crc_error = true;
@@ -940,27 +1089,38 @@ void radio_irq_handler(void)
     case 1121:
 		{
 			//read status
-			uint32_t irqstatus = LR112X_GetIrq();
-			LR112X_ClearIrq(LR112X_IRQMASK_ALL);
+			uint32_t irqstatus;
+			lr11xx_system_get_irq_status(NULL,&irqstatus);
+			lr11xx_system_clear_irq_status(NULL,LR11XX_SYSTEM_IRQ_ALL_MASK);
 			//printf("IRQ:0x%08X\r\n",irqstatus);
-			if(irqstatus & LR112X_TX_DONE) packet_sent = true;
-			if(irqstatus & LR112X_RX_DONE) packet_received = true;
-			if(irqstatus & LR112X_CRC_ERROR) crc_error = true;
-//			if(irqstatus & LR112X_PRE_DET) {};
-//			if(irqstatus & LR112X_SYNC_DET) {};
-//			if(irqstatus & LR112X_HEADER_ERROR) {};
-//			if(irqstatus & LR112X_CAD_DONE) {};
-//			if(irqstatus & LR112X_CAD_DETECTED) {};
-//			if(irqstatus & LR112X_TIMEOUT) {};
-//			if(irqstatus & LR112X_LR_FHSS_HOP) {};
-//			if(irqstatus & LR112X_LBD) {};	
-//			if(irqstatus & LR112X_CMD_ERROR) {};	
-//			if(irqstatus & LR112X_ERROR) {};	
-//			if(irqstatus & LR112X_FSK_LEN_ERROR) {};	
-//			if(irqstatus & LR112X_FSK_ADDR_ERROR) {};		
-//			if(irqstatus & LR112X_LR_RX_TIMESTAMP) {};				
+			if(irqstatus & LR11XX_SYSTEM_IRQ_TX_DONE) packet_sent = true;
+			if(irqstatus & LR11XX_SYSTEM_IRQ_RX_DONE) packet_received = true;
+			if(irqstatus & LR11XX_SYSTEM_IRQ_CRC_ERROR) crc_error = true;
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_PREAMBLE_DETECTED) {};
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_SYNC_WORD_HEADER_VALID) {};
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_HEADER_ERROR) {};
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_CAD_DONE) {};
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_CAD_DETECTED) {};
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_TIMEOUT) {};
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_LR_FHSS_INTRA_PKT_HOP) {};
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_REQ_VALID) {};	
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_REQ_DISCARDED) {};	
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_RESP_DONE) {};	
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_EXCH_VALID) {};	
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_TIMEOUT) {};		
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_GNSS_SCAN_DONE) {};		
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_WIFI_SCAN_DONE) {};	
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_EOL) {};	
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_CMD_ERROR) {};		
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_ERROR) {};	
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_FSK_LEN_ERROR) {};	
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_FSK_ADDR_ERROR) {};	
+//			if(irqstatus & LR11XX_SYSTEM_IRQ_LORA_RX_TIMESTAMP) {};		
 			break;   
 		}
+		
+		case 2021:
+		break;
 		
 		case 3029:
 		PAN_irq_handler();
@@ -977,19 +1137,52 @@ int8_t radio_rx(void)
   switch(radioconfig.chip)
   {
     case 1262:
-    SX126X_SetLoRaPacketParams(radioconfig.prelen,radioconfig.paylen,radioconfig.header,radioconfig.crc,radioconfig.invertiq);
-    SX126X_setopmode(RADIO_OPMODE_RX);
-		return RADIO_OK;
+		{
+			sx126x_pkt_params_lora_t pktparams;
+			pktparams.header_type = radioconfig.header;
+			pktparams.preamble_len_in_symb = radioconfig.prelen;
+			pktparams.pld_len_in_bytes = radioconfig.paylen;
+			pktparams.crc_is_on = radioconfig.crc;
+			pktparams.invert_iq_is_on = radioconfig.invertiq;
+			sx126x_set_lora_pkt_params(NULL,&pktparams);
+			SX126X_setopmode(RADIO_OPMODE_RX);
+			return RADIO_OK;
+		}
 		
     case 1280:
-		SX128X_LORA_SetPacketParams(radioconfig.prelen,radioconfig.header,radioconfig.paylen,radioconfig.crc,radioconfig.invertiq);
-    SX128X_setopmode(RADIO_OPMODE_RX);
-		return RADIO_OK;
+		{
+			sx128x_pkt_params_lora_t pktparams;
+			uint8_t m,e;
+			SX128X_CalcPreamble(radioconfig.prelen,&m,&e);
+			pktparams.preamble_len.mant = m;
+			pktparams.preamble_len.exp = e;
+			pktparams.pld_len_in_bytes = radioconfig.paylen;
+			if(radioconfig.header == false) pktparams.header_type = SX128X_LORA_RANGING_PKT_EXPLICIT;
+			else pktparams.header_type = SX128X_LORA_RANGING_PKT_IMPLICIT;
+			pktparams.crc_is_on = radioconfig.crc;
+			pktparams.invert_iq_is_on = radioconfig.invertiq;
+			sx128x_set_lora_pkt_params(NULL,&pktparams);
+			SX128X_setopmode(RADIO_OPMODE_RX);
+			return RADIO_OK;
+		}
 		
     case 1121:
-		LR112X_SetLoRaPacketParams(radioconfig.prelen,radioconfig.header,radioconfig.paylen,radioconfig.crc,radioconfig.invertiq);
-    LR112X_setopmode(RADIO_OPMODE_RX);
-		return RADIO_OK;
+		{
+			lr11xx_radio_pkt_params_lora_t pktparams;
+			pktparams.preamble_len_in_symb = radioconfig.prelen;
+			pktparams.pld_len_in_bytes = radioconfig.paylen;
+			pktparams.header_type = radioconfig.header;
+			pktparams.crc = radioconfig.crc;
+			pktparams.iq = radioconfig.invertiq;
+			lr11xx_radio_set_lora_pkt_params(NULL,&pktparams);
+			LR112X_setopmode(RADIO_OPMODE_RX);
+			return RADIO_OK;
+		}
+		
+		case 2021:
+		{
+			return RADIO_TODO;
+		}
 		
 		case 3029:
 		PAN_EnterContinousRxState();
@@ -1005,16 +1198,31 @@ int8_t radio_getrssi(float *dbm)
   switch(radioconfig.chip)
   {
     case 1262:
-    *dbm = SX126X_GetRssiInst()/-2.0f;
-    return RADIO_OK;
+		{
+			int16_t rssi;
+			sx126x_get_rssi_inst(NULL,&rssi);
+			*dbm = rssi;
+			return RADIO_OK;
+		}
 		
     case 1280:
-    *dbm = SX128X_GetRssiInst()/-2.0f;
-    return RADIO_OK;
+		{
+			int16_t rssi;
+			sx128x_get_rssi_inst(NULL,&rssi);
+			*dbm = rssi;
+			return RADIO_OK;
+		}
 		
     case 1121:
-		*dbm = LR112X_GetRssiInst()/-2.0f;
-		return RADIO_OK;
+		{
+			int8_t rssi;
+			lr11xx_radio_get_rssi_inst(NULL,&rssi);
+			*dbm = rssi;
+			return RADIO_OK;
+		}
+		
+		case 2021:
+		return RADIO_TODO;
 		
 		case 3029:
 		*dbm = (float)PAN_GetRealTimeRssi();
@@ -1045,12 +1253,12 @@ int8_t radio_stream(uint8_t stream)
 		//prevopmode = opmode;
     if(stream == 1) 
 		{
-			SX126X_SetCW();
+			sx126x_set_tx_cw(NULL);
 			txmode = 1;
 		}
     else 
 		{
-			SX126X_SetTxInfinitePreamble();
+			sx126x_set_tx_infinite_preamble(NULL);
 			txmode = 2;
 		}
 		txled_on();
@@ -1062,12 +1270,12 @@ int8_t radio_stream(uint8_t stream)
 		//prevopmode = opmode;
     if(stream == 1) 
 		{
-			SX128X_SetCW();
+			sx128x_set_tx_cw(NULL);
 			txmode = 1;
 		}
     else 
 		{
-			SX128X_SetPRE();
+			sx128x_set_tx_infinite_preamble(NULL);
 			txmode = 2;
 		}
 		txled_on();

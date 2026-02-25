@@ -449,18 +449,16 @@ int8_t PAN_Calibrate(void)
 * - PAN_OK: Operation successful
 * - PAN_FAIL: Operation failed
 */
-int8_t PAN_ConfigAgc(void)
+int8_t PAN_ConfigAgc(uint32_t freq)
 {
   /* Enable AGC function
   - [Page2][0x06][Bit0] equal to 0 means enable AGC function
   - [Page2][0x06][Bit1] equal to 1 means disable AGC function */
+	
   PAN_ASSERT(PAN_ResetPageRegBits(2, 0x06, 0x01));
-
-#if REGION_DEFAULT == REGION_CN470_510 //change here according to actual frequencies!!!
-  PAN_WritePageRegs(2, 0x0A, (uint8_t *)g_LowFreqAgcCfg, 40);
-#elif REGION_DEFAULT == REGION_EU_863_870 || REGION_DEFAULT == REGION_US_902_928 
-  PAN_WritePageRegs(2, 0x0A, (uint8_t *)g_HighFreqAgcCfg, 40);
-#endif
+	//PAN_ASSERT(PAN_SetPageRegBits(2, 0x06, 0x02));
+	if(freq < 700000000) PAN_WritePageRegs(2, 0x0A, (uint8_t *)g_LowFreqAgcCfg, 40);
+	else PAN_WritePageRegs(2, 0x0A, (uint8_t *)g_HighFreqAgcCfg, 40);
   PAN_ASSERT(PAN_WritePageReg(2, 0x34, 0xEF));
   return PAN_OK;
 }
@@ -478,6 +476,11 @@ int8_t PAN_ConfigDefaultParams(void)
   {
     PAN_WritePageReg(g_RfDefaultConfig[i].Page, g_RfDefaultConfig[i].Addr, g_RfDefaultConfig[i].Value);
   }
+	//added for SX126x compatibility - testing needed!!!
+	//uint8_t tempreg = PAN_ReadPageReg(3,0x12);
+	//PAN_WritePageReg(1,0x25,0x48);
+	//PAN_WritePageReg(3,0x12,(0x02 | (tempreg & 0x08)));
+	//PAN_SetChipMode(CHIPMODE_MODE1);       /* Set the chip mode to MODE1 */
   return PAN_OK;
 }
 
@@ -488,7 +491,7 @@ int8_t PAN_ConfigDefaultParams(void)
 * - PAN_FAIL: Operation failed
 * @note Before calling this function, you must configure the MCU's SPI and related GPIO pins.
 */
-int8_t PAN_Init(void)
+int8_t PAN_Init(uint32_t freq)
 {
 #if USE_PAN_RST_GPIO == 1
   PAN_Reset();
@@ -537,7 +540,7 @@ int8_t PAN_Init(void)
 	PAN_DelayMs(1);                        /* Ensure that the actual delay is above 10us */
   PAN_ASSERT(PAN_ConfigDefaultParams());              /* Configure the default parameters of the RF register */
   PAN_ASSERT(PAN_Calibrate());                        /* Calibrate RF related parameters */
-  PAN_ASSERT(PAN_ConfigAgc());                        /* Configure the AGC function */
+  PAN_ASSERT(PAN_ConfigAgc(freq));                        /* Configure the AGC function */
   PAN_InitAntGpio();                                 /* Initialize the antenna GPIO pinS */
   g_RfOperatetate = PAN_STATE_STB3;                  /* Set the current working state to STB3 */
   return PAN_OK;
@@ -767,10 +770,13 @@ int8_t PAN_SetFreq(uint32_t Frequency)
 {
   int i;
   uint32_t Fa, Fb;
-  uint32_t Temp = 0;
+  //uint32_t Temp = 0;
+	double tmp_var = 0.0;
   uint32_t IntegerPart;
+	double FractionalPart = 0.0;
   uint8_t FreqReg[4], Fab[3];
   uint32_t FreqTableNum = (sizeof(g_RfFreqTable) / sizeof(RadioFreqTable_t));
+	uint8_t LoMux;
    
   if (Frequency < g_RfFreqTable[0].StartFreq || Frequency > g_RfFreqTable[FreqTableNum - 1].StopFreq) return PAN_FAIL;
   /* Traverse the frequency table and find the matching frequency segment */
@@ -778,26 +784,38 @@ int8_t PAN_SetFreq(uint32_t Frequency)
   {
     if (Frequency > g_RfFreqTable[i].StartFreq && Frequency <= g_RfFreqTable[i].StopFreq)
     {
-      uint8_t LoMux = (g_RfFreqTable[i].LoParam & 0x70) >> 4;
-      Temp = Frequency * g_VcoDivTable[LoMux];
+      LoMux = (g_RfFreqTable[i].LoParam & 0x70) >> 4;
+      //Temp = Frequency * g_VcoDivTable[LoMux];
+			tmp_var = Frequency * 1.0 * g_VcoDivTable[LoMux] / 31999900; //XO must be parametrized.
       PAN_WritePageRegs(0, 0x40, (uint8_t *)&g_RfFreqTable[i].VcoParam, 2);
       PAN_WriteReg(0x3D, g_RfFreqTable[i].LoParam);
+			//printf("vcoparam=0x%02X\r\nloparam=0x%02X\r\nlodiv=0x%02X\r\n",g_RfFreqTable[i].VcoParam,g_RfFreqTable[i].LoParam,g_VcoDivTable[LoMux]);
       break;
     }
   }
-  /* No frequency range matched */
+	/* No frequency range matched */
   if (i >= FreqTableNum) return PAN_FAIL;
-  IntegerPart = Temp / 32000000;
+  //IntegerPart = Temp / 32000000;
+	IntegerPart = (uint32_t)tmp_var;
+	FractionalPart = tmp_var - IntegerPart;
   Fa = IntegerPart - 20; //640MHz
-  Fb = (Temp % 32000000) / 40000;
+  //Fb = (Temp % 32000000) / 40000;
+	//Fb = (int)(FractionalPart * 1600 / g_VcoDivTable[LoMux]);
+	Fb = (int)(FractionalPart * 800.0);
+	
+	//printf("Int=%d\r\nFrac=%.6f\r\nFa=%d\r\nFb=%d\r\n",IntegerPart,FractionalPart,Fa,Fb);
+	
   FreqReg[0] = (uint8_t)Frequency;
   FreqReg[1] = (uint8_t)(Frequency >> 8);
   FreqReg[2] = (uint8_t)(Frequency >> 16);
   FreqReg[3] = (uint8_t)(Frequency >> 24);
   PAN_WritePageRegs(3, 0x09, FreqReg, 4);
-  Fab[0] = (uint8_t)(Fa); 
-  Fab[1] = (uint8_t)(Fb); //10kHz 
-  Fab[2] = (uint8_t)((Fb >> 8) & 0x0F); //2.56MHz
+  //Fab[0] = (uint8_t)(Fa);
+	Fab[0] = (uint8_t)(Fa & 0xff); 
+  //Fab[1] = (uint8_t)(Fb); //10kHz 
+	Fab[1] = (uint8_t)(Fb & 0xff);
+  Fab[2] = (uint8_t)((Fb >> 8) & 0x0f); //2.56MHz
+	//Fab[2] = (uint8_t)(Fb >> 8);
   PAN_WritePageRegs(3, 0x15, Fab, 3);
   g_RfCfgParams.Frequency = Frequency;
   return PAN_OK;

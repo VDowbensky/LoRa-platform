@@ -23,43 +23,43 @@ void SX126X_setopmode(uint8_t mode)
   {
     case RADIO_OPMODE_SLEEP:
     opmode = RADIO_OPMODE_SLEEP;
-    SX126X_SetSleep(0,0);
+    sx126x_set_sleep(NULL,SX126X_SLEEP_CFG_COLD_START); //SX126X_SLEEP_CFG_WARM_START
     break;
 
     case RADIO_OPMODE_STBYRC:
     opmode = RADIO_OPMODE_STBYRC;
-    SX126X_SetStandby(0);
+    sx126x_set_standby(NULL,SX126X_STANDBY_CFG_RC);
     break;
 
     case RADIO_OPMODE_STBYXOSC:
     opmode = RADIO_OPMODE_STBYXOSC;
-    SX126X_SetStandby(1);
+    sx126x_set_standby(NULL,SX126X_STANDBY_CFG_XOSC);
     break;
 
     case RADIO_OPMODE_FS:
     opmode = RADIO_OPMODE_FS;
-    SX126X_SetFs();
+    sx126x_set_fs(NULL);
     break;
 
     case RADIO_OPMODE_TX:
     opmode = RADIO_OPMODE_TX;
-    SX126X_SetTx(0xffffff); //temp.
+    sx126x_set_tx_with_timeout_in_rtc_step(NULL,0xffffff); //temp.
     break;
 
     case RADIO_OPMODE_RX:
     default:
     opmode = RADIO_OPMODE_RX;
-    SX126X_SetRx(0xffffff); //temp.
+    sx126x_set_rx_with_timeout_in_rtc_step(NULL,0xffffff); //temp.
     break;
 
     case RADIO_OPMODE_TXSTREAMCW:
     opmode = RADIO_OPMODE_TXSTREAMCW;
-    SX126X_SetCW();
+    sx126x_set_tx_cw(NULL);
     break;
 
     case RADIO_OPMODE_TXSTREAMPRE:
     opmode = RADIO_OPMODE_TXSTREAMPRE;
-    SX126X_SetTxInfinitePreamble();
+    sx126x_set_tx_infinite_preamble(NULL);
     break;
   }
 }
@@ -67,8 +67,7 @@ void SX126X_setopmode(uint8_t mode)
 //boost LNA
 void SX126X_LNAboost(bool boost)
 {
-  if(boost) SX126X_writeReg(0x08ac,0x96);
-  else SX126X_writeReg(0x08ac,0x94);
+	sx126x_cfg_rx_boosted(NULL,boost);
 }
 
 //calibrate IR according to RF ftequency
@@ -91,7 +90,7 @@ void SX126X_CalibrateIR(void)
   f = (f * 3) / 2; //probably 1.5 times
   if(f > 1020) f = 1020;
   f2 = (uint8_t)(f / 4);
-  SX126X_CalibrateImage(f1,f2);
+  sx126x_cal_img(NULL,f1,f2);
   //restore Ctune needed
 }
 

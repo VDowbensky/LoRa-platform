@@ -41,7 +41,7 @@
 #define REGION_CN470_510           0x00 /* China 470-510MHz band */
 #define REGION_EU_863_870          0x01 /* Europe 863-870MHz band */
 #define REGION_US_902_928          0x02 /* United States 902-928MHz band */
-#define REGION_DEFAULT             REGION_CN470_510 /* Default frequency band is China 470-510MHz band */
+//#define REGION_DEFAULT             REGION_CN470_510 /* Default frequency band is China 470-510MHz band */
 
 /**
 * @brief Defines the default parameters for the PAN3029/3060. Users can modify these RF parameters as needed.
@@ -86,7 +86,9 @@
 #define PAN_IRQ_RX_TIMEOUT               0x02 /* Single receive timeout interrupt flag */
 #define PAN_IRQ_CRC_ERR                  0x04 /* CRC error interrupt flag */
 #define PAN_IRQ_RX_DONE                  0x08 /* Receive complete interrupt flag */
+#define PAN_IRQ_RX_PHLD_DONE             0x10 /* PHLD complete interrupt flag */
 #define PAN_IRQ_MAPM_DONE                0x40 /* MAPM interrupt flag */
+#define PAN_IRQ_EFUSE_WR	               0x80 /* Efuse read/write complete interrupt flag */
 
 /**
 * @brief PAN3029/3060 modulation mode definition
@@ -608,7 +610,8 @@ int8_t PAN_Calibrate(void);
 * - PAN_OK: Operation successful
 * - PAN_FAIL: Operation failed
 */
-int8_t PAN_ConfigAgc(void);
+//int8_t PAN_ConfigAgc(void);
+int8_t PAN_ConfigAgc(uint32_t freq);
 /**
 * @brief Configures the default parameters of the RF registers
 * @return int8_t Returns the operation result
@@ -623,7 +626,8 @@ int8_t PAN_ConfigDefaultParams(void);
 * - PAN_FAIL: Operation failed
 * @note Before calling this function, you must configure the MCU's SPI and related GPIO pins.
 */
-int8_t PAN_Init(void);
+//int8_t PAN_Init(void);
+int8_t PAN_Init(uint32_t freq);
 /**
 * @brief Configure the user parameters of the RF chip
 */

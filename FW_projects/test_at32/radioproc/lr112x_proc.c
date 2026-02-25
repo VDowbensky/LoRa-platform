@@ -20,44 +20,49 @@ void LR112X_setopmode(uint8_t mode)
   switch(mode)
   {
     case RADIO_OPMODE_SLEEP:
-		opmode = RADIO_OPMODE_SLEEP;
-    LR112X_SetSleep(LR112X_SLEEP_POWERDOWN,false);
-    break;
+		{
+			opmode = RADIO_OPMODE_SLEEP;
+			lr11xx_system_sleep_cfg_t sleepcfg;
+			sleepcfg.is_rtc_timeout = false;
+			sleepcfg.is_warm_start = false;
+			lr11xx_system_set_sleep(NULL,sleepcfg,0);
+			break;
+		}
 
     case RADIO_OPMODE_STBYRC:
 		opmode = RADIO_OPMODE_STBYRC;
-    LR112X_SetStandby(0);
+    lr11xx_system_set_standby(NULL,LR11XX_SYSTEM_STANDBY_CFG_RC);
     break;
 
     case RADIO_OPMODE_STBYXOSC:
 		opmode = RADIO_OPMODE_STBYXOSC;
-    LR112X_SetStandby(1);
+    lr11xx_system_set_standby(NULL,LR11XX_SYSTEM_STANDBY_CFG_XOSC);
     break;
 
     case RADIO_OPMODE_FS:
 		opmode = RADIO_OPMODE_FS;
-    LR112X_SetFs();
+    lr11xx_system_set_fs(NULL);
     break;
 
     case RADIO_OPMODE_TX:
 		opmode = RADIO_OPMODE_TX;
-    LR112X_SetTx(0); //temp.
+    lr11xx_radio_set_tx(NULL,0); //temp.
     break;
 
     case RADIO_OPMODE_RX:
     default:
 		opmode = RADIO_OPMODE_RX;
-    LR112X_SetRx(0xffffff); //temp.
+    lr11xx_radio_set_rx(NULL,0xffffff); //temp.
     break;
 
     case RADIO_OPMODE_TXSTREAMCW:
 		opmode = RADIO_OPMODE_TXSTREAMCW;
-    LR112X_SetTxCw();
+    lr11xx_radio_set_tx_cw(NULL);
     break;
 
     case RADIO_OPMODE_TXSTREAMPRE:
 		opmode = RADIO_OPMODE_TXSTREAMPRE;
-    LR112X_SetTxInfinitePreamble();
+    lr11xx_radio_set_tx_infinite_preamble(NULL);
     break;
   }
 	//LR112X_printerrors(0);
