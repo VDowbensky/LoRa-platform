@@ -978,7 +978,6 @@ int8_t radio_getstats(rxstats_t *stats)
   {
     case 1262:
 		{
-			uint8_t dummy;
 			sx126x_stats_lora_t lora_stats;
 			sx126x_get_lora_stats(NULL,&lora_stats);
 			stats->pkt_received = lora_stats.nb_pkt_received;
@@ -1287,16 +1286,19 @@ int8_t radio_stream(uint8_t stream)
 		//prevopmode = opmode;
     if(stream == 1) 
 		{
-			LR112X_SetTxCw();
+			lr11xx_radio_set_tx_cw(NULL);
 			txmode = 1;
 		}
     else 
 		{
-			LR112X_SetTxInfinitePreamble();
+			lr11xx_radio_set_tx_infinite_preamble(NULL);
 			txmode = 2;
 		}
 		txled_on();
     return RADIO_OK;
+		
+		case 2021:
+		return RADIO_TODO;
 		
 		case 3029:
 		if(stream == 1)
@@ -1366,8 +1368,7 @@ int8_t radio_setxotrim(uint8_t trim)
 		sx126x_xtbtrim = trim - sx126x_xtatrim;
 		prevopmode = opmode;
 		SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
-		SX126X_writeReg(SX126X_REG_XTATRIM,sx126x_xtatrim);
-		SX126X_writeReg(SX126X_REG_XTBTRIM,sx126x_xtbtrim);
+		sx126x_set_trimming_capacitor_values(NULL,sx126x_xtatrim,sx126x_xtbtrim);
 		SX126X_setopmode(prevopmode);
 		return RADIO_OK;
 		
@@ -1375,6 +1376,9 @@ int8_t radio_setxotrim(uint8_t trim)
 		return RADIO_TODO;
 		
     case 1121:
+    return FEATURE_NOT_SUPPORTED;
+		
+		case 2021:
     return FEATURE_NOT_SUPPORTED;
 		
 		case 3029:
