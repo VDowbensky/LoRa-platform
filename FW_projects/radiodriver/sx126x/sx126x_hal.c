@@ -21,7 +21,7 @@ sx126x_hal_status_t sx126x_hal_read(const void* context,const uint8_t* command,c
 {
   uint16_t i;
     
-  sx126x_hal_status_t retval = sx128x_hal_wait_on_busy(context);
+  sx126x_hal_status_t retval = sx126x_hal_wait_on_busy(context);
   if(retval != SX126X_HAL_STATUS_OK) return retval;
   sx126x_select(context);
   for(i = 0; i < command_length; i++) sx126x_spi_transfer(context,command[i]);
