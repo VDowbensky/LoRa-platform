@@ -78,10 +78,25 @@ void LR112X_RssiCal(uint32_t freq)
 
 void LR112X_printstatus(void)
 {
-	uint8_t stat1,stat2;
-	LR112X_GetStatus(&stat1,&stat2);
+	lr11xx_system_stat1_t stat1;
+	lr11xx_system_stat2_t stat2;
+	lr11xx_system_irq_mask_t irqstatus;
+	lr11xx_system_get_status(NULL,&stat1,&stat2,&irqstatus);
+
 	printf("Status=0x%02X,0x%02X\r\n",stat1>>1,(stat2 & 0x0f) >> 1); //mask reset source	`		
 }
+
+//typedef struct lr11xx_system_stat1_s
+//{
+//    lr11xx_system_command_status_t command_status;
+//    bool                           is_interrupt_active;
+//} lr11xx_system_stat1_t;
+//typedef struct lr11xx_system_stat2_s
+//{
+//    lr11xx_system_reset_status_t reset_status;
+//    lr11xx_system_chip_modes_t   chip_mode;
+//    bool                         is_running_from_flash;
+//} lr11xx_system_stat2_t;
 
 void LR112X_printerrors(void)
 {
