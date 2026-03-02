@@ -116,3 +116,4 @@ FW/mesh_sniffer/FW_AT32/MDK_V5/JLinkLog.txt
 swsc002d.zip
 *.Admin
 *.Admin
+/node_nrf52/History
