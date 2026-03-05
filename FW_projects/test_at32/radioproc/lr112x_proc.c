@@ -11,9 +11,9 @@ void LR112X_printerrors(void);
 void LR112X_printstatus(void);
 void LR112X_configcommon(void);
 
-const LR112X_RssiCalibParams_t calib_0_600 =     {12,12,14, 0, 1, 3, 4, 4, 3, 6, 6, 6, 6, 6, 6, 6, 6, 0};
-const LR112X_RssiCalibParams_t calib_600_2000 =  { 2, 2, 2, 3, 3, 4, 5, 4, 4, 6, 5, 5, 6, 6, 6, 7, 6, 0};
-const LR112X_RssiCalibParams_t calib_2000_2700 = { 6, 7, 6, 4, 3, 4,14,12,14,12,12,12,12, 8, 8, 9, 9, 2030};
+const lr11xx_radio_rssi_calibration_table_t calib_0_600 =     {12,12,14, 0, 1, 3, 4, 4, 3, 6, 6, 6, 6, 6, 6, 6, 6, 0};
+const lr11xx_radio_rssi_calibration_table_t calib_600_2000 =  { 2, 2, 2, 3, 3, 4, 5, 4, 4, 6, 5, 5, 6, 6, 6, 7, 6, 0};
+const lr11xx_radio_rssi_calibration_table_t calib_2000_2700 = { 6, 7, 6, 4, 3, 4,14,12,14,12,12,12,12, 8, 8, 9, 9, 2030};
 
 void LR112X_setopmode(uint8_t mode)
 {
@@ -68,12 +68,11 @@ void LR112X_setopmode(uint8_t mode)
 	//LR112X_printerrors(0);
 }
 
-
 void LR112X_RssiCal(uint32_t freq)
 {
-	if(freq <= 60000000) LR112X_SetRssiCalibration(&calib_0_600);
-	else if((freq > 60000000) && (freq <= 200000000)) LR112X_SetRssiCalibration(&calib_600_2000);
-	else LR112X_SetRssiCalibration(&calib_2000_2700);
+	if(freq <= 60000000) lr11xx_radio_set_rssi_calibration(NULL,&calib_0_600);
+	else if((freq > 60000000) && (freq <= 200000000)) lr11xx_radio_set_rssi_calibration(NULL,&calib_600_2000);
+	else lr11xx_radio_set_rssi_calibration(NULL,&calib_2000_2700);
 }
 
 void LR112X_printstatus(void)
@@ -83,24 +82,14 @@ void LR112X_printstatus(void)
 	lr11xx_system_irq_mask_t irqstatus;
 	lr11xx_system_get_status(NULL,&stat1,&stat2,&irqstatus);
 
-	printf("Status=0x%02X,0x%02X\r\n",stat1>>1,(stat2 & 0x0f) >> 1); //mask reset source	`		
+	printf("Status=0x%02X,0x%02X\r\n",stat1.command_status,stat2.chip_mode); //mask reset source	`		
 }
-
-//typedef struct lr11xx_system_stat1_s
-//{
-//    lr11xx_system_command_status_t command_status;
-//    bool                           is_interrupt_active;
-//} lr11xx_system_stat1_t;
-//typedef struct lr11xx_system_stat2_s
-//{
-//    lr11xx_system_reset_status_t reset_status;
-//    lr11xx_system_chip_modes_t   chip_mode;
-//    bool                         is_running_from_flash;
-//} lr11xx_system_stat2_t;
 
 void LR112X_printerrors(void)
 {
-	uint16_t errors = LR112X_GetErrors();
+	
+	uint16_t errors;
+	lr11xx_system_get_errors(NULL,&errors);
 	printf("Errors: 0x%04X\r\n",errors);
 }
 

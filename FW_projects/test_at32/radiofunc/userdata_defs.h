@@ -45,6 +45,8 @@
 #define sx126x_tcxo_voltage (radioconfig.userdata[1])
 #define lr112x_tcxo (radioconfig.userdata[0])
 #define lr112x_tcxo_voltage (radioconfig.userdata[1])
+#define lr202x_tcxo (radioconfig.userdata[0])
+#define lr202x_tcxo_voltage (radioconfig.userdata[1])
 #define sx126x_xtatrim (radioconfig.userdata[2])
 #define sx126x_xtbtrim (radioconfig.userdata[3])
 

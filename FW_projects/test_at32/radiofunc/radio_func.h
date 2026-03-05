@@ -5,8 +5,11 @@
 #include "userdata_defs.h"
 
 #include "sx126x_proc.h"
+#include "sx126x_regs.h"
 #include "sx126x.h"
+
 #include "sx128x_proc.h"
+#include "sx128x_regs.h"
 #include "sx128x.h"
 
 #include "lr11xx.h"
@@ -112,7 +115,7 @@ int8_t radio_readreg(uint32_t reg,uint32_t *val);
 int8_t radio_writereg(uint32_t reg,uint32_t val);
 
 int8_t radio_get_chip_version(uint8_t *hw,uint8_t *use_case,uint8_t *fw_major,uint8_t *fw_minor);
-int8_t radio_get_status(uint8_t *stat1,uint8_t *stat2);
+int8_t radio_get_status(uint8_t *chip_mode,uint8_t *cmd_status);
 
 uint8_t radio_setopmode(uint8_t mode);
 void radio_irq_handler(void);

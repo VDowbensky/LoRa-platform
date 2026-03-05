@@ -50,7 +50,6 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 			sx126x_tcxo_voltage = 2; //1.8V
 		}
 		else sx126x_tcxo = 0;
-    //return RADIO_OK;
 		break;
 		
 		case 1280:
@@ -77,7 +76,6 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 //			sx128x_tcxo_voltage = 2; //1.8V
 //		}
 //		else sx128x_tcxo = 0;
-		//return RADIO_OK;
 		break;
 
     case 1121:
@@ -104,7 +102,6 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 			lr112x_tcxo_voltage = 2; //1.8V
 		}
 		else lr112x_tcxo = 0;
-    //return RADIO_OK;
 		break;
 		
     case 2021:
@@ -125,13 +122,12 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     radioconfig.crc = 1;
     radioconfig.invertiq = 0;
     //params[64]; //maybe different
-//		if(tcxo) 
-//		{
-//			lr112x_tcxo = 1;
-//			lr112x_tcxo_voltage = 2; //1.8V
-//		}
-//		else lr112x_tcxo = 0;
-    //return RADIO_OK;
+		if(tcxo) 
+		{
+			lr202x_tcxo = 1;
+			lr202x_tcxo_voltage = 2; //1.8V
+		}
+		else lr202x_tcxo = 0;
 		break;
 		
     case 3029:
@@ -159,7 +155,6 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 //			sx126x_tcxo_voltage = 2; //1.8V
 //		}
 //		else sx126x_tcxo = 0;
-    //return RADIO_OK;
 		break;
 
     default:
@@ -1394,8 +1389,12 @@ int8_t radio_getxotrim(uint8_t *trim)
   switch(radioconfig.chip)
   {
     case 1262:
-		*trim = SX126X_readReg(SX126X_REG_XTATRIM) + SX126X_readReg(SX126X_REG_XTBTRIM);
-		return RADIO_OK;
+		{
+			uint8_t buf[2];
+			sx126x_read_register(NULL,SX126X_REG_XTATRIM,buf,2);
+			*trim = buf[0] + buf[1];
+			return RADIO_OK;
+		}
 		
     case 1280: //0x093c
 		return RADIO_TODO;
@@ -1416,21 +1415,44 @@ int8_t radio_readreg(uint32_t reg,uint32_t *val)
   switch(radioconfig.chip)
   {
     case 1262:
-		if(reg > 0xffff) return RADIO_INVALID_PARAMETER;
-		*val = SX126X_readReg(reg);
-		return RADIO_OK;
+		{
+			uint8_t regval;
+			if(reg > 0xffff) return RADIO_INVALID_PARAMETER;
+			sx126x_read_register(NULL,reg,&regval,1);
+			*val = regval;
+			return RADIO_OK;
+		}
 		
     case 1280:
-		if(reg > 0xffff) return RADIO_INVALID_PARAMETER;
-		*val = SX128X_readReg(reg);
-		return RADIO_OK;
+		{
+			uint8_t regval;
+			if(reg > 0xffff) return RADIO_INVALID_PARAMETER;
+			sx128x_read_register(NULL,reg,&regval,1);
+			*val = regval;
+			return RADIO_OK;
+		}
 		
     case 1121:
-		if(reg > 0xffffff) return RADIO_INVALID_PARAMETER; //24 bits - ???
-		return RADIO_TODO;
+		{
+			uint32_t regval;
+			if(reg > 0xffffff) return RADIO_INVALID_PARAMETER; //24 bits - ???
+			lr11xx_regmem_read_regmem32(NULL,reg,&regval,1);
+			return RADIO_OK;
+		}
+		
+		case 2021:
+		{
+			uint32_t regval;
+			if(reg > 0xffffff) return RADIO_INVALID_PARAMETER; //24 bits - ???
+			lr20xx_regmem_read_regmem32(NULL,reg,&regval,1);
+			return RADIO_OK;
+		}
 		
 		case 3029:
-		return RADIO_TODO;
+		{
+			*val = PAN_ReadReg(reg);
+			return RADIO_OK;
+		}
 
     default:
     return INVALID_CHIP;
@@ -1442,23 +1464,39 @@ int8_t radio_writereg(uint32_t reg,uint32_t val)
   switch(radioconfig.chip)
   {
     case 1262:
-		if(reg > 0xffff) return RADIO_INVALID_PARAMETER;
-		if(val > 0xff) return RADIO_INVALID_PARAMETER;
-		SX126X_writeReg(reg,val);
-		return RADIO_OK;
+		{
+			uint8_t regval = val & 0xff;
+			if(reg > 0xffff) return RADIO_INVALID_PARAMETER;
+			if(val > 0xff) return RADIO_INVALID_PARAMETER;
+			sx126x_write_register(NULL,reg,&regval,1);
+			return RADIO_OK;
+		}
 		
     case 1280:
-		if(reg > 0xffff) return RADIO_INVALID_PARAMETER;
-		if(val > 0xff) return RADIO_INVALID_PARAMETER;
-		SX128X_writeReg(reg,val);
-		return RADIO_OK;
+		{
+			uint8_t regval = val & 0xff;
+			if(reg > 0xffff) return RADIO_INVALID_PARAMETER;
+			if(val > 0xff) return RADIO_INVALID_PARAMETER;
+			sx128x_write_register(NULL,reg,&regval,1);
+			return RADIO_OK;
+		}
 		
     case 1121:
 		if(reg > 0xffffff) return RADIO_INVALID_PARAMETER; //24 bits - ???
-		return RADIO_TODO;
+		lr11xx_regmem_write_regmem32(NULL,reg,&val,1);
+		return RADIO_OK;
+		
+		case 2021:
+		if(reg > 0xffffff) return RADIO_INVALID_PARAMETER; //24 bits - ???
+		lr20xx_regmem_write_regmem32(NULL,reg,&val,1);
+		return RADIO_OK;	
 		
 		case 3029:
-		return RADIO_TODO;
+		{
+			uint8_t regval = val & 0xff;
+			PAN_WriteReg(reg,regval);
+			return RADIO_OK;
+		}
 		
     default:
     return INVALID_CHIP;
@@ -1471,13 +1509,39 @@ int8_t radio_get_chip_version(uint8_t *hw,uint8_t *use_case,uint8_t *fw_major,ui
   {
     case 1262:
 		return RADIO_TODO;
-		
+
     case 1280:
-		return RADIO_TODO;
-		
+		{
+			uint8_t buf[2];
+			sx128x_read_register(NULL,SX128X_REG_FW_VERSION,buf,2);
+			*hw = 0;
+			*use_case = 0;
+			*fw_major = buf[0];
+			*fw_minor = buf[1];
+			return RADIO_OK;
+		}
+
     case 1121:
-		LR112X_GetVersion(hw,use_case,fw_major,fw_minor);
-		return RADIO_OK;
+		{
+			lr11xx_system_version_t version;
+			lr11xx_system_get_version(NULL,&version);
+			*hw = version.hw;
+			*use_case = version.type;
+			*fw_major = version.fw >> 8;
+			*fw_minor = version.fw & 0xff;
+			return RADIO_OK;
+		}
+
+    case 2021:
+		{
+			lr20xx_system_version_t version;
+			lr20xx_system_get_version(NULL,&version);
+			*hw = 0;
+			*use_case = 0;
+			*fw_major = version.major;
+			*fw_minor = version.minor;
+			return RADIO_OK;
+		}
 		
 		case 3029:
 		return RADIO_TODO;
@@ -1487,19 +1551,47 @@ int8_t radio_get_chip_version(uint8_t *hw,uint8_t *use_case,uint8_t *fw_major,ui
   }
 }
 
-int8_t radio_get_status(uint8_t *stat1,uint8_t *stat2)
+int8_t radio_get_status(uint8_t *chip_mode,uint8_t *cmd_status)
 {
   switch(radioconfig.chip)
   {
-    case 1262:
-		return RADIO_TODO;
-		
+		case 1262:
+		{	
+			sx126x_chip_status_t status;
+			sx126x_get_status(NULL,&status);
+			*chip_mode = status.chip_mode;
+			*cmd_status = status.cmd_status;
+			return RADIO_OK;
+		}
+
     case 1280:
-		return RADIO_TODO;
-		
+		{
+			sx128x_chip_status_t status;
+			sx128x_get_status(NULL,&status);
+			*chip_mode = status.chip_mode;
+			*cmd_status = status.cmd_status;
+			return RADIO_OK;
+		}
+
     case 1121:
-		LR112X_GetStatus(stat1,stat2);
-		return RADIO_OK;
+		{
+			lr11xx_system_stat1_t s1;
+			lr11xx_system_stat2_t s2;
+			lr11xx_system_get_status(NULL,&s1,&s2,NULL);
+			*chip_mode = s2.chip_mode;
+			*cmd_status = s1.command_status;
+			return RADIO_OK;
+		}
+		
+		case 2021:
+		{
+			lr20xx_system_stat1_t s1;
+			lr20xx_system_stat2_t s2;
+			lr20xx_system_get_status(NULL,&s1,&s2,NULL);
+			*chip_mode = s2.chip_mode;
+			*cmd_status = s1.command_status;
+			return RADIO_OK;
+		}
 		
 		case 3029:
 		return RADIO_TODO;
