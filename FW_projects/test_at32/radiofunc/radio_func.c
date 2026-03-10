@@ -334,10 +334,96 @@ int8_t radio_init(void)
 			//LR112X_WriteRegMem32(lr,0x00f30024,buf,1);
 			return RADIO_OK;
 		}
-		
+//enum lr20xx_system_dio_rf_switch_cfg_e
+//{
+//    LR20XX_SYSTEM_DIO_RF_SWITCH_WHEN_STANDBY = ( 1 << 0 ),
+//    LR20XX_SYSTEM_DIO_RF_SWITCH_WHEN_RX_LF   = ( 1 << 1 ),
+//    LR20XX_SYSTEM_DIO_RF_SWITCH_WHEN_TX_LF   = ( 1 << 2 ),
+//    LR20XX_SYSTEM_DIO_RF_SWITCH_WHEN_RX_HF   = ( 1 << 3 ),
+//    LR20XX_SYSTEM_DIO_RF_SWITCH_WHEN_TX_HF   = ( 1 << 4 ),
+//    LR20XX_SYSTEM_DIO_RF_SWITCH_ALL_MASK =
+//        LR20XX_SYSTEM_DIO_RF_SWITCH_WHEN_STANDBY | LR20XX_SYSTEM_DIO_RF_SWITCH_WHEN_RX_LF |
+//        LR20XX_SYSTEM_DIO_RF_SWITCH_WHEN_TX_LF | LR20XX_SYSTEM_DIO_RF_SWITCH_WHEN_RX_HF |
+//        LR20XX_SYSTEM_DIO_RF_SWITCH_WHEN_TX_HF,
+//};
+//lr20xx_status_t lr20xx_system_set_dio_rf_switch_cfg( const void* context, lr20xx_system_dio_t dio,
+//
+//typedef enum lr20xx_system_dio_e
+//{
+//    LR20XX_SYSTEM_DIO_5  = 0x05,  //!< DIO5
+//    LR20XX_SYSTEM_DIO_6  = 0x06,  //!< DIO6
+//    LR20XX_SYSTEM_DIO_7  = 0x07,  //!< DIO7
+//    LR20XX_SYSTEM_DIO_8  = 0x08,  //!< DIO8
+//    LR20XX_SYSTEM_DIO_9  = 0x09,  //!< DIO9
+//    LR20XX_SYSTEM_DIO_10 = 0x0A,  //!< DIO10
+//    LR20XX_SYSTEM_DIO_11 = 0x0B,  //!< DIO11
+//} lr20xx_system_dio_t;
 		case 2021:
 		{
-			return RADIO_TODO;
+			lr20xx_system_dio_rf_switch_cfg_t rfsw_cfg[7] = {0}; //change to correct values
+
+			lr20xx_radio_lora_mod_params_t modparams;
+			modparams.bw = LR112X_bw[radioconfig.bw_index];
+			modparams.sf = radioconfig.sf;
+			modparams.cr = radioconfig.cr;
+			modparams.ppm = 0; //temporary
+			
+			lr20xx_radio_lora_pkt_params_t pktparams;
+			pktparams.preamble_len_in_symb = radioconfig.prelen;
+			pktparams.pld_len_in_bytes = radioconfig.paylen;
+			pktparams.pkt_mode = radioconfig.header; //???
+			pktparams.crc = radioconfig.crc;
+			pktparams.iq = radioconfig.invertiq;
+			
+			lr20xx_system_reset(NULL);
+			delay_ms(500);
+			lr20xx_system_wakeup(NULL);
+			//delay_ms(500);
+			lr20xx_system_set_reg_mode(NULL,LR20XX_SYSTEM_REG_MODE_DCDC);
+			lr20xx_system_set_dio_rf_switch_cfg(NULL,LR20XX_SYSTEM_DIO_5,rfsw_cfg[0]);
+			lr20xx_system_set_dio_rf_switch_cfg(NULL,LR20XX_SYSTEM_DIO_6,rfsw_cfg[1]);
+			lr20xx_system_set_dio_rf_switch_cfg(NULL,LR20XX_SYSTEM_DIO_7,rfsw_cfg[2]);
+			lr20xx_system_set_dio_rf_switch_cfg(NULL,LR20XX_SYSTEM_DIO_8,rfsw_cfg[3]);
+			lr20xx_system_set_dio_rf_switch_cfg(NULL,LR20XX_SYSTEM_DIO_9,rfsw_cfg[4]);
+			lr20xx_system_set_dio_rf_switch_cfg(NULL,LR20XX_SYSTEM_DIO_10,rfsw_cfg[5]);
+			lr20xx_system_set_dio_rf_switch_cfg(NULL,LR20XX_SYSTEM_DIO_11,rfsw_cfg[6]);
+			//LR112X_printstatus();
+			lr20xx_system_clear_errors(NULL);
+			if(lr202x_tcxo) lr20xx_system_set_tcxo_mode(NULL,LR20XX_SYSTEM_TCXO_CTRL_1_8V,320); //check
+			delay_ms(10);
+			lr20xx_system_cfg_lfclk(NULL,LR20XX_SYSTEM_LFCLK_RC); //LR20XX_SYSTEM_LFCLK_EXT
+			lr20xx_system_clear_irq_status(NULL,LR20XX_SYSTEM_IRQ_ALL_MASK);
+			lr20xx_system_set_standby_mode(NULL,LR20XX_SYSTEM_STANDBY_MODE_XOSC);
+			delay_ms(10);
+			lr20xx_system_clear_errors(NULL);
+			lr20xx_system_calibrate(NULL,0x7f);
+			lr20xx_system_clear_errors(NULL);
+			lr20xx_system_clear_irq_status(NULL,LR20XX_SYSTEM_IRQ_ALL_MASK);
+			//lr11xx_system_get_version(NULL, &version);
+			lr20xx_radio_common_set_pkt_type(NULL,LR20XX_RADIO_COMMON_PKT_TYPE_LORA);
+			lr20xx_radio_lora_set_modulation_params(NULL,&modparams);
+			lr20xx_radio_lora_set_packet_params(NULL,&pktparams);
+			lr20xx_radio_lora_set_syncword(NULL,radioconfig.sync);
+			lr20xx_radio_common_set_rf_freq(NULL,radioconfig.freq);
+			radio_set_power(radioconfig.txpower);
+			//LR112X_SetTxParams(radioconfig.txpower,LR112X_PA_RAMP_48U);
+			//calibrate image here
+			//lr20xx_system_calibrate_image(NULL,radioconfig.freq / 4000000, radioconfig.freq / 4000000 + 2); //must be rewritted
+			//calibrate RSSI
+			//LR112X_RssiCal(radioconfig.freq);
+			
+			lr20xx_system_set_dio_irq_cfg(NULL,LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR,LR11XX_SYSTEM_IRQ_NONE);
+			
+			//lr20xx_system_set_dio_irq_cfg(NULL,LR20XX_SYSTEM_DIO_0,mask);
+				
+			lr20xx_radio_common_set_rx_tx_fallback_mode(NULL,LR20XX_RADIO_FALLBACK_STDBY_XOSC);
+			//lr20xx_radio_cfg_rx_boosted(NULL,true); //false
+			radio_rx();
+			//The workaround is to set the bit 4 in the register 0x00F30024 when the chip ends a reception in the 2.4GHz band before launching a GNSS scan. - ???
+			//LR112X_ReadRegMem32(lr,0x00f30024,buf,1);
+			//buf[0] |= 0x10;
+			//LR112X_WriteRegMem32(lr,0x00f30024,buf,1);
+			return RADIO_OK;
 		}
 				
 		case 3029:
