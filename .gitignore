@@ -119,3 +119,5 @@ swsc002d.zip
 /node_nrf52/History
 FW_projects/test_at32/MDK_V5/JLinkLog.txt
 FW_projects/test_at32/MDK_V5/objects/test_at32.axf
+*.html
+*.drc

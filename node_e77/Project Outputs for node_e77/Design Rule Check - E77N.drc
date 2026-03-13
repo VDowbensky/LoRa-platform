@@ -1,7 +1,7 @@
 Protel Design System Design Rule Check
 PCB File : D:\RFprojects\LoRa-platform\node_e77\E77N.PcbDoc
-Date     : 01.12.2025
-Time     : 10:20:59
+Date     : 13.03.2026
+Time     : 16:59:42
 
 Processing Rule : Clearance Constraint (Gap=0.15mm) (All),(All)
 Rule Violations :0
@@ -45,4 +45,4 @@ Rule Violations :0
 
 Violations Detected : 0
 Waived Violations : 0
-Time Elapsed        : 00:00:01
+Time Elapsed        : 00:00:00
