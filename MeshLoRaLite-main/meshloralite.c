@@ -24,12 +24,12 @@ uint32_t lastPrune = 0;
 uint8_t meshChan = 0;
 
 /* ================= IRQ ================= */
-void onRx() 
+void onRx(void) 
 {
   rxFlag = true;
 }
 
-void onTx() 
+void onTx(void) 
 {
   txFlag = true;
 }
@@ -160,7 +160,7 @@ void saveConfig(void)
 }
 
 /* ================= RADIO ================= */
-void radioRX() 
+void radioRX(void) 
 {
   radio.startReceive();
 }
@@ -169,7 +169,8 @@ void radioTX(uint8_t* d, size_t l)
 {
   txFlag = false;
   int err = radio.startTransmit(d, l);
-  if (err != RADIOLIB_ERR_NONE) {
+  if (err != RADIOLIB_ERR_NONE) 
+  {
     if (debug) printf("[TX START FAILED] error=%d\n", err);
     radio.startReceive();
   }
@@ -560,7 +561,7 @@ void cli(char* l)
 }
 
 /* ================= UTILS ================= */
-void processPending() 
+void processPending(void) 
 {
   uint32_t now = millis();
   for (uint8_t i = 0; i < MAX_PENDING; i++) 
@@ -578,7 +579,7 @@ void processPending()
   }
 }
 /* ================= SETUP ================= */
-void setup() 
+void setup(void) 
 {
   nodeID = genNodeID();
 
@@ -653,7 +654,7 @@ void setup()
   printf("MeshLoRa node: %04X\n", nodeID);
 }
 /* ================= LOOP ================= */
-void loop() 
+void loop(void) 
 {
   static char cliBuf[128];
   static uint8_t cliLen = 0;
