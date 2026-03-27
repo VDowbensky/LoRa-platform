@@ -122,3 +122,4 @@ FW_projects/test_at32/MDK_V5/objects/test_at32.axf
 *.html
 *.drc
 *.OutJob
+/fakeTec_pcb-master/Circuit/.history
