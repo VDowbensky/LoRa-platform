@@ -11,6 +11,7 @@ void SX126X_LNAboost(bool boost);
 
 void SX126X_CalibrateIR(void);
 void SX126X_irq_proc(void);
+void SX126X_restart_agc(void);
 
 extern uint8_t opmode;
 extern uint8_t prevopmode;

@@ -87,6 +87,22 @@ void SX126X_irq_proc(void)
   if(irqstatus & SX126X_CRCERR_IRQMSK) crc_error = true;
 }
 
+void SX126X_restart_agc(void)
+{
+	//get status
+	uint16_t irqstatus = SX126X_GetIrqStatus();
+	if(!(irqstatus & SX126X_ALL_IRQMSK))
+	{
+		// warm sleep to power down the analog frontend
+		// wake to RC standby
+		// recalibrate all blocks
+		// re-calibrate image rejection for the operating frequency
+		// SX126X_CalibrateIR();
+		// re-apply DIO2 RF switch if it was configured
+	}
+}
+
+
 
 
 

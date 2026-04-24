@@ -48,6 +48,8 @@ extern uint32_t master_id;
 extern uint32_t slave_id;
 
 extern uint8_t opmode;
-extern uint8_t prevopmod;
+extern uint8_t prevopmode;
+
+extern volatile bool sec_flag;
 
 #endif

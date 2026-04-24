@@ -29,6 +29,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "bsp.h"
+//#include "adc.h"
+//#include "beeper.h"
 
 /* USER CODE END Includes */
 
@@ -65,7 +68,9 @@ void HSEM_IRQHandler(void);
 void SUBGHZ_Radio_IRQHandler(void);
 void AES_IRQHandler(void);
 /* USER CODE BEGIN EFP */
-//extern volatile uint32_t delay_ticks;
+//volatile uint32_t delay_ticks;
+//volatile uint32_t millis = 0;
+
 /* USER CODE END EFP */
 
 #ifdef __cplusplus

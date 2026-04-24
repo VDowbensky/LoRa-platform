@@ -34,6 +34,9 @@ meshtastic_pkt_t rxmessage;
 void prepareTxPacket(void);
 void printcrcerror(void);
 
+volatile uint32_t millis = 0;
+volatile bool sec_flag = false;
+
 
 //radio events handler
 void radio_proc(void)
@@ -94,6 +97,15 @@ void radio_proc(void)
 			if(currfreq >= stopfreq) currfreq = startfreq;
 			radio_set_freq(currfreq);
 			radio_rx();
+		}
+	}
+	if(sec_flag)
+	{
+		sec_flag = false;
+		if((radioconfig.chip == 1262) && (opmode == RADIO_OPMODE_RX))
+		{
+			//restart AGC in RX idle mode
+			SX126X_restart_agc();
 		}
 	}
 }
