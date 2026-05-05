@@ -1,132 +1,4 @@
-/* 
-## Translation Decisions and Implementation Details
-
-### 1. **Generic Type Handling (I2C Interface)**
-- **Rust**: Uses generics `Display<I2C>` where `I2C: embedded_hal::i2c::I2c<Error = E>`
-- **C**: Created an `I2cInterface` struct with function pointers to abstract the I2C hardware:
-  ```c
-  typedef struct {
-      void* hw_handle;  // Hardware-specific handle
-      DisplayError (*write)(void* hw_handle, uint8_t addr, const uint8_t* data, size_t len);
-  } I2cInterface;
-  ```
-- This approach allows the same flexibility as Rust generics while maintaining C compatibility
-
-### 2. **Error Handling**
-- **Rust**: Uses `Result<(), DisplayError>` type
-- **C**: Functions return `DisplayError` enum directly, with `DISPLAY_ERROR_OK = 0` for success
-- This is idiomatic C error handling where 0 indicates success
-
-### 3. **String Formatting (heapless::String)**
-- **Rust**: Uses `heapless::String<N>` for fixed-size strings without heap allocation
-- **C**: Replaced with fixed-size `char` buffers passed as parameters with size bounds checking
-- All formatting functions (`format_battery`, `format_hex32`, `format_u32`, `format_i16`) take output buffers
-
-### 4. **Method to Function Conversion**
-- **Rust**: `impl<I2C> Display<I2C> { pub fn method(&mut self) }`
-- **C**: `void display_method(Display* disp)` - methods become functions with struct pointer as first parameter
-- Naming convention: `struct_name_method_name`
-
-### 5. **Static Arrays**
-- Preserved as `static const` arrays in C
-- `FONT_5X7`, `MOON_PHASES`, and `YOURS_FACE` remain identical in structure
-- Used `const` qualifier for read-only data
-
-### 6. **Trait Bounds and Where Clauses**
-- **Rust**: `where I2C: embedded_hal::i2c::I2c<Error = E>`
-- **C**: Handled through the `I2cInterface` struct with function pointers
-- The calling code must provide a write function that matches the signature
-
-### 7. **Boolean Types**
-- **Rust**: Native `bool` type
-- **C**: Using `<stdbool.h>` for `bool`, `true`, `false`
-
-### 8. **Array Slices and Bounds Checking**
-- **Rust**: Automatic bounds checking on slices
-- **C**: Manual bounds checking with `if (x >= DISPLAY_WIDTH || y >= DISPLAY_HEIGHT)`
-- Added explicit size checks in all array access operations
-
-### 9. **Struct Initialization**
-- **Rust**: `Self { field: value, ... }`
-- **C**: Provided both initialization functions (`display_init_struct`) and constructor-style functions (`display_new`)
-- Used `memset` for zeroing framebuffer arrays
-
-### 10. **Pattern Matching and Enums**
-- **Rust**: `match` expressions and `#[derive(Debug, Clone, Copy, PartialEq, Eq)]`
-- **C**: Simple `typedef enum` for `DisplayError`
-- Removed trait derivations as they don't have direct C equivalents
-
-### 11. **Closure/Function Pointer for Delay**
-- **Rust**: `delay_fn: &mut dyn FnMut(u32)`
-- **C**: `void (*delay_fn)(uint32_t)` - standard function pointer
-- The caller provides a function that matches this signature
-
-### 12. **Mutable References**
-- **Rust**: `&mut self`, `&mut Display<I2C>`
-- **C**: `Display*` - pointer to struct
-- Used const pointers (`const Display*`) for read-only access
-
-### 13. **Memory Management**
-- **Rust**: Stack-allocated with automatic cleanup
-- **C**: All structs can be stack or heap allocated; no dynamic allocation used
-- Framebuffer is embedded directly in the struct (no separate allocation needed)
-
-### 14. **Integer Types**
-- **Rust**: `u8`, `u16`, `u32`, `i16`, etc.
-- **C**: `uint8_t`, `uint16_t`, `uint32_t`, `int16_t` from `<stdint.h>`
-- Maintains exact same sizes across platforms
-
-### 15. **String Handling**
-- **Rust**: `&str` for string slices
-- **C**: `const char*` for read-only string parameters
-- Using `strlen` and `strcpy` from `<string.h>` for string operations
-
-### 16. **Saturating Arithmetic**
-- **Rust**: `.saturating_sub(2)` for safe underflow
-- **C**: Explicit check `if (filled > 2)` before subtraction
-- Prevents undefined behavior from unsigned underflow
-
-## Usage Example
-
-To use this C code, the calling code needs to provide an I2C write function:
-
-```c
-// Example implementation for STM32 HAL:
-DisplayError i2c_write_impl(void* hw_handle, uint8_t addr, const uint8_t* data, size_t len) {
-    I2C_HandleTypeDef* hi2c = (I2C_HandleTypeDef*)hw_handle;
-    HAL_StatusTypeDef status = HAL_I2C_Master_Transmit(hi2c, addr << 1, (uint8_t*)data, len, 100);
-    return (status == HAL_OK) ? DISPLAY_ERROR_OK : DISPLAY_ERROR_I2C;
-}
-
-// Usage:
-I2cInterface i2c_if = {
-    .hw_handle = &hi2c1,
-    .write = i2c_write_impl
-};
-
-StatusDisplay status_disp = status_display_new(i2c_if);
-status_display_init(&status_disp);
-status_display_show_splash(&status_disp);
-```
-
-## Completeness Verification
-
-✅ All constants and defines translated
-✅ All static data arrays included
-✅ All structs defined with complete members
-✅ All methods converted to functions
-✅ All helper functions implemented
-✅ Error handling fully implemented
-✅ No placeholder comments or TODOs
-✅ All functionality preserved exactly
-✅ Complete, working code that can be used immediately
-
- */
-
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
+#include "display.h"
 
 // Constants
 #define SSD1306_ADDR 0x3C
@@ -385,42 +257,47 @@ static const uint8_t YOURS_FACE[128] = {
 };
 
 // Error enum
-typedef enum {
-    DISPLAY_ERROR_OK = 0,
-    DISPLAY_ERROR_I2C,
-    DISPLAY_ERROR_INVALID_COORDINATES,
-    DISPLAY_ERROR_BUFFER_OVERFLOW
+typedef enum 
+{
+  DISPLAY_ERROR_OK = 0,
+  DISPLAY_ERROR_I2C,
+  DISPLAY_ERROR_INVALID_COORDINATES,
+  DISPLAY_ERROR_BUFFER_OVERFLOW
 } DisplayError;
 
 // I2C interface - function pointer abstraction for embedded_hal::i2c::I2c trait
-typedef struct {
-    void* hw_handle;  // Hardware-specific I2C handle (e.g., I2C_HandleTypeDef* for STM32)
-    DisplayError (*write)(void* hw_handle, uint8_t addr, const uint8_t* data, size_t len);
+typedef struct 
+{
+  void* hw_handle;  // Hardware-specific I2C handle (e.g., I2C_HandleTypeDef* for STM32)
+  DisplayError (*write)(void* hw_handle, uint8_t addr, const uint8_t* data, size_t len);
 } I2cInterface;
 
 // Display structure
-typedef struct {
-    I2cInterface i2c;
-    uint8_t framebuffer[FRAMEBUFFER_SIZE];
-    bool power_on;
-    bool inverted;
-    uint8_t contrast;
+typedef struct 
+{
+  I2cInterface i2c;
+  uint8_t framebuffer[FRAMEBUFFER_SIZE];
+  bool power_on;
+  bool inverted;
+  uint8_t contrast;
 } Display;
 
 // StatusContent structure
-typedef struct {
-    const char* protocol;
-    uint32_t node_id;
-    uint8_t battery_pct;
-    uint32_t rx_count;
-    uint32_t tx_count;
-    int16_t rssi;
-    bool connected;
+typedef struct 
+{
+  const char* protocol;
+  uint32_t node_id;
+  uint8_t battery_pct;
+  uint32_t rx_count;
+  uint32_t tx_count;
+  int16_t rssi;
+  bool connected;
 } StatusContent;
 
 // StatusDisplay structure
-typedef struct {
-    Display display;
+typedef struct 
+{
+  Display display;
 } StatusDisplay;
 
 // Forward declarations
@@ -428,558 +305,508 @@ static DisplayError display_write_command(Display* disp, uint8_t cmd);
 static DisplayError display_write_commands(Display* disp, const uint8_t* cmds, size_t count);
 
 // Helper string formatting functions
-static void format_battery(uint8_t pct, char* buf, size_t buf_size) {
-    if (buf_size < 5) return;  // Need at least 4 chars + null
-    
-    size_t idx = 0;
-    if (pct >= 100) {
-        buf[idx++] = '1';
-        buf[idx++] = '0';
-        buf[idx++] = '0';
-    } else if (pct >= 10) {
-        buf[idx++] = '0' + pct / 10;
-        buf[idx++] = '0' + pct % 10;
-    } else {
-        buf[idx++] = '0' + pct;
-    }
-    buf[idx++] = '%';
-    buf[idx] = '\0';
+static void format_battery(uint8_t pct, char* buf, size_t buf_size) 
+{
+  if (buf_size < 5) return;  // Need at least 4 chars + null
+  size_t idx = 0;
+  if (pct >= 100) 
+  {
+    buf[idx++] = '1';
+    buf[idx++] = '0';
+    buf[idx++] = '0';
+  } 
+  else if (pct >= 10) 
+  {
+    buf[idx++] = '0' + pct / 10;
+    buf[idx++] = '0' + pct % 10;
+  } 
+  else buf[idx++] = '0' + pct;
+  buf[idx++] = '%';
+  buf[idx] = '\0';
 }
 
-static void format_hex32(uint32_t val, char* buf, size_t buf_size) {
-    if (buf_size < 9) return;  // Need 8 chars + null
-    
-    const char HEX[] = "0123456789ABCDEF";
-    for (int i = 7; i >= 0; i--) {
-        uint8_t nibble = (val >> (i * 4)) & 0xF;
-        buf[7 - i] = HEX[nibble];
-    }
-    buf[8] = '\0';
+static void format_hex32(uint32_t val, char* buf, size_t buf_size) 
+{
+  if (buf_size < 9) return;  // Need 8 chars + null
+  const char HEX[] = "0123456789ABCDEF";
+  for (int i = 7; i >= 0; i--) 
+  {
+    uint8_t nibble = (val >> (i * 4)) & 0xF;
+    buf[7 - i] = HEX[nibble];
+  }
+  buf[8] = '\0';
 }
 
-static void format_u32(uint32_t val, char* buf, size_t buf_size) {
-    if (buf_size < 11) return;  // Need up to 10 digits + null
-    
-    if (val == 0) {
-        buf[0] = '0';
-        buf[1] = '\0';
-        return;
-    }
-    
-    uint8_t digits[10];
-    size_t count = 0;
-    uint32_t v = val;
-    
-    while (v > 0) {
-        digits[count] = v % 10;
-        v /= 10;
-        count++;
-    }
-    
-    for (size_t i = 0; i < count; i++) {
-        buf[i] = '0' + digits[count - 1 - i];
-    }
-    buf[count] = '\0';
+static void format_u32(uint32_t val, char* buf, size_t buf_size) 
+{
+  if (buf_size < 11) return;  // Need up to 10 digits + null
+  if (val == 0) 
+  {
+    buf[0] = '0';
+    buf[1] = '\0';
+    return;
+  }
+  uint8_t digits[10];
+  size_t count = 0;
+  uint32_t v = val;
+  while (v > 0) 
+  {
+    digits[count] = v % 10;
+    v /= 10;
+    count++;
+  }
+  for (size_t i = 0; i < count; i++) buf[i] = '0' + digits[count - 1 - i];
+  buf[count] = '\0';
 }
 
-static void format_i16(int16_t val, char* buf, size_t buf_size) {
-    if (buf_size < 7) return;  // Need up to 6 chars + null
-    
-    size_t idx = 0;
-    if (val < 0) {
-        buf[idx++] = '-';
-        uint32_t abs_val = (uint32_t)(-(int32_t)val);
-        char temp[11];
-        format_u32(abs_val, temp, sizeof(temp));
-        size_t temp_len = strlen(temp);
-        if (idx + temp_len < buf_size) {
-            strcpy(&buf[idx], temp);
-        }
-    } else {
-        format_u32((uint32_t)val, buf, buf_size);
-    }
+static void format_i16(int16_t val, char* buf, size_t buf_size) 
+{
+  if (buf_size < 7) return;  // Need up to 6 chars + null
+  size_t idx = 0;
+  if (val < 0) 
+  {
+    buf[idx++] = '-';
+    uint32_t abs_val = (uint32_t)(-(int32_t)val);
+    char temp[11];
+    format_u32(abs_val, temp, sizeof(temp));
+    size_t temp_len = strlen(temp);
+    if (idx + temp_len < buf_size) strcpy(&buf[idx], temp);
+  } 
+  else format_u32((uint32_t)val, buf, buf_size);
 }
 
 // Display implementation
 
-void display_init_struct(Display* disp, I2cInterface i2c) {
-    disp->i2c = i2c;
-    memset(disp->framebuffer, 0, FRAMEBUFFER_SIZE);
-    disp->power_on = false;
-    disp->inverted = false;
-    disp->contrast = 0x7F;
+void display_init_struct(Display* disp, I2cInterface i2c) 
+{
+  disp->i2c = i2c;
+  memset(disp->framebuffer, 0, FRAMEBUFFER_SIZE);
+  disp->power_on = false;
+  disp->inverted = false;
+  disp->contrast = 0x7F;
 }
 
-Display display_new(I2cInterface i2c) {
-    Display disp;
-    display_init_struct(&disp, i2c);
-    return disp;
+Display display_new(I2cInterface i2c) 
+{
+  Display disp;
+  display_init_struct(&disp, i2c);
+  return disp;
 }
 
-DisplayError display_init(Display* disp) {
-    // Initialization command sequence
-    const uint8_t init_cmds[] = {
-        CMD_DISPLAY_OFF,
-        CMD_SET_DISPLAY_CLOCK_DIV, 0x80,
-        CMD_SET_MULTIPLEX, 0x3F,
-        CMD_SET_DISPLAY_OFFSET, 0x00,
-        CMD_SET_START_LINE | 0x00,
-        CMD_CHARGE_PUMP, 0x14,
-        CMD_MEMORY_MODE, 0x00,
-        CMD_SEG_REMAP | 0x01,
-        CMD_COM_SCAN_DEC,
-        CMD_SET_COM_PINS, 0x12,
-        CMD_SET_CONTRAST, disp->contrast,
-        CMD_SET_PRECHARGE, 0xF1,
-        CMD_SET_VCOM_DETECT, 0x40,
-        CMD_DISPLAY_ALL_ON_RESUME,
-        CMD_NORMAL_DISPLAY,
-        CMD_DEACTIVATE_SCROLL,
-        CMD_DISPLAY_ON,
-    };
-    
-    for (size_t i = 0; i < sizeof(init_cmds); i++) {
-        DisplayError err = display_write_command(disp, init_cmds[i]);
-        if (err != DISPLAY_ERROR_OK) {
-            return err;
-        }
+DisplayError display_init(Display* disp) 
+{
+  // Initialization command sequence
+  const uint8_t init_cmds[] = 
+  {
+    CMD_DISPLAY_OFF,
+    CMD_SET_DISPLAY_CLOCK_DIV, 0x80,
+    CMD_SET_MULTIPLEX, 0x3F,
+    CMD_SET_DISPLAY_OFFSET, 0x00,
+    CMD_SET_START_LINE | 0x00,
+    CMD_CHARGE_PUMP, 0x14,
+    CMD_MEMORY_MODE, 0x00,
+    CMD_SEG_REMAP | 0x01,
+    CMD_COM_SCAN_DEC,
+    CMD_SET_COM_PINS, 0x12,
+    CMD_SET_CONTRAST, disp->contrast,
+    CMD_SET_PRECHARGE, 0xF1,
+    CMD_SET_VCOM_DETECT, 0x40,
+    CMD_DISPLAY_ALL_ON_RESUME,
+    CMD_NORMAL_DISPLAY,
+    CMD_DEACTIVATE_SCROLL,
+    CMD_DISPLAY_ON,
+  };
+  for (size_t i = 0; i < sizeof(init_cmds); i++) 
+  {
+    DisplayError err = display_write_command(disp, init_cmds[i]);
+    if (err != DISPLAY_ERROR_OK) return err;
+  }
+  disp->power_on = true;
+  display_clear(disp);
+  DisplayError err = display_flush(disp);
+  if (err != DISPLAY_ERROR_OK) return err;
+  return DISPLAY_ERROR_OK;
+}
+
+static DisplayError display_write_command(Display* disp, uint8_t cmd) 
+{
+  uint8_t buf[2] = {CONTROL_CMD_SINGLE, cmd};
+  return disp->i2c.write(disp->i2c.hw_handle, SSD1306_ADDR, buf, 2);
+}
+
+static DisplayError display_write_commands(Display* disp, const uint8_t* cmds, size_t count) 
+{
+  for (size_t i = 0; i < count; i++) 
+  {
+    DisplayError err = display_write_command(disp, cmds[i]);
+    if (err != DISPLAY_ERROR_OK) return err;
+  }
+  return DISPLAY_ERROR_OK;
+}
+
+DisplayError display_flush(Display* disp) 
+{
+  // Set column address range
+  const uint8_t col_cmds[] = {CMD_COLUMN_ADDR, 0, (DISPLAY_WIDTH - 1)};
+  DisplayError err = display_write_commands(disp, col_cmds, 3);
+  if (err != DISPLAY_ERROR_OK) return err;
+  // Set page address range
+  const uint8_t page_cmds[] = {CMD_PAGE_ADDR, 0, (DISPLAY_PAGES - 1)};
+  err = display_write_commands(disp, page_cmds, 3);
+  if (err != DISPLAY_ERROR_OK) return err;
+  // Send framebuffer data in chunks
+  const size_t CHUNK_SIZE = 128;
+  uint8_t buf[CHUNK_SIZE + 1];
+  for (size_t offset = 0; offset < FRAMEBUFFER_SIZE; offset += CHUNK_SIZE) 
+  {
+    size_t chunk_len = CHUNK_SIZE;
+    if (offset + chunk_len > FRAMEBUFFER_SIZE) chunk_len = FRAMEBUFFER_SIZE - offset;
+    buf[0] = CONTROL_DATA_STREAM;
+    memcpy(&buf[1], &disp->framebuffer[offset], chunk_len);
+    err = disp->i2c.write(disp->i2c.hw_handle, SSD1306_ADDR, buf, 1 + chunk_len);
+    if (err != DISPLAY_ERROR_OK) return err;
+  }
+  return DISPLAY_ERROR_OK;
+}
+
+void display_clear(Display* disp) 
+{
+  memset(disp->framebuffer, 0, FRAMEBUFFER_SIZE);
+}
+
+void display_fill(Display* disp) 
+{
+  memset(disp->framebuffer, 0xFF, FRAMEBUFFER_SIZE);
+}
+
+void display_set_pixel(Display* disp, size_t x, size_t y, bool on) 
+{
+  if (x >= DISPLAY_WIDTH || y >= DISPLAY_HEIGHT) return;
+  size_t page = y / 8;
+  size_t bit = y % 8;
+  size_t idx = page * DISPLAY_WIDTH + x;
+  if (on) disp->framebuffer[idx] |= (1 << bit);
+  else disp->framebuffer[idx] &= ~(1 << bit);
+}
+
+bool display_get_pixel(const Display* disp, size_t x, size_t y) 
+{
+  if (x >= DISPLAY_WIDTH || y >= DISPLAY_HEIGHT) return false;
+  size_t page = y / 8;
+  size_t bit = y % 8;
+  size_t idx = page * DISPLAY_WIDTH + x;
+  return ((disp->framebuffer[idx] >> bit) & 1) != 0;
+}
+
+void display_draw_hline(Display* disp, size_t x, size_t y, size_t width, bool on) 
+{
+  for (size_t dx = 0; dx < width; dx++) display_set_pixel(disp, x + dx, y, on);
+}
+
+void display_draw_vline(Display* disp, size_t x, size_t y, size_t height, bool on) 
+{
+  for (size_t dy = 0; dy < height; dy++) display_set_pixel(disp, x, y + dy, on);
+}
+
+void display_draw_rect(Display* disp, size_t x, size_t y, size_t width, size_t height, bool on) 
+{
+  display_draw_hline(disp, x, y, width, on);
+  display_draw_hline(disp, x, y + height - 1, width, on);
+  display_draw_vline(disp, x, y, height, on);
+  display_draw_vline(disp, x + width - 1, y, height, on);
+}
+
+void display_fill_rect(Display* disp, size_t x, size_t y, size_t width, size_t height, bool on) 
+{
+  for (size_t dy = 0; dy < height; dy++) display_draw_hline(disp, x, y + dy, width, on);
+}
+
+size_t display_draw_char(Display* disp, size_t x, size_t y, char c) 
+{
+  uint8_t c_val = (uint8_t)c;
+  if (c_val < 32 || c_val > 95 + 32) return 0;
+  size_t idx = ((size_t)(c_val - 32)) * 5;
+  if (idx + 5 > sizeof(FONT_5X7)) return 0;
+  for (size_t col = 0; col < 5; col++) 
+  {
+    uint8_t bits = FONT_5X7[idx + col];
+    for (size_t row = 0; row < 7; row++) 
+    {
+      bool pixel_on = ((bits >> row) & 1) != 0;
+      display_set_pixel(disp, x + col, y + row, pixel_on);
     }
-    
-    disp->power_on = true;
-    display_clear(disp);
-    DisplayError err = display_flush(disp);
-    if (err != DISPLAY_ERROR_OK) {
-        return err;
+  }
+  return 6;
+}
+
+void display_draw_text(Display* disp, size_t x, size_t y, const char* text) 
+{
+  size_t cx = x;
+  for (const char* p = text; *p != '\0'; p++) 
+  {
+    if (cx >= DISPLAY_WIDTH) break;
+    cx += display_draw_char(disp, cx, y, *p);
+  }
+}
+
+void display_draw_text_centered(Display* disp, size_t y, const char* text) 
+{
+  size_t text_len = strlen(text);
+  size_t width = text_len * 6;
+  size_t x = (width < DISPLAY_WIDTH) ? ((DISPLAY_WIDTH - width) / 2) : 0;
+  display_draw_text(disp, x, y, text);
+}
+
+DisplayError display_set_contrast(Display* disp, uint8_t contrast) 
+{
+  disp->contrast = contrast;
+  const uint8_t cmds[] = {CMD_SET_CONTRAST, contrast};
+  return display_write_commands(disp, cmds, 2);
+}
+
+DisplayError display_power_on(Display* disp) 
+{
+  DisplayError err = display_write_command(disp, CMD_DISPLAY_ON);
+  if (err == DISPLAY_ERROR_OK) disp->power_on = true;
+  return err;
+}
+
+DisplayError display_power_off(Display* disp) 
+{
+  DisplayError err = display_write_command(disp, CMD_DISPLAY_OFF);
+  if (err == DISPLAY_ERROR_OK) disp->power_on = false;
+  return err;
+}
+
+DisplayError display_invert(Display* disp, bool invert) 
+{
+  disp->inverted = invert;
+  uint8_t cmd = invert ? CMD_INVERT_DISPLAY : CMD_NORMAL_DISPLAY;
+  return display_write_command(disp, cmd);
+}
+
+bool display_is_on(const Display* disp) 
+{
+  return disp->power_on;
+}
+
+const uint8_t* display_framebuffer(const Display* disp) 
+{
+  return disp->framebuffer;
+}
+
+uint8_t* display_framebuffer_mut(Display* disp) 
+{
+  return disp->framebuffer;
+}
+
+void display_draw_bitmap_24x24(Display* disp, size_t x, size_t y, const uint8_t bitmap[72]) 
+{
+  for (size_t col = 0; col < 24; col++) 
+  {
+    for (size_t page = 0; page < 3; page++) 
+    {
+      uint8_t byte = bitmap[page * 24 + col];
+      for (size_t bit = 0; bit < 8; bit++) 
+      {
+        size_t px_y = y + page * 8 + bit;
+        size_t px_x = x + col;
+        if (px_x < DISPLAY_WIDTH && px_y < DISPLAY_HEIGHT) display_set_pixel(disp, px_x, px_y, ((byte >> bit) & 1) != 0);
+      }
     }
-    
-    return DISPLAY_ERROR_OK;
+  }
 }
 
-static DisplayError display_write_command(Display* disp, uint8_t cmd) {
-    uint8_t buf[2] = {CONTROL_CMD_SINGLE, cmd};
-    return disp->i2c.write(disp->i2c.hw_handle, SSD1306_ADDR, buf, 2);
-}
-
-static DisplayError display_write_commands(Display* disp, const uint8_t* cmds, size_t count) {
-    for (size_t i = 0; i < count; i++) {
-        DisplayError err = display_write_command(disp, cmds[i]);
-        if (err != DISPLAY_ERROR_OK) {
-            return err;
-        }
+void display_draw_bitmap_32x32(Display* disp, size_t x, size_t y, const uint8_t bitmap[128]) 
+{
+  for (size_t col = 0; col < 32; col++) 
+  {
+    for (size_t page = 0; page < 4; page++) 
+    {
+      uint8_t byte = bitmap[page * 32 + col];
+      for (size_t bit = 0; bit < 8; bit++) 
+      {
+        size_t px_y = y + page * 8 + bit;
+        size_t px_x = x + col;
+        if (px_x < DISPLAY_WIDTH && px_y < DISPLAY_HEIGHT) display_set_pixel(disp, px_x, px_y, ((byte >> bit) & 1) != 0);
+      }
     }
-    return DISPLAY_ERROR_OK;
-}
-
-DisplayError display_flush(Display* disp) {
-    // Set column address range
-    const uint8_t col_cmds[] = {CMD_COLUMN_ADDR, 0, (DISPLAY_WIDTH - 1)};
-    DisplayError err = display_write_commands(disp, col_cmds, 3);
-    if (err != DISPLAY_ERROR_OK) {
-        return err;
-    }
-    
-    // Set page address range
-    const uint8_t page_cmds[] = {CMD_PAGE_ADDR, 0, (DISPLAY_PAGES - 1)};
-    err = display_write_commands(disp, page_cmds, 3);
-    if (err != DISPLAY_ERROR_OK) {
-        return err;
-    }
-    
-    // Send framebuffer data in chunks
-    const size_t CHUNK_SIZE = 128;
-    uint8_t buf[CHUNK_SIZE + 1];
-    
-    for (size_t offset = 0; offset < FRAMEBUFFER_SIZE; offset += CHUNK_SIZE) {
-        size_t chunk_len = CHUNK_SIZE;
-        if (offset + chunk_len > FRAMEBUFFER_SIZE) {
-            chunk_len = FRAMEBUFFER_SIZE - offset;
-        }
-        
-        buf[0] = CONTROL_DATA_STREAM;
-        memcpy(&buf[1], &disp->framebuffer[offset], chunk_len);
-        
-        err = disp->i2c.write(disp->i2c.hw_handle, SSD1306_ADDR, buf, 1 + chunk_len);
-        if (err != DISPLAY_ERROR_OK) {
-            return err;
-        }
-    }
-    
-    return DISPLAY_ERROR_OK;
-}
-
-void display_clear(Display* disp) {
-    memset(disp->framebuffer, 0, FRAMEBUFFER_SIZE);
-}
-
-void display_fill(Display* disp) {
-    memset(disp->framebuffer, 0xFF, FRAMEBUFFER_SIZE);
-}
-
-void display_set_pixel(Display* disp, size_t x, size_t y, bool on) {
-    if (x >= DISPLAY_WIDTH || y >= DISPLAY_HEIGHT) {
-        return;
-    }
-    
-    size_t page = y / 8;
-    size_t bit = y % 8;
-    size_t idx = page * DISPLAY_WIDTH + x;
-    
-    if (on) {
-        disp->framebuffer[idx] |= (1 << bit);
-    } else {
-        disp->framebuffer[idx] &= ~(1 << bit);
-    }
-}
-
-bool display_get_pixel(const Display* disp, size_t x, size_t y) {
-    if (x >= DISPLAY_WIDTH || y >= DISPLAY_HEIGHT) {
-        return false;
-    }
-    
-    size_t page = y / 8;
-    size_t bit = y % 8;
-    size_t idx = page * DISPLAY_WIDTH + x;
-    
-    return ((disp->framebuffer[idx] >> bit) & 1) != 0;
-}
-
-void display_draw_hline(Display* disp, size_t x, size_t y, size_t width, bool on) {
-    for (size_t dx = 0; dx < width; dx++) {
-        display_set_pixel(disp, x + dx, y, on);
-    }
-}
-
-void display_draw_vline(Display* disp, size_t x, size_t y, size_t height, bool on) {
-    for (size_t dy = 0; dy < height; dy++) {
-        display_set_pixel(disp, x, y + dy, on);
-    }
-}
-
-void display_draw_rect(Display* disp, size_t x, size_t y, size_t width, size_t height, bool on) {
-    display_draw_hline(disp, x, y, width, on);
-    display_draw_hline(disp, x, y + height - 1, width, on);
-    display_draw_vline(disp, x, y, height, on);
-    display_draw_vline(disp, x + width - 1, y, height, on);
-}
-
-void display_fill_rect(Display* disp, size_t x, size_t y, size_t width, size_t height, bool on) {
-    for (size_t dy = 0; dy < height; dy++) {
-        display_draw_hline(disp, x, y + dy, width, on);
-    }
-}
-
-size_t display_draw_char(Display* disp, size_t x, size_t y, char c) {
-    uint8_t c_val = (uint8_t)c;
-    if (c_val < 32 || c_val > 95 + 32) {
-        return 0;
-    }
-    
-    size_t idx = ((size_t)(c_val - 32)) * 5;
-    if (idx + 5 > sizeof(FONT_5X7)) {
-        return 0;
-    }
-    
-    for (size_t col = 0; col < 5; col++) {
-        uint8_t bits = FONT_5X7[idx + col];
-        for (size_t row = 0; row < 7; row++) {
-            bool pixel_on = ((bits >> row) & 1) != 0;
-            display_set_pixel(disp, x + col, y + row, pixel_on);
-        }
-    }
-    
-    return 6;
-}
-
-void display_draw_text(Display* disp, size_t x, size_t y, const char* text) {
-    size_t cx = x;
-    for (const char* p = text; *p != '\0'; p++) {
-        if (cx >= DISPLAY_WIDTH) {
-            break;
-        }
-        cx += display_draw_char(disp, cx, y, *p);
-    }
-}
-
-void display_draw_text_centered(Display* disp, size_t y, const char* text) {
-    size_t text_len = strlen(text);
-    size_t width = text_len * 6;
-    size_t x = (width < DISPLAY_WIDTH) ? ((DISPLAY_WIDTH - width) / 2) : 0;
-    display_draw_text(disp, x, y, text);
-}
-
-DisplayError display_set_contrast(Display* disp, uint8_t contrast) {
-    disp->contrast = contrast;
-    const uint8_t cmds[] = {CMD_SET_CONTRAST, contrast};
-    return display_write_commands(disp, cmds, 2);
-}
-
-DisplayError display_power_on(Display* disp) {
-    DisplayError err = display_write_command(disp, CMD_DISPLAY_ON);
-    if (err == DISPLAY_ERROR_OK) {
-        disp->power_on = true;
-    }
-    return err;
-}
-
-DisplayError display_power_off(Display* disp) {
-    DisplayError err = display_write_command(disp, CMD_DISPLAY_OFF);
-    if (err == DISPLAY_ERROR_OK) {
-        disp->power_on = false;
-    }
-    return err;
-}
-
-DisplayError display_invert(Display* disp, bool invert) {
-    disp->inverted = invert;
-    uint8_t cmd = invert ? CMD_INVERT_DISPLAY : CMD_NORMAL_DISPLAY;
-    return display_write_command(disp, cmd);
-}
-
-bool display_is_on(const Display* disp) {
-    return disp->power_on;
-}
-
-const uint8_t* display_framebuffer(const Display* disp) {
-    return disp->framebuffer;
-}
-
-uint8_t* display_framebuffer_mut(Display* disp) {
-    return disp->framebuffer;
-}
-
-void display_draw_bitmap_24x24(Display* disp, size_t x, size_t y, const uint8_t bitmap[72]) {
-    for (size_t col = 0; col < 24; col++) {
-        for (size_t page = 0; page < 3; page++) {
-            uint8_t byte = bitmap[page * 24 + col];
-            for (size_t bit = 0; bit < 8; bit++) {
-                size_t px_y = y + page * 8 + bit;
-                size_t px_x = x + col;
-                if (px_x < DISPLAY_WIDTH && px_y < DISPLAY_HEIGHT) {
-                    display_set_pixel(disp, px_x, px_y, ((byte >> bit) & 1) != 0);
-                }
-            }
-        }
-    }
-}
-
-void display_draw_bitmap_32x32(Display* disp, size_t x, size_t y, const uint8_t bitmap[128]) {
-    for (size_t col = 0; col < 32; col++) {
-        for (size_t page = 0; page < 4; page++) {
-            uint8_t byte = bitmap[page * 32 + col];
-            for (size_t bit = 0; bit < 8; bit++) {
-                size_t px_y = y + page * 8 + bit;
-                size_t px_x = x + col;
-                if (px_x < DISPLAY_WIDTH && px_y < DISPLAY_HEIGHT) {
-                    display_set_pixel(disp, px_x, px_y, ((byte >> bit) & 1) != 0);
-                }
-            }
-        }
-    }
+  }
 }
 
 // StatusDisplay implementation
 
-void status_display_init_struct(StatusDisplay* status_disp, I2cInterface i2c) {
-    display_init_struct(&status_disp->display, i2c);
+void status_display_init_struct(StatusDisplay* status_disp, I2cInterface i2c) 
+{
+  display_init_struct(&status_disp->display, i2c);
 }
 
-StatusDisplay status_display_new(I2cInterface i2c) {
-    StatusDisplay status_disp;
-    status_display_init_struct(&status_disp, i2c);
-    return status_disp;
+StatusDisplay status_display_new(I2cInterface i2c) 
+{
+  StatusDisplay status_disp;
+  status_display_init_struct(&status_disp, i2c);
+  return status_disp;
 }
 
-DisplayError status_display_init(StatusDisplay* status_disp) {
-    return display_init(&status_disp->display);
+DisplayError status_display_init(StatusDisplay* status_disp) 
+{
+  return display_init(&status_disp->display);
 }
 
-DisplayError status_display_show_splash(StatusDisplay* status_disp) {
-    display_clear(&status_disp->display);
-    
-    // Draw border
-    display_draw_rect(&status_disp->display, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, true);
-    
-    // Draw text
-    display_draw_text_centered(&status_disp->display, 8, "LunarCore");
-    display_draw_text_centered(&status_disp->display, 18, "v1.0.0");
-    
-    display_draw_text_centered(&status_disp->display, 32, "Unified Mesh");
-    display_draw_text_centered(&status_disp->display, 42, "Bridge Firmware");
-    
-    display_draw_text_centered(&status_disp->display, 54, "MC | MT | RN");
-    
-    return display_flush(&status_disp->display);
+DisplayError status_display_show_splash(StatusDisplay* status_disp) 
+{
+  display_clear(&status_disp->display);
+  // Draw border
+  display_draw_rect(&status_disp->display, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, true);
+  // Draw text
+  display_draw_text_centered(&status_disp->display, 8, "LunarCore");
+  display_draw_text_centered(&status_disp->display, 18, "v1.0.0");
+  display_draw_text_centered(&status_disp->display, 32, "Unified Mesh");
+  display_draw_text_centered(&status_disp->display, 42, "Bridge Firmware");
+  display_draw_text_centered(&status_disp->display, 54, "MC | MT | RN");
+  return display_flush(&status_disp->display);
 }
 
-DisplayError status_display_show_status(StatusDisplay* status_disp, const StatusContent* status) {
-    display_clear(&status_disp->display);
-    
-    // Protocol name
-    display_draw_text(&status_disp->display, 0, 0, status->protocol);
-    
-    // Battery percentage
-    char batt_str[5];
-    format_battery(status->battery_pct, batt_str, sizeof(batt_str));
-    display_draw_text(&status_disp->display, DISPLAY_WIDTH - 24, 0, batt_str);
-    
-    // Separator line
-    display_draw_hline(&status_disp->display, 0, 9, DISPLAY_WIDTH, true);
-    
-    // Node ID
-    display_draw_text(&status_disp->display, 0, 12, "ID:");
-    char id_str[9];
-    format_hex32(status->node_id, id_str, sizeof(id_str));
-    display_draw_text(&status_disp->display, 24, 12, id_str);
-    
-    // RX count
-    display_draw_text(&status_disp->display, 0, 22, "RX:");
-    char rx_str[11];
-    format_u32(status->rx_count, rx_str, sizeof(rx_str));
-    display_draw_text(&status_disp->display, 24, 22, rx_str);
-    
-    // TX count
-    display_draw_text(&status_disp->display, 64, 22, "TX:");
-    char tx_str[11];
-    format_u32(status->tx_count, tx_str, sizeof(tx_str));
-    display_draw_text(&status_disp->display, 88, 22, tx_str);
-    
-    // RSSI
-    display_draw_text(&status_disp->display, 0, 32, "RSSI:");
-    char rssi_str[7];
-    format_i16(status->rssi, rssi_str, sizeof(rssi_str));
-    display_draw_text(&status_disp->display, 36, 32, rssi_str);
-    display_draw_text(&status_disp->display, 72, 32, "dBm");
-    
-    // Connection status
-    display_draw_text(&status_disp->display, 0, 44, "Status:");
-    if (status->connected) {
-        display_draw_text(&status_disp->display, 48, 44, "CONNECTED");
-    } else {
-        display_draw_text(&status_disp->display, 48, 44, "WAITING");
+DisplayError status_display_show_status(StatusDisplay* status_disp, const StatusContent* status) 
+{
+  display_clear(&status_disp->display);
+  // Protocol name
+  display_draw_text(&status_disp->display, 0, 0, status->protocol);
+  // Battery percentage
+  char batt_str[5];
+  format_battery(status->battery_pct, batt_str, sizeof(batt_str));
+  display_draw_text(&status_disp->display, DISPLAY_WIDTH - 24, 0, batt_str);
+  // Separator line
+  display_draw_hline(&status_disp->display, 0, 9, DISPLAY_WIDTH, true);
+  // Node ID
+  display_draw_text(&status_disp->display, 0, 12, "ID:");
+  char id_str[9];
+  format_hex32(status->node_id, id_str, sizeof(id_str));
+  display_draw_text(&status_disp->display, 24, 12, id_str);
+  // RX count
+  display_draw_text(&status_disp->display, 0, 22, "RX:");
+  char rx_str[11];
+  format_u32(status->rx_count, rx_str, sizeof(rx_str));
+  display_draw_text(&status_disp->display, 24, 22, rx_str);
+  // TX count
+  display_draw_text(&status_disp->display, 64, 22, "TX:");
+  char tx_str[11];
+  format_u32(status->tx_count, tx_str, sizeof(tx_str));
+  display_draw_text(&status_disp->display, 88, 22, tx_str);
+  // RSSI
+  display_draw_text(&status_disp->display, 0, 32, "RSSI:");
+  char rssi_str[7];
+  format_i16(status->rssi, rssi_str, sizeof(rssi_str));
+  display_draw_text(&status_disp->display, 36, 32, rssi_str);
+  display_draw_text(&status_disp->display, 72, 32, "dBm");
+  // Connection status
+  display_draw_text(&status_disp->display, 0, 44, "Status:");
+  if (status->connected) display_draw_text(&status_disp->display, 48, 44, "CONNECTED");
+  else display_draw_text(&status_disp->display, 48, 44, "WAITING");
+  // Bottom separator
+  display_draw_hline(&status_disp->display, 0, 54, DISPLAY_WIDTH, true);
+  // Footer
+  display_draw_text_centered(&status_disp->display, 56, "github.com/yours");
+  return display_flush(&status_disp->display);
+}
+
+DisplayError status_display_show_error(StatusDisplay* status_disp, const char* msg) 
+{
+  display_clear(&status_disp->display);
+  display_draw_text_centered(&status_disp->display, 20, "ERROR");
+  display_draw_hline(&status_disp->display, 20, 30, DISPLAY_WIDTH - 40, true);
+  display_draw_text_centered(&status_disp->display, 36, msg);
+  return display_flush(&status_disp->display);
+}
+
+DisplayError status_display_show_message(StatusDisplay* status_disp, const char* line1, const char* line2) 
+{
+  display_clear(&status_disp->display);
+  display_draw_text_centered(&status_disp->display, 24, line1);
+  display_draw_text_centered(&status_disp->display, 36, line2);
+  return display_flush(&status_disp->display);
+}
+
+DisplayError status_display_power_off(StatusDisplay* status_disp) 
+{
+  return display_power_off(&status_disp->display);
+}
+
+DisplayError status_display_power_on(StatusDisplay* status_disp) 
+{
+  return display_power_on(&status_disp->display);
+}
+
+Display* status_display_get_display(StatusDisplay* status_disp) 
+{
+  return &status_disp->display;
+}
+
+DisplayError status_display_boot_animation(StatusDisplay* status_disp, void (*delay_fn)(uint32_t)) 
+{
+  // Two cycles through all moon phases
+  for (size_t cycle = 0; cycle < 2; cycle++) 
+  {
+    for (size_t phase = 0; phase < 8; phase++) 
+    {
+      display_clear(&status_disp->display);
+      // Draw moon phase
+      size_t moon_x = (DISPLAY_WIDTH - 24) / 2;
+      size_t moon_y = 8;
+      display_draw_bitmap_24x24(&status_disp->display, moon_x, moon_y, MOON_PHASES[phase]);
+      // Draw text
+      display_draw_text_centered(&status_disp->display, 40, "LUNARCORE");
+      // Draw progress dots
+      size_t dots_x = (DISPLAY_WIDTH - 8 * 4) / 2;
+      for (size_t i = 0; i < 8; i++) 
+      {
+        bool dot_on = i <= phase;
+        display_fill_rect(&status_disp->display, dots_x + i * 4, 54, 2, 2, dot_on);
+      }
+      DisplayError err = display_flush(&status_disp->display); return err;
+      if (err != DISPLAY_ERROR_OK) 
+      // Delay
+      uint32_t delay_ms = (cycle == 1) ? 120 : 80;
+      delay_fn(delay_ms);
     }
-    
-    // Bottom separator
-    display_draw_hline(&status_disp->display, 0, 54, DISPLAY_WIDTH, true);
-    
-    // Footer
-    display_draw_text_centered(&status_disp->display, 56, "github.com/yours");
-    
-    return display_flush(&status_disp->display);
+  }
+  // Show branding
+  DisplayError err = status_display_show_branding(status_disp);
+  if (err != DISPLAY_ERROR_OK) return err;
+  delay_fn(1500);
+  return DISPLAY_ERROR_OK;
 }
 
-DisplayError status_display_show_error(StatusDisplay* status_disp, const char* msg) {
-    display_clear(&status_disp->display);
-    
-    display_draw_text_centered(&status_disp->display, 20, "ERROR");
-    display_draw_hline(&status_disp->display, 20, 30, DISPLAY_WIDTH - 40, true);
-    display_draw_text_centered(&status_disp->display, 36, msg);
-    
-    return display_flush(&status_disp->display);
+DisplayError status_display_show_branding(StatusDisplay* status_disp) 
+{
+  display_clear(&status_disp->display);
+  // Draw logo
+  size_t logo_x = (DISPLAY_WIDTH - 32) / 2;
+  size_t logo_y = 4;
+  display_draw_bitmap_32x32(&status_disp->display, logo_x, logo_y, YOURS_FACE);
+  // Draw text
+  display_draw_text_centered(&status_disp->display, 42, "[ YOURS ]");
+  display_draw_text_centered(&status_disp->display, 52, "x [ LUNARCORE ]");
+  return display_flush(&status_disp->display);
 }
 
-DisplayError status_display_show_message(StatusDisplay* status_disp, const char* line1, const char* line2) {
-    display_clear(&status_disp->display);
-    
-    display_draw_text_centered(&status_disp->display, 24, line1);
-    display_draw_text_centered(&status_disp->display, 36, line2);
-    
-    return display_flush(&status_disp->display);
-}
-
-DisplayError status_display_power_off(StatusDisplay* status_disp) {
-    return display_power_off(&status_disp->display);
-}
-
-DisplayError status_display_power_on(StatusDisplay* status_disp) {
-    return display_power_on(&status_disp->display);
-}
-
-Display* status_display_get_display(StatusDisplay* status_disp) {
-    return &status_disp->display;
-}
-
-DisplayError status_display_boot_animation(StatusDisplay* status_disp, void (*delay_fn)(uint32_t)) {
-    // Two cycles through all moon phases
-    for (size_t cycle = 0; cycle < 2; cycle++) {
-        for (size_t phase = 0; phase < 8; phase++) {
-            display_clear(&status_disp->display);
-            
-            // Draw moon phase
-            size_t moon_x = (DISPLAY_WIDTH - 24) / 2;
-            size_t moon_y = 8;
-            display_draw_bitmap_24x24(&status_disp->display, moon_x, moon_y, MOON_PHASES[phase]);
-            
-            // Draw text
-            display_draw_text_centered(&status_disp->display, 40, "LUNARCORE");
-            
-            // Draw progress dots
-            size_t dots_x = (DISPLAY_WIDTH - 8 * 4) / 2;
-            for (size_t i = 0; i < 8; i++) {
-                bool dot_on = i <= phase;
-                display_fill_rect(&status_disp->display, dots_x + i * 4, 54, 2, 2, dot_on);
-            }
-            
-            DisplayError err = display_flush(&status_disp->display);
-            if (err != DISPLAY_ERROR_OK) {
-                return err;
-            }
-            
-            // Delay
-            uint32_t delay_ms = (cycle == 1) ? 120 : 80;
-            delay_fn(delay_ms);
-        }
-    }
-    
-    // Show branding
-    DisplayError err = status_display_show_branding(status_disp);
-    if (err != DISPLAY_ERROR_OK) {
-        return err;
-    }
-    delay_fn(1500);
-    
-    return DISPLAY_ERROR_OK;
-}
-
-DisplayError status_display_show_branding(StatusDisplay* status_disp) {
-    display_clear(&status_disp->display);
-    
-    // Draw logo
-    size_t logo_x = (DISPLAY_WIDTH - 32) / 2;
-    size_t logo_y = 4;
-    display_draw_bitmap_32x32(&status_disp->display, logo_x, logo_y, YOURS_FACE);
-    
-    // Draw text
-    display_draw_text_centered(&status_disp->display, 42, "[ YOURS ]");
-    display_draw_text_centered(&status_disp->display, 52, "x [ LUNARCORE ]");
-    
-    return display_flush(&status_disp->display);
-}
-
-DisplayError status_display_show_init_progress(StatusDisplay* status_disp, const char* step, uint8_t progress) {
-    display_clear(&status_disp->display);
-    
-    display_draw_text_centered(&status_disp->display, 8, "INITIALIZING");
-    
-    display_draw_text_centered(&status_disp->display, 24, step);
-    
-    // Progress bar
-    const size_t bar_width = 100;
-    size_t bar_x = (DISPLAY_WIDTH - bar_width) / 2;
-    size_t bar_y = 40;
-    size_t filled = (bar_width * progress) / 100;
-    
-    display_draw_rect(&status_disp->display, bar_x, bar_y, bar_width, 8, true);
-    
-    // Draw filled portion (with bounds check)
-    if (filled > 2) {
-        display_fill_rect(&status_disp->display, bar_x + 1, bar_y + 1, filled - 2, 6, true);
-    }
-    
-    // Progress percentage
-    char pct_str[5];
-    format_battery(progress, pct_str, sizeof(pct_str));
-    display_draw_text_centered(&status_disp->display, 52, pct_str);
-    
-    return display_flush(&status_disp->display);
+DisplayError status_display_show_init_progress(StatusDisplay* status_disp, const char* step, uint8_t progress) 
+{
+  display_clear(&status_disp->display);
+  display_draw_text_centered(&status_disp->display, 8, "INITIALIZING");
+  display_draw_text_centered(&status_disp->display, 24, step);
+  // Progress bar
+  const size_t bar_width = 100;
+  size_t bar_x = (DISPLAY_WIDTH - bar_width) / 2;
+  size_t bar_y = 40;
+  size_t filled = (bar_width * progress) / 100;
+  display_draw_rect(&status_disp->display, bar_x, bar_y, bar_width, 8, true);
+  // Draw filled portion (with bounds check)
+  if (filled > 2) display_fill_rect(&status_disp->display, bar_x + 1, bar_y + 1, filled - 2, 6, true);
+  // Progress percentage
+  char pct_str[5];
+  format_battery(progress, pct_str, sizeof(pct_str));
+  display_draw_text_centered(&status_disp->display, 52, pct_str);
+  return display_flush(&status_disp->display);
 }
 ```
