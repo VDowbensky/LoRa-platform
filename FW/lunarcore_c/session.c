@@ -732,90 +732,84 @@ static SessionError session_manager_save_to_nvs(const SessionManager* manager)
 // Load sessions from NVS (xtensa architecture)
 static size_t session_manager_load_from_nvs(SessionManager* manager) 
 {
-    nvs_handle_t handle;
-    esp_err_t err;
-    
-    // Open NVS namespace
-    err = nvs_open(NVS_SESSION_NAMESPACE, NVS_READONLY, &handle);
-    if (err != ESP_OK) return 0;
-    {
-        
-    }
-    
-    // Get session count
-    uint32_t count = 0;
-    if (nvs_get_u32(handle, "sess_count", &count) != ESP_OK) {
-        nvs_close(handle);
-        return 0;
-    }
-    
-    // Limit count to maximum
-    if (count > MAX_PERSISTED_SESSIONS) {
-        count = MAX_PERSISTED_SESSIONS;
-    }
-    
-    // Load each session
-    size_t loaded = 0;
-    for (uint32_t idx = 0; idx < count; idx++) {
-        // Create key name
-        char key_name[16];
-        if (idx < 10) {
-            key_name[0] = 's';
-            key_name[1] = 'e';
-            key_name[2] = 's';
-            key_name[3] = 's';
-            key_name[4] = '_';
-            key_name[5] = '0' + (char)idx;
-            key_name[6] = '\0';
-        } else {
-            key_name[0] = 's';
-            key_name[1] = 'e';
-            key_name[2] = 's';
-            key_name[3] = 's';
-            key_name[4] = '_';
-            key_name[5] = '0' + (char)(idx / 10);
-            key_name[6] = '0' + (char)(idx % 10);
-            key_name[7] = '\0';
-        }
-        
-        // Load blob
-        uint8_t blob[8 + SESSION_SERIALIZED_SIZE];
-        size_t blob_len = sizeof(blob);
-        
-        if (nvs_get_blob(handle, key_name, blob, &blob_len) == ESP_OK &&
-            blob_len == sizeof(blob)) {
-            
-            // Find empty slot
-            for (size_t i = 0; i < MAX_PERSISTED_SESSIONS; i++) {
-                if (!manager->entries[i].occupied) {
-                    // Deserialize session
-                    memcpy(manager->entries[i].peer_key, blob, 8);
-                    if (session_deserialize(blob + 8, SESSION_SERIALIZED_SIZE, 
-                                          &manager->entries[i].session)) {
-                        manager->entries[i].occupied = true;
-                        loaded++;
-                        if (i >= manager->count) {
-                            manager->count = i + 1;
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-    }
-    
+  nvs_handle_t handle;
+  esp_err_t err;
+  // Open NVS namespace
+  err = nvs_open(NVS_SESSION_NAMESPACE, NVS_READONLY, &handle);
+  if (err != ESP_OK) return 0;
+  // Get session count
+  uint32_t count = 0;
+  if (nvs_get_u32(handle, "sess_count", &count) != ESP_OK) 
+  {
     nvs_close(handle);
-    return loaded;
+    return 0;
+  }
+  // Limit count to maximum
+  if (count > MAX_PERSISTED_SESSIONS) count = MAX_PERSISTED_SESSIONS;
+  // Load each session
+  size_t loaded = 0;
+  for (uint32_t idx = 0; idx < count; idx++) 
+  {
+    // Create key name
+    char key_name[16];
+    if (idx < 10) 
+    {
+      key_name[0] = 's';
+      key_name[1] = 'e';
+      key_name[2] = 's';
+      key_name[3] = 's';
+      key_name[4] = '_';
+      key_name[5] = '0' + (char)idx;
+      key_name[6] = '\0';
+    } 
+    else 
+    {
+      key_name[0] = 's';
+      key_name[1] = 'e';
+      key_name[2] = 's';
+      key_name[3] = 's';
+      key_name[4] = '_';
+      key_name[5] = '0' + (char)(idx / 10);
+      key_name[6] = '0' + (char)(idx % 10);
+      key_name[7] = '\0';
+    }
+    // Load blob
+    uint8_t blob[8 + SESSION_SERIALIZED_SIZE];
+    size_t blob_len = sizeof(blob);
+    if (nvs_get_blob(handle, key_name, blob, &blob_len) == ESP_OK && blob_len == sizeof(blob)) 
+    {
+      // Find empty slot
+      for (size_t i = 0; i < MAX_PERSISTED_SESSIONS; i++) 
+      {
+        if (!manager->entries[i].occupied) 
+        {
+          // Deserialize session
+          memcpy(manager->entries[i].peer_key, blob, 8);
+          if (session_deserialize(blob + 8, SESSION_SERIALIZED_SIZE,&manager->entries[i].session)) 
+          {
+            manager->entries[i].occupied = true;
+            loaded++;
+            if (i >= manager->count) manager->count = i + 1;
+          }
+          break;
+        }
+      }
+    }
+  }
+  nvs_close(handle);
+  return loaded;
 }
 #else
 // Stub implementations for non-xtensa platforms
-static SessionError session_manager_save_to_nvs(const SessionManager* manager) {
-    (void)manager;
-    return SESSION_ERROR_NONE;
+static SessionError session_manager_save_to_nvs(const SessionManager* manager) 
+{
+  (void)manager;
+  return SESSION_ERROR_NONE;
 }
 
-static size_t session_manager_load_from_nvs(SessionManager* manager) {
-    (void)manager;
-    return 0;
+static size_t session_manager_load_from_nvs(SessionManager* manager) 
+{
+  (void)manager;
+  return 0;
 }
 #endif

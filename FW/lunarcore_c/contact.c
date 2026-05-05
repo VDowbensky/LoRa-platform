@@ -820,5 +820,5 @@ ContactHelloError contact_store_load_from_nvs(ContactStore* store, size_t* loade
   return CONTACT_HELLO_ERROR_NONE;
 }
 #endif
-```
+
 

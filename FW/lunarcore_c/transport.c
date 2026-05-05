@@ -40,9 +40,10 @@ typedef struct
   size_t len;
 } Vec214;
 
-typedef struct {
-    uint8_t data[237];
-    size_t len;
+typedef struct 
+{
+  uint8_t data[237];
+  size_t len;
 } Vec237;
 
 typedef struct 
