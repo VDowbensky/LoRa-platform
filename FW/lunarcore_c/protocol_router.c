@@ -220,10 +220,7 @@ OptionProtocol protocol_detector_feed(ProtocolDetector* self, uint8_t byte)
     {
       // Stay in MeshCore1 state
     } 
-    else 
-    {
-      self->state = DETECT_STATE_IDLE;
-    }
+    else self->state = DETECT_STATE_IDLE;
     break;
 
     case DETECT_STATE_MESHTASTIC1:

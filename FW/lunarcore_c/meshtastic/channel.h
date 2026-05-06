@@ -1,30 +1,15 @@
 #ifndef _CHANNEL_H_
 #define _CHANNEL_H_
 
+// Required dependencies
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
-#include <stdio.h>
-
-// Forward declarations for crypto functions
-typedef struct Aes128 Aes128;
-typedef struct Aes256 Aes256;
-typedef struct Sha256 Sha256;
-
-// Crypto function declarations (these would be in separate crypto headers)
-extern void crypto_secure_zero(void* ptr, size_t len);
-extern Aes128* aes128_new(const uint8_t key[16]);
-extern void aes128_encrypt_ctr(const Aes128* cipher, const uint8_t nonce[16], uint8_t* data, size_t len);
-extern void aes128_decrypt_ctr(const Aes128* cipher, const uint8_t nonce[16], uint8_t* data, size_t len);
-extern void aes128_free(Aes128* cipher);
-extern Aes256* aes256_new(const uint8_t key[32]);
-extern void aes256_encrypt_ctr(const Aes256* cipher, const uint8_t nonce[16], uint8_t* data, size_t len);
-extern void aes256_decrypt_ctr(const Aes256* cipher, const uint8_t nonce[16], uint8_t* data, size_t len);
-extern void aes256_free(Aes256* cipher);
-extern void mesh_kdf_derive_nonce(uint32_t packet_id, uint32_t sender, uint8_t nonce[16]);
-extern void mesh_kdf_derive_channel_key(const char* name, uint8_t hash[32]);
-extern const uint8_t MESH_KDF_DEFAULT_KEY[16];
+#include "crypto/aes.h"
+#include "crypto/sha256.h"
+#include "crypto/hkdf.h"
+#include "crypto/secure_zero.h"
 
 // Constants
 #define MAX_CHANNEL_NAME 12
@@ -32,7 +17,89 @@ extern const uint8_t MESH_KDF_DEFAULT_KEY[16];
 #define KEY_SIZE_256 32
 #define NONCE_SIZE 16
 #define MAX_CHANNELS 8
-#define MAX_VEC_256 256
+#define MAX_VEC_SIZE 256
+
+// LoraParams structure
+typedef struct 
+{
+  uint8_t spreading_factor;
+  uint32_t bandwidth;
+  uint8_t coding_rate;
+} LoraParams;
+
+// ModemPreset enum
+typedef enum 
+{
+  MODEM_PRESET_LONG_SLOW = 0,
+  MODEM_PRESET_LONG_FAST = 1,
+  MODEM_PRESET_LONG_MODERATE = 2,
+  MODEM_PRESET_VERY_LONG_SLOW = 3,
+  MODEM_PRESET_MEDIUM_SLOW = 4,
+  MODEM_PRESET_MEDIUM_FAST = 5,
+  MODEM_PRESET_SHORT_SLOW = 6,
+  MODEM_PRESET_SHORT_FAST = 7,
+  MODEM_PRESET_SHORT_TURBO = 8
+} ModemPreset;
+
+// ChannelKey enum type
+typedef enum 
+{
+  CHANNEL_KEY_NONE,
+  CHANNEL_KEY_AES128,
+  CHANNEL_KEY_AES256
+} ChannelKeyType;
+
+// ChannelKey structure (tagged union)
+typedef struct 
+{
+  ChannelKeyType type;
+  union 
+  {
+    uint8_t aes128[KEY_SIZE_128];
+    uint8_t aes256[KEY_SIZE_256];
+  } data;
+} ChannelKey;
+
+// Vec structure (heapless Vec equivalent)
+typedef struct 
+{
+  uint8_t data[MAX_CHANNEL_NAME];
+  size_t len;
+} VecChannelName;
+
+typedef struct 
+{
+  uint8_t data[MAX_VEC_SIZE];
+  size_t len;
+} Vec256;
+
+// Channel structure
+typedef struct 
+{
+  uint8_t index;
+  VecChannelName name;
+  ChannelKey key;
+  ModemPreset modem_preset;
+  bool uplink_enabled;
+  bool downlink_enabled;
+  uint8_t position_precision;
+} Channel;
+
+// ChannelSet structure
+typedef struct 
+{
+  Channel* channels[MAX_CHANNELS];
+} ChannelSet;
+
+
+
+
+
+// Forward declarations for crypto functions
+typedef struct Aes128 Aes128;
+typedef struct Aes256 Aes256;
+typedef struct Sha256 Sha256;
+
 
 // Modem preset enumeration
 typedef enum 
@@ -107,22 +174,6 @@ typedef struct
 {
   OptionChannel channels[MAX_CHANNELS];
 } ChannelSet;
-
-// Base64 decode table
-static const int8_t BASE64_DECODE[128] = 
-{
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, 62, -1, 63,
-  52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
-  -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
-  15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, 63,
-  -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-  41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1
-};
-
-// Base64 character table
-static const uint8_t BASE64_CHARS[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 
 // Default for ModemPreset
@@ -220,12 +271,6 @@ size_t channel_set_count(const ChannelSet* cs);
 void channel_set_default(ChannelSet* cs);
 // Drop/cleanup channel set
 void channel_set_drop(ChannelSet* cs);
-
-// Base64 encoding/decoding
-// Encode data to base64
-size_t base64_encode(const uint8_t* data, size_t data_len, uint8_t* output, size_t output_len);
-// Decode base64 data
-size_t base64_decode(const uint8_t* data, size_t data_len, uint8_t* output, size_t output_len);
 
 #endif
 

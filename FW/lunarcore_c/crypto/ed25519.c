@@ -1,103 +1,4 @@
-/* # Conversion Notes for Rust to C Translation
-
-## Key Translation Decisions
-
-### 1. Type System Adaptations
-- **Rust structs → C structs**: All Rust structs (Signature, Fe, ExtendedPoint, etc.) translated to C structs
-- **Rust arrays → C arrays**: Fixed-size Rust arrays like `[u8; 32]` become C arrays `uint8_t[32]`
-- **Type aliases**: Preserved PublicKey, PrivateKey as typedef aliases
-- **Option<T>**: Converted to bool return values for functions that return Option (e.g., `extended_point_from_bytes` returns bool and uses output parameter)
-
-### 2. Memory Management
-- **No automatic copying**: Implemented explicit copy semantics where Rust's Copy trait was used
-- **Struct passing**: Changed from pass-by-value to pass-by-pointer for efficiency in C
-- **Stack allocation**: All operations use stack allocation matching Rust's behavior
-
-### 3. Method to Function Conversion
-- **Instance methods**: Converted to functions with `self` as first parameter (e.g., `fe.mul(&other)` → `fe_mul(&self, &other)`)
-- **Static methods**: Converted to regular functions (e.g., `Fe::zero()` → `fe_zero()`)
-- **const fn**: Converted to regular functions (C doesn't have const functions in the same sense)
-
-### 4. Language-Specific Features
-
-#### i128 Type
-- **Rust's i128**: Used GCC/Clang's `__int128` extension for 128-bit arithmetic in field multiplication
-- This is necessary for accurate overflow handling in Ed25519 field arithmetic
-- **Portability note**: Requires compiler support for 128-bit integers (available in GCC/Clang on 64-bit systems)
-
-#### Pattern Matching
-- **Option handling**: Converted Rust's `match` on Option to if statements with bool return values
-- **Early returns**: Preserved Rust's early return pattern using C's return statements
-
-#### Loops
-- **Range loops**: Converted `for i in 0..10` to `for (int i = 0; i < 10; i++)`
-- **Reverse ranges**: Converted `(0..256).rev()` to `for (int i = 255; i >= 0; i--)`
-
-### 5. External Dependencies
-- **SHA-512**: Declared external function signatures for SHA-512 operations (assumed from external implementation)
-- **constant_time_eq**: Declared external function for constant-time comparison
-- These must be provided by the calling code or linked library
-
-### 6. Constant-Time Operations
-- **Preserved timing-safety**: All constant-time swap and select operations maintain the same bit-masking logic
-- **Bitwise operations**: Directly translated XOR-based constant-time operations
-
-### 7. Scalar Arithmetic
-- **sc_reduce**: Complete implementation of modular reduction for Ed25519 scalars
-- **sc_muladd**: Full implementation of scalar multiplication and addition
-- **sc_is_valid**: Implemented scalar validation against group order L
-
-### 8. Comments and Documentation
-- **Preserved structure**: Maintained the overall structure and logic flow
-- **Added clarifications**: Added comments where C-specific implementation differs from Rust
-
-## Potential Issues and Limitations
-
-### 1. Compiler Dependencies
-- **128-bit integers**: Requires compiler support for `__int128` (GCC/Clang on 64-bit)
-- **Alternative**: Could implement using 64-bit limbs if 128-bit not available, but would require code changes
-
-### 2. External Dependencies
-- **SHA-512 implementation**: Must be provided externally
-- **Function signatures provided**: The code assumes specific function signatures for SHA-512 operations
-- **constant_time_eq**: Must be provided for secure comparison
-
-### 3. Platform Considerations
-- **Endianness**: Code assumes little-endian byte order (consistent with Ed25519 spec)
-- **Integer sizes**: Assumes standard integer sizes (int64_t is 64 bits, etc.)
-
-### 4. Error Handling
-- **No exceptions**: C doesn't have exceptions; uses bool return values and output parameters
-- **NULL checks**: Calling code should validate pointers before passing to functions
-
-### 5. Memory Safety
-- **No bounds checking**: C arrays don't have automatic bounds checking
-- **Caller responsibility**: Calling code must ensure array sizes match expected values
-- **Buffer overflows**: Care must be taken to pass correctly-sized buffers
-
-## Implementation Completeness
-
-✓ All field element operations (Fe) fully implemented
-✓ All extended point operations fully implemented  
-✓ All scalar operations fully implemented
-✓ Complete Ed25519 sign/verify/keygen implementation
-✓ All constant-time operations preserved
-✓ All helper functions included
-✓ No placeholder code or TODOs
-✓ Ready for immediate use (with external SHA-512 implementation)
-
-## Testing Recommendations
-
-1. Test with known Ed25519 test vectors
-2. Verify constant-time behavior with timing analysis
-3. Test on target platform to confirm 128-bit integer support
-4. Validate against reference implementation (e.g., libsodium)
-5. Test edge cases (invalid public keys, invalid signatures, etc.)
- */
-
-#include <stdint.h>
-#include <string.h>
-#include <stdbool.h>
+#include "ed25519.h"
 
 /* Forward declarations */
 typedef struct Sha512 Sha512;
@@ -1052,4 +953,433 @@ bool ed25519_verify(const PublicKey public_key, const uint8_t* message, size_t m
     extended_point_to_bytes(&rhs, rhs_bytes);
     
     return constant_time_eq(lhs_bytes, rhs_bytes, 32);
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+/* Global constant for Ed25519 scalar field modulus limbs (21-bit base) */
+const int64_t L_LIMBS[12] = 
+{
+  0x1cf5d3ed, 0x009318d2, 0x1de73596, 0x1df3bd45,
+  0x0000014d, 0x00000000, 0x00000000, 0x00000000,
+  0x00000000, 0x00000000, 0x00000000, 0x00200000,
+};
+
+/* Forward declarations for helper functions */
+static int64_t load_3_i64(const uint8_t *s);
+static int64_t load_4_i64(const uint8_t *s);
+static void sc_reduce_limbs(int64_t a[24]);
+static void sc_load(int64_t a[12], const uint8_t s[32]);
+
+/**
+ * Reduces a 64-byte scalar modulo the group order L.
+ * Returns the 32-byte reduced result.
+ */
+void sc_reduce(const uint8_t s[64], uint8_t out[32]) 
+{
+  int64_t a[24];
+  a[0] = 0x1fffff & load_3_i64(&s[0]);
+  a[1] = 0x1fffff & (load_4_i64(&s[2]) >> 5);
+  a[2] = 0x1fffff & (load_3_i64(&s[5]) >> 2);
+  a[3] = 0x1fffff & (load_4_i64(&s[7]) >> 7);
+  a[4] = 0x1fffff & (load_4_i64(&s[10]) >> 4);
+  a[5] = 0x1fffff & (load_3_i64(&s[13]) >> 1);
+  a[6] = 0x1fffff & (load_4_i64(&s[15]) >> 6);
+  a[7] = 0x1fffff & (load_3_i64(&s[18]) >> 3);
+  a[8] = 0x1fffff & load_3_i64(&s[21]);
+  a[9] = 0x1fffff & (load_4_i64(&s[23]) >> 5);
+  a[10] = 0x1fffff & (load_3_i64(&s[26]) >> 2);
+  a[11] = 0x1fffff & (load_4_i64(&s[28]) >> 7);
+  a[12] = 0x1fffff & (load_4_i64(&s[31]) >> 4);
+  a[13] = 0x1fffff & (load_3_i64(&s[34]) >> 1);
+  a[14] = 0x1fffff & (load_4_i64(&s[36]) >> 6);
+  a[15] = 0x1fffff & (load_3_i64(&s[39]) >> 3);
+  a[16] = 0x1fffff & load_3_i64(&s[42]);
+  a[17] = 0x1fffff & (load_4_i64(&s[44]) >> 5);
+  a[18] = 0x1fffff & (load_3_i64(&s[47]) >> 2);
+  a[19] = 0x1fffff & (load_4_i64(&s[49]) >> 7);
+  a[20] = 0x1fffff & (load_4_i64(&s[52]) >> 4);
+  a[21] = 0x1fffff & (load_3_i64(&s[55]) >> 1);
+  a[22] = 0x1fffff & (load_4_i64(&s[57]) >> 6);
+  a[23] = load_4_i64(&s[60]) >> 3;
+  sc_reduce_limbs(a);
+  out[0] = (uint8_t)a[0];
+  out[1] = (uint8_t)(a[0] >> 8);
+  out[2] = (uint8_t)((a[0] >> 16) | (a[1] << 5));
+  out[3] = (uint8_t)(a[1] >> 3);
+  out[4] = (uint8_t)(a[1] >> 11);
+  out[5] = (uint8_t)((a[1] >> 19) | (a[2] << 2));
+  out[6] = (uint8_t)(a[2] >> 6);
+  out[7] = (uint8_t)((a[2] >> 14) | (a[3] << 7));
+  out[8] = (uint8_t)(a[3] >> 1);
+  out[9] = (uint8_t)(a[3] >> 9);
+  out[10] = (uint8_t)((a[3] >> 17) | (a[4] << 4));
+  out[11] = (uint8_t)(a[4] >> 4);
+  out[12] = (uint8_t)(a[4] >> 12);
+  out[13] = (uint8_t)((a[4] >> 20) | (a[5] << 1));
+  out[14] = (uint8_t)(a[5] >> 7);
+  out[15] = (uint8_t)((a[5] >> 15) | (a[6] << 6));
+  out[16] = (uint8_t)(a[6] >> 2);
+  out[17] = (uint8_t)(a[6] >> 10);
+  out[18] = (uint8_t)((a[6] >> 18) | (a[7] << 3));
+  out[19] = (uint8_t)(a[7] >> 5);
+  out[20] = (uint8_t)(a[7] >> 13);
+  out[21] = (uint8_t)a[8];
+  out[22] = (uint8_t)(a[8] >> 8);
+  out[23] = (uint8_t)((a[8] >> 16) | (a[9] << 5));
+  out[24] = (uint8_t)(a[9] >> 3);
+  out[25] = (uint8_t)(a[9] >> 11);
+  out[26] = (uint8_t)((a[9] >> 19) | (a[10] << 2));
+  out[27] = (uint8_t)(a[10] >> 6);
+  out[28] = (uint8_t)((a[10] >> 14) | (a[11] << 7));
+  out[29] = (uint8_t)(a[11] >> 1);
+  out[30] = (uint8_t)(a[11] >> 9);
+  out[31] = (uint8_t)(a[11] >> 17);
+}
+
+/**
+ * Core limb reduction logic for the Ed25519 scalar field modulus L.
+ */
+static void sc_reduce_limbs(int64_t a[24]) 
+{
+  for (int i = 23; i >= 12; i--) 
+  {
+    int64_t q = a[i];
+    if (q == 0) continue;
+    int shift = i - 11;
+    a[shift + 0] -= q * 0x1cf5d3ed;
+    a[shift + 1] -= q * 0x009318d2;
+    a[shift + 2] -= q * 0x1de73596;
+    a[shift + 3] -= q * 0x1df3bd45;
+    a[shift + 4] -= q * 0x0000014d;
+    a[shift + 11] -= q * 0x00200000;
+    a[i] = 0;
+  }
+  for (int iter = 0; iter < 2; iter++) 
+  {
+    for (int i = 0; i < 11; i++) 
+    {
+      int64_t carry = a[i] >> 21;
+      a[i] &= 0x1fffff;
+      a[i + 1] += carry;
+    }
+    for (int i = 0; i < 11; i++) 
+    {
+      if (a[i] < 0) 
+      {
+        a[i] += 0x200000;
+        a[i + 1] -= 1;
+      }
+    }
+  }
+  int64_t borrow = 0;
+  int64_t tmp[12];
+  tmp[0] = a[0] - 0x1cf5d3ed;
+  tmp[1] = a[1] - 0x009318d2;
+  tmp[2] = a[2] - 0x1de73596;
+  tmp[3] = a[3] - 0x1df3bd45;
+  tmp[4] = a[4] - 0x0000014d;
+  tmp[5] = a[5];
+  tmp[6] = a[6];
+  tmp[7] = a[7];
+  tmp[8] = a[8];
+  tmp[9] = a[9];
+  tmp[10] = a[10];
+  tmp[11] = a[11] - 0x00200000;
+  for (int i = 0; i < 11; i++) 
+  {
+    tmp[i] += borrow;
+    borrow = tmp[i] >> 63;
+    if (tmp[i] < 0) 
+    {
+      tmp[i] += 0x200000;
+      borrow = -1;
+    } 
+    else borrow = 0;
+  }
+  tmp[11] += borrow;
+  int64_t mask = ~(tmp[11] >> 63);
+  for (int i = 0; i < 12; i++) a[i] = (a[i] & ~mask) | (tmp[i] & mask);
+}
+
+static int64_t load_3_i64(const uint8_t *s) 
+{
+  return ((int64_t)s[0]) | (((int64_t)s[1]) << 8) | (((int64_t)s[2]) << 16);
+}
+
+static int64_t load_4_i64(const uint8_t *s) 
+{
+  return ((int64_t)s[0]) | (((int64_t)s[1]) << 8) | (((int64_t)s[2]) << 16) | (((int64_t)s[3]) << 24);
+}
+
+/**
+ * Performs (a * b) + c modulo L.
+ */
+void sc_muladd(const uint8_t a[32], const uint8_t b[32], const uint8_t c[32], uint8_t out[32]) 
+{
+  int64_t a_limbs[12];
+  int64_t b_limbs[12];
+  int64_t c_limbs[12];
+  sc_load(a_limbs, a);
+  sc_load(b_limbs, b);
+  sc_load(c_limbs, c);
+  int64_t product[24];
+  memset(product, 0, sizeof(product));
+  for (int i = 0; i < 12; i++) 
+  {
+    for (int j = 0; j < 12; j++) product[i + j] += a_limbs[i] * b_limbs[j];
+  }
+  for (int i = 0; i < 12; i++) product[i] += c_limbs[i];
+  for (int i = 0; i < 23; i++) 
+  {
+    int64_t carry = product[i] >> 21;
+    product[i] &= 0x1fffff;
+    product[i + 1] += carry;
+  }
+  sc_reduce_limbs(product);
+  out[0] = (uint8_t)product[0];
+  out[1] = (uint8_t)(product[0] >> 8);
+  out[2] = (uint8_t)((product[0] >> 16) | (product[1] << 5));
+  out[3] = (uint8_t)(product[1] >> 3);
+  out[4] = (uint8_t)(product[1] >> 11);
+  out[5] = (uint8_t)((product[1] >> 19) | (product[2] << 2));
+  out[6] = (uint8_t)(product[2] >> 6);
+  out[7] = (uint8_t)((product[2] >> 14) | (product[3] << 7));
+  out[8] = (uint8_t)(product[3] >> 1);
+  out[9] = (uint8_t)(product[3] >> 9);
+  out[10] = (uint8_t)((product[3] >> 17) | (product[4] << 4));
+  out[11] = (uint8_t)(product[4] >> 4);
+  out[12] = (uint8_t)(product[4] >> 12);
+  out[13] = (uint8_t)((product[4] >> 20) | (product[5] << 1));
+  out[14] = (uint8_t)(product[5] >> 7);
+  out[15] = (uint8_t)((product[5] >> 15) | (product[6] << 6));
+  out[16] = (uint8_t)(product[6] >> 2);
+  out[17] = (uint8_t)(product[6] >> 10);
+  out[18] = (uint8_t)((product[6] >> 18) | (product[7] << 3));
+  out[19] = (uint8_t)(product[7] >> 5);
+  out[20] = (uint8_t)(product[7] >> 13);
+  out[21] = (uint8_t)product[8];
+  out[22] = (uint8_t)(product[8] >> 8);
+  out[23] = (uint8_t)((product[8] >> 16) | (product[9] << 5));
+  out[24] = (uint8_t)(product[9] >> 3);
+  out[25] = (uint8_t)(product[9] >> 11);
+  out[26] = (uint8_t)((product[9] >> 19) | (product[10] << 2));
+  out[27] = (uint8_t)(product[10] >> 6);
+  out[28] = (uint8_t)((product[10] >> 14) | (product[11] << 7));
+  out[29] = (uint8_t)(product[11] >> 1);
+  out[30] = (uint8_t)(product[11] >> 9);
+  out[31] = (uint8_t)(product[11] >> 17);
+}
+
+static void sc_load(int64_t a[12], const uint8_t s[32]) 
+{
+  a[0] = 0x1fffff & load_3_i64(&s[0]);
+  a[1] = 0x1fffff & (load_4_i64(&s[2]) >> 5);
+  a[2] = 0x1fffff & (load_3_i64(&s[5]) >> 2);
+  a[3] = 0x1fffff & (load_4_i64(&s[7]) >> 7);
+  a[4] = 0x1fffff & (load_4_i64(&s[10]) >> 4);
+  a[5] = 0x1fffff & (load_3_i64(&s[13]) >> 1);
+  a[6] = 0x1fffff & (load_4_i64(&s[15]) >> 6);
+  a[7] = 0x1fffff & (load_3_i64(&s[18]) >> 3);
+  a[8] = 0x1fffff & load_3_i64(&s[21]);
+  a[9] = 0x1fffff & (load_4_i64(&s[23]) >> 5);
+  a[10] = 0x1fffff & (load_3_i64(&s[26]) >> 2);
+  a[11] = load_4_i64(&s[28]) >> 7;
+}
+
+/**
+ * Checks if a 32-byte array represents a scalar less than the group order L.
+ */
+bool sc_is_valid(const uint8_t *s, size_t len) 
+{
+  if (len != 32) return false;
+  const uint8_t L[32] = 
+  {
+    0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
+    0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10,
+  };
+  int16_t borrow = 0;
+  for (int i = 0; i < 32; i++) 
+  {
+    int16_t diff = (int16_t)s[i] - (int16_t)L[i] - borrow;
+    borrow = (diff >> 15) & 1;
+  }
+  return borrow == 1;
+}
+
+/* --- SHA-512 Implementation --- */
+
+typedef struct 
+{
+  uint64_t state[8];
+  __uint128_t total_len;
+  uint8_t buffer[128];
+  size_t buffer_len;
+} Sha512;
+
+const uint64_t K512[80] = 
+{
+  0x428a2f98d728ae22, 0x7137449123ef65cd, 0xb5c0fbcfec4d3b2f, 0xe9b5dba58189dbbc,
+  0x3956c25bf348b538, 0x59f111f1b605d019, 0x923f82a4af194f9b, 0xab1c5ed5da6d8118,
+  0xd807aa98a3030242, 0x12835b0145706fbe, 0x243185be4ee4b28c, 0x550c7dc3d5ffb4e2,
+  0x72be5d74f27b896f, 0x80deb1fe3b1696b1, 0x9bdc06a725c71235, 0xc19bf174cf692694,
+  0xe49b69c19ef14ad2, 0xefbe4786384f25e3, 0x0fc19dc68b8cd5b5, 0x240ca1cc77ac9c65,
+  0x2de92c6f592b0275, 0x4a7484aa6ea6e483, 0x5cb0a9dcbd41fbd4, 0x76f988da831153b5,
+  0x983e5152ee66dfab, 0xa831c66d2db43210, 0xb00327c898fb213f, 0xbf597fc7beef0ee4,
+  0xc6e00bf33da88fc2, 0xd5a79147930aa725, 0x06ca6351e003826f, 0x142929670a0e6e70,
+  0x27b70a8546d22ffc, 0x2e1b21385c26c926, 0x4d2c6dfc5ac42aed, 0x53380d139d95b3df,
+  0x650a73548baf63de, 0x766a0abb3c77b2a8, 0x81c2c92e47edaee6, 0x92722c851482353b,
+  0xa2bfe8a14cf10364, 0xa81a664bbc423001, 0xc24b8b70d0f89791, 0xc76c51a30654be30,
+  0xd192e819d6ef5218, 0xd69906245565a910, 0xf40e35855771202a, 0x106aa07032bbd1b8,
+  0x19a4c116b8d2d0c8, 0x1e376c085141ab53, 0x2748774cdf8eeb99, 0x34b0bcb5e19b48a8,
+  0x391c0cb3c5c95a63, 0x4ed8aa4ae3418acb, 0x5b9cca4f7763e373, 0x682e6ff3d6b2b8a3,
+  0x748f82ee5defb2fc, 0x78a5636f43172f60, 0x84c87814a1f0ab72, 0x8cc702081a6439ec,
+  0x90befffa23631e28, 0xa4506cebde82bde9, 0xbef9a3f7b2c67915, 0xc67178f2e372532b,
+  0xca273eceea26619c, 0xd186b8c721c0c207, 0xeada7dd6cde0eb1e, 0xf57d4f7fee6ed178,
+  0x06f067aa72176fba, 0x0a637dc5a2c898a6, 0x113f9804bef90dae, 0x1b710b35131c471b,
+  0x28db77f523047d84, 0x32caab7b40c72493, 0x3c9ebe0a15c9bebc, 0x431d67c49c100d4c,
+  0x4cc5d4becb3e42b6, 0x597f299cfc657e2a, 0x5fcb6fab3ad6faec, 0x6c44198c4a475817,
+};
+
+static uint64_t rotr64(uint64_t x, uint32_t n) 
+{
+  return (x >> n) | (x << (64 - n));
+}
+
+static uint64_t u64_from_be_bytes(const uint8_t b[8]) 
+{
+  return ((uint64_t)b[0] << 56) | ((uint64_t)b[1] << 48) | ((uint64_t)b[2] << 40) | ((uint64_t)b[3] << 32) |
+        ((uint64_t)b[4] << 24) | ((uint64_t)b[5] << 16) | ((uint64_t)b[6] << 8) | (uint64_t)b[7];
+}
+
+static void u64_to_be_bytes(uint64_t v, uint8_t b[8]) 
+{
+  b[0] = (uint8_t)(v >> 56); b[1] = (uint8_t)(v >> 48); b[2] = (uint8_t)(v >> 40); b[3] = (uint8_t)(v >> 32);
+  b[4] = (uint8_t)(v >> 24); b[5] = (uint8_t)(v >> 16); b[6] = (uint8_t)(v >> 8);  b[7] = (uint8_t)v;
+}
+
+static void u128_to_be_bytes(__uint128_t v, uint8_t b[16]) 
+{
+  for (int i = 0; i < 16; i++) b[i] = (uint8_t)(v >> (120 - i * 8));
+}
+
+void sha512_process_block(Sha512 *self, const uint8_t block[128]) 
+{
+  uint64_t w[80];
+
+  for (int i = 0; i < 16; i++) w[i] = u64_from_be_bytes(&block[i * 8]);
+  for (int i = 16; i < 80; i++) 
+  {
+    uint64_t s0 = rotr64(w[i - 15], 1) ^ rotr64(w[i - 15], 8) ^ (w[i - 15] >> 7);
+    uint64_t s1 = rotr64(w[i - 2], 19) ^ rotr64(w[i - 2], 61) ^ (w[i - 2] >> 6);
+    w[i] = w[i - 16] + s0 + w[i - 7] + s1;
+  }
+  uint64_t a = self->state[0];
+  uint64_t b = self->state[1];
+  uint64_t c = self->state[2];
+  uint64_t d = self->state[3];
+  uint64_t e = self->state[4];
+  uint64_t f = self->state[5];
+  uint64_t g = self->state[6];
+  uint64_t h = self->state[7];
+  for (int i = 0; i < 80; i++) 
+  {
+    uint64_t s1 = rotr64(e, 14) ^ rotr64(e, 18) ^ rotr64(e, 41);
+    uint64_t ch = (e & f) ^ ((~e) & g);
+    uint64_t temp1 = h + s1 + ch + K512[i] + w[i];
+    uint64_t s0 = rotr64(a, 28) ^ rotr64(a, 34) ^ rotr64(a, 39);
+    uint64_t maj = (a & b) ^ (a & c) ^ (b & c);
+    uint64_t temp2 = s0 + maj;
+    h = g; g = f; f = e;
+    e = d + temp1;
+    d = c; c = b; b = a;
+    a = temp1 + temp2;
+  }
+  self->state[0] += a;
+  self->state[1] += b;
+  self->state[2] += c;
+  self->state[3] += d;
+  self->state[4] += e;
+  self->state[5] += f;
+  self->state[6] += g;
+  self->state[7] += h;
+}
+
+void sha512_init(Sha512 *self) 
+{
+  self->state[0] = 0x6a09e667f3bcc908;
+  self->state[1] = 0xbb67ae8584caa73b;
+  self->state[2] = 0x3c6ef372fe94f82b;
+  self->state[3] = 0xa54ff53a5f1d36f1;
+  self->state[4] = 0x510e527fade682d1;
+  self->state[5] = 0x9b05688c2b3e6c1f;
+  self->state[6] = 0x1f83d9abfb41bd6b;
+  self->state[7] = 0x5be0cd19137e2179;
+  self->total_len = 0;
+  memset(self->buffer, 0, 128);
+  self->buffer_len = 0;
+}
+
+void sha512_update(Sha512 *self, const uint8_t *data, size_t len) 
+{
+  size_t offset = 0;
+  if (self->buffer_len > 0) 
+  {
+    size_t needed = 128 - self->buffer_len;
+    if (len >= needed) 
+    {
+      memcpy(self->buffer + self->buffer_len, data, needed);
+      sha512_process_block(self, self->buffer);
+      self->buffer_len = 0;
+      offset = needed;
+    } 
+    else 
+    {
+      memcpy(self->buffer + self->buffer_len, data, len);
+      self->buffer_len += len;
+      self->total_len += len;
+      return;
+    }
+  }
+  while (offset + 128 <= len) 
+  {
+    sha512_process_block(self, &data[offset]);
+    offset += 128;
+  }
+  if (offset < len) 
+  {
+    size_t remaining = len - offset;
+    memcpy(self->buffer, &data[offset], remaining);
+    self->buffer_len = remaining;
+  }
+  self->total_len += len;
+}
+
+void sha512_finalize(Sha512 *self, uint8_t digest[64]) 
+{
+  __uint128_t total_bits = self->total_len * 8;
+  self->buffer[self->buffer_len] = 0x80;
+  self->buffer_len += 1;
+  if (self->buffer_len > 112) 
+  {
+    for (size_t i = self->buffer_len; i < 128; i++) self->buffer[i] = 0;
+    sha512_process_block(self, self->buffer);
+    self->buffer_len = 0;
+  }
+  for (size_t i = self->buffer_len; i < 112; i++) self->buffer[i] = 0;
+  uint8_t total_bits_bytes[16];
+  u128_to_be_bytes(total_bits, total_bits_bytes);
+  memcpy(&self->buffer[112], total_bits_bytes, 16);
+  sha512_process_block(self, self->buffer);
+  for (int i = 0; i < 8; i++) u64_to_be_bytes(self->state[i], &digest[i * 8]);
+}
+
+void sha512(const uint8_t *data, size_t len, uint8_t out[64]) 
+{
+  Sha512 hasher;
+  sha512_init(&hasher);
+  sha512_update(&hasher, data, len);
+  sha512_finalize(&hasher, out);
 }
