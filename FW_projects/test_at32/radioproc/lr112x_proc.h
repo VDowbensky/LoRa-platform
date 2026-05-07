@@ -1,5 +1,5 @@
-#ifndef _LR112X_CONFIG_H_
-#define _LR112X_CONFIG_H_
+#ifndef _LR112X_PROC_H_
+#define _LR112X_PROC_H_
 
 #include "bsp.h"
 #include "lr11xx.h"

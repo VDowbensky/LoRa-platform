@@ -4,6 +4,7 @@
 #include "sx126x.h"
 #include "sx128x.h"
 #include "lr11xx.h"
+#include "lr20xx.h"
 #include  "common_defs.h"
 
 #define SX126X_SYNTH_STEP ((double)FXO / 33554432)
@@ -56,8 +57,10 @@ extern const uint8_t SX128X_bw[];
 extern const uint16_t SX128X_bw_kHz[];
 extern const uint8_t LR112X_bw[];
 extern const uint16_t LR112X_bw_kHz[];
+extern const uint8_t LR202X_bw[];
 extern const uint8_t PAN_bw[];
 extern const uint16_t PAN_bw_kHz[];
+
 				
 //LR1121
 

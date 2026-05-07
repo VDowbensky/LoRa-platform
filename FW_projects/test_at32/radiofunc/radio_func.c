@@ -174,13 +174,13 @@ int8_t radio_init(void)
     case 1262:
 		{
 			sx126x_mod_params_lora_t modparams;
-			modparams.bw = SX126X_bw[radioconfig.bw_index];
-			modparams.cr = radioconfig.cr;
-			modparams.sf = radioconfig.sf;
+			modparams.bw = (sx126x_lora_bw_t)SX126X_bw[radioconfig.bw_index];
+			modparams.cr = (sx126x_lora_cr_t)radioconfig.cr;
+			modparams.sf = (sx126x_lora_sf_t)radioconfig.sf;
 			modparams.ldro = radioconfig.ldropt;
 			
 			sx126x_pkt_params_lora_t pktparams;
-			pktparams.header_type = radioconfig.header;
+			pktparams.header_type = (sx126x_lora_pkt_len_modes_t)radioconfig.header;
 			pktparams.preamble_len_in_symb = radioconfig.prelen;
 			pktparams.pld_len_in_bytes = radioconfig.paylen;
 			pktparams.crc_is_on = radioconfig.crc;
@@ -200,7 +200,7 @@ int8_t radio_init(void)
 			//set TCXO here if needed
 			if(sx126x_tcxo != 0)
 			{
-				sx126x_set_dio3_as_tcxo_ctrl(NULL,sx126x_tcxo_voltage,1000); //check
+				sx126x_set_dio3_as_tcxo_ctrl(NULL,(sx126x_tcxo_ctrl_voltages_t)sx126x_tcxo_voltage,1000); //check
 				sx126x_cal(NULL,SX126X_CAL_ALL);
 			}
 			sx126x_set_pkt_type(NULL,SX126X_PKT_TYPE_LORA);
@@ -233,9 +233,9 @@ int8_t radio_init(void)
 		case 1280:
 		{
 			sx128x_mod_params_lora_t modparams;
-			modparams.bw = SX128X_bw[radioconfig.bw_index];
-			modparams.sf = radioconfig.sf << 4;
-			modparams.cr = radioconfig.cr;
+			modparams.bw = (sx128x_lora_bw_t)SX128X_bw[radioconfig.bw_index];
+			modparams.sf = (sx128x_lora_sf_t)(radioconfig.sf << 4);
+			modparams.cr = (sx128x_lora_cr_t)radioconfig.cr;
 			
 			sx128x_pkt_params_lora_t pktparams;
 			uint8_t m,e;
@@ -279,17 +279,17 @@ int8_t radio_init(void)
 			rfsw_cfg.wifi = LR112X_RFSW_HF_RX; //check
 			
 			lr11xx_radio_mod_params_lora_t modparams;
-			modparams.bw = LR112X_bw[radioconfig.bw_index];
-			modparams.sf = radioconfig.sf;
-			modparams.cr = radioconfig.cr;
+			modparams.bw = (lr11xx_radio_lora_bw_t)LR112X_bw[radioconfig.bw_index];
+			modparams.sf = (lr11xx_radio_lora_sf_t)radioconfig.sf;
+			modparams.cr = (lr11xx_radio_lora_cr_t)radioconfig.cr;
 			modparams.ldro = radioconfig.ldropt;
 			
 			lr11xx_radio_pkt_params_lora_t pktparams;
 			pktparams.preamble_len_in_symb = radioconfig.prelen;
 			pktparams.pld_len_in_bytes = radioconfig.paylen;
-			pktparams.header_type = radioconfig.header;
-			pktparams.crc = radioconfig.crc;
-			pktparams.iq = radioconfig.invertiq;
+			pktparams.header_type = (lr11xx_radio_lora_pkt_len_modes_t)radioconfig.header;
+			pktparams.crc = (lr11xx_radio_lora_crc_t)radioconfig.crc;
+			pktparams.iq = (lr11xx_radio_lora_iq_t)radioconfig.invertiq;
 			
 			lr11xx_system_reset(NULL);
 			delay_ms(500);
@@ -363,17 +363,17 @@ int8_t radio_init(void)
 			lr20xx_system_dio_rf_switch_cfg_t rfsw_cfg[7] = {0}; //change to correct values
 
 			lr20xx_radio_lora_mod_params_t modparams;
-			modparams.bw = LR112X_bw[radioconfig.bw_index];
-			modparams.sf = radioconfig.sf;
-			modparams.cr = radioconfig.cr;
-			modparams.ppm = 0; //temporary
+			modparams.bw = (lr20xx_radio_lora_bw_t)LR202X_bw[radioconfig.bw_index];
+			modparams.sf = (lr20xx_radio_lora_sf_t)radioconfig.sf;
+			modparams.cr = (lr20xx_radio_lora_cr_t)radioconfig.cr;
+			modparams.ppm = LR20XX_RADIO_LORA_NO_PPM; //LR20XX_RADIO_LORA_PPM_1_4
 			
 			lr20xx_radio_lora_pkt_params_t pktparams;
 			pktparams.preamble_len_in_symb = radioconfig.prelen;
 			pktparams.pld_len_in_bytes = radioconfig.paylen;
-			pktparams.pkt_mode = radioconfig.header; //???
-			pktparams.crc = radioconfig.crc;
-			pktparams.iq = radioconfig.invertiq;
+			pktparams.pkt_mode = (lr20xx_radio_lora_pkt_mode_t)radioconfig.header; //???
+			pktparams.crc = (lr20xx_radio_lora_crc_t)radioconfig.crc;
+			pktparams.iq = (lr20xx_radio_lora_iq_t)radioconfig.invertiq;
 			
 			lr20xx_system_reset(NULL);
 			delay_ms(500);
@@ -406,23 +406,14 @@ int8_t radio_init(void)
 			lr20xx_radio_lora_set_syncword(NULL,radioconfig.sync);
 			lr20xx_radio_common_set_rf_freq(NULL,radioconfig.freq);
 			radio_set_power(radioconfig.txpower);
-			//LR112X_SetTxParams(radioconfig.txpower,LR112X_PA_RAMP_48U);
 			//calibrate image here
 			//lr20xx_system_calibrate_image(NULL,radioconfig.freq / 4000000, radioconfig.freq / 4000000 + 2); //must be rewritted
 			//calibrate RSSI
-			//LR112X_RssiCal(radioconfig.freq);
 			
-			lr20xx_system_set_dio_irq_cfg(NULL,LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR,LR11XX_SYSTEM_IRQ_NONE);
-			
-			//lr20xx_system_set_dio_irq_cfg(NULL,LR20XX_SYSTEM_DIO_0,mask);
-				
+			lr20xx_system_set_dio_irq_cfg(NULL,LR20XX_SYSTEM_DIO_9,LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR); //to be checked!!!
 			lr20xx_radio_common_set_rx_tx_fallback_mode(NULL,LR20XX_RADIO_FALLBACK_STDBY_XOSC);
 			//lr20xx_radio_cfg_rx_boosted(NULL,true); //false
 			radio_rx();
-			//The workaround is to set the bit 4 in the register 0x00F30024 when the chip ends a reception in the 2.4GHz band before launching a GNSS scan. - ???
-			//LR112X_ReadRegMem32(lr,0x00f30024,buf,1);
-			//buf[0] |= 0x10;
-			//LR112X_WriteRegMem32(lr,0x00f30024,buf,1);
 			return RADIO_OK;
 		}
 				
@@ -627,9 +618,9 @@ int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
 			radioconfig.ldropt = ldropt;
 			prevopmode = opmode;
 			SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
-			modparams.bw = SX126X_bw[radioconfig.bw_index];
-			modparams.cr = radioconfig.cr;
-			modparams.sf = radioconfig.sf;
+			modparams.bw = (sx126x_lora_bw_t)SX126X_bw[radioconfig.bw_index];
+			modparams.cr = (sx126x_lora_cr_t)radioconfig.cr;
+			modparams.sf = (sx126x_lora_sf_t)radioconfig.sf;
 			modparams.ldro = radioconfig.ldropt;
 			sx126x_set_lora_mod_params(NULL,&modparams);
 			SX126X_setopmode(prevopmode);
@@ -655,9 +646,9 @@ int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
 			//radioconfig.ldropt = ldropt;
 			prevopmode = opmode;
 			SX128X_setopmode(RADIO_OPMODE_STBYXOSC);
-			modparams.bw = SX128X_bw[radioconfig.bw_index];
-			modparams.sf = radioconfig.sf << 4;
-			modparams.cr = radioconfig.cr;
+			modparams.bw = (sx128x_lora_bw_t)SX128X_bw[radioconfig.bw_index];
+			modparams.sf = (sx128x_lora_sf_t)(radioconfig.sf << 4);
+			modparams.cr = (sx128x_lora_cr_t)radioconfig.cr;
 			sx128x_set_lora_mod_params(NULL,&modparams);
 			SX128X_setopmode(prevopmode);
 			return RADIO_OK;
@@ -691,9 +682,9 @@ int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
 			radioconfig.ldropt = ldropt;
 			prevopmode = opmode;
 			LR112X_setopmode(RADIO_OPMODE_STBYXOSC);
-			modparams.bw = LR112X_bw[radioconfig.bw_index];
-			modparams.sf = radioconfig.sf;
-			modparams.cr = radioconfig.cr;
+			modparams.bw = (lr11xx_radio_lora_bw_t)LR112X_bw[radioconfig.bw_index];
+			modparams.sf = (lr11xx_radio_lora_sf_t)radioconfig.sf;
+			modparams.cr = (lr11xx_radio_lora_cr_t)radioconfig.cr;
 			modparams.ldro = radioconfig.ldropt;
 			lr11xx_radio_set_lora_mod_params(NULL,&modparams);
 			LR112X_setopmode(prevopmode);
@@ -800,7 +791,7 @@ int8_t radio_setpktparams(uint16_t sync,uint16_t prelen,uint8_t paylen,uint8_t h
 			radioconfig.invertiq = invertiq;
 			prevopmode = opmode;
 			SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
-			pktparams.header_type = radioconfig.header;
+			pktparams.header_type = (sx126x_lora_pkt_len_modes_t)radioconfig.header;
 			pktparams.preamble_len_in_symb = radioconfig.prelen;
 			pktparams.pld_len_in_bytes = radioconfig.paylen;
 			pktparams.crc_is_on = radioconfig.crc;
@@ -856,9 +847,9 @@ int8_t radio_setpktparams(uint16_t sync,uint16_t prelen,uint8_t paylen,uint8_t h
 			LR112X_setopmode(RADIO_OPMODE_STBYXOSC);
 			pktparams.preamble_len_in_symb = radioconfig.prelen;
 			pktparams.pld_len_in_bytes = radioconfig.paylen;
-			pktparams.header_type = radioconfig.header;
-			pktparams.crc = radioconfig.crc;
-			pktparams.iq = radioconfig.invertiq;
+			pktparams.header_type = (lr11xx_radio_lora_pkt_len_modes_t)radioconfig.header;
+			pktparams.crc = (lr11xx_radio_lora_crc_t)radioconfig.crc;
+			pktparams.iq = (lr11xx_radio_lora_iq_t)radioconfig.invertiq;
 			lr11xx_radio_set_lora_pkt_params(NULL,&pktparams);
 			lr11xx_radio_set_lora_sync_word(NULL,radioconfig.sync & 0xff);
 			LR112X_setopmode(prevopmode);
@@ -904,7 +895,7 @@ int8_t radio_sendpacket(uint8_t *buf)
 			sx126x_pkt_params_lora_t pktparams;
 			pktparams.preamble_len_in_symb = radioconfig.prelen;
 			pktparams.pld_len_in_bytes = txlen;
-			pktparams.header_type = radioconfig.header;
+			pktparams.header_type = (sx126x_lora_pkt_len_modes_t)radioconfig.header;
 			pktparams.crc_is_on = radioconfig.crc;
 			pktparams.invert_iq_is_on = radioconfig.invertiq;
 			sx126x_set_lora_pkt_params(NULL,&pktparams);
@@ -936,9 +927,9 @@ int8_t radio_sendpacket(uint8_t *buf)
 			lr11xx_radio_pkt_params_lora_t pktparams;
 			pktparams.preamble_len_in_symb = radioconfig.prelen;
 			pktparams.pld_len_in_bytes = txlen;
-			pktparams.header_type = radioconfig.header;
-			pktparams.crc = radioconfig.crc;
-			pktparams.iq = radioconfig.invertiq;
+			pktparams.header_type = (lr11xx_radio_lora_pkt_len_modes_t)radioconfig.header;
+			pktparams.crc = (lr11xx_radio_lora_crc_t)radioconfig.crc;
+			pktparams.iq = (lr11xx_radio_lora_iq_t)radioconfig.invertiq;
 			lr11xx_radio_set_lora_pkt_params(NULL,&pktparams);
 			lr11xx_regmem_write_buffer8(NULL,buf,txlen);
 			LR112X_setopmode(RADIO_OPMODE_TX);
@@ -993,7 +984,14 @@ int8_t radio_getpktstatus(rxpacketstatus_t *status)
 		}
 		
 		case 2021:
-		return RADIO_TODO;
+		{
+			lr20xx_radio_lora_packet_status_t pktstatus;
+			lr20xx_radio_lora_get_packet_status(NULL,&pktstatus);
+			status->rssi_pkt = pktstatus.rssi_pkt_in_dbm;
+			status->snr_pkt = pktstatus.snr_pkt_raw;
+			status->signal_rssi_pkt = pktstatus.rssi_signal_pkt_in_dbm;
+			return RADIO_OK;
+		}
 		
 		case 3029:
 		status->rssi_pkt = g_RfRxPkt.Rssi; //recompute
@@ -1040,7 +1038,14 @@ int8_t radio_getpacket(uint8_t *buf)
 		}
 		
 		case 2021:
-		return RADIO_TODO;
+		{
+			lr20xx_radio_lora_packet_status_t pktstatus;
+			lr20xx_radio_lora_get_packet_status(NULL,&pktstatus);
+			rxlen = pktstatus.packet_length_bytes;
+			lr20xx_radio_fifo_read_rx(NULL,buf,rxlen);
+			lr20xx_radio_fifo_clear_rx(NULL); //???
+			return RADIO_OK;
+		}
 		
 		case 3029:
 		rxlen = g_RfRxPkt.RxLen;
@@ -1082,8 +1087,16 @@ int8_t radio_getstats(rxstats_t *stats)
 		}
 		
 		case 2021:
-		return RADIO_TODO;
-		
+		{
+			lr20xx_radio_lora_rx_statistics_t lora_stats;
+			lr20xx_radio_lora_get_rx_statistics(NULL,&lora_stats);
+			stats->pkt_received = lora_stats.n_received_packets;
+			stats->crc_error = lora_stats.n_crc_errors;
+			stats->header_error = lora_stats.n_false_synchronisation;
+			stats->header_error = lora_stats.n_header_errors;
+			return RADIO_OK;
+		}
+
 		case 3029:
 		return RADIO_TODO;
     
@@ -1106,6 +1119,10 @@ int8_t radio_clearstats(void)
     case 1121:
     lr11xx_radio_reset_stats(NULL);
     return RADIO_OK;
+		
+		case 2021:
+		lr20xx_radio_common_reset_rx_stats(NULL);
+		return RADIO_OK;
 		
 		case 3029:
 		return RADIO_TODO;
@@ -1200,6 +1217,41 @@ void radio_irq_handler(void)
 		}
 		
 		case 2021:
+		{
+			//read status
+			uint32_t irqstatus;
+			lr20xx_system_get_and_clear_irq_status(NULL,&irqstatus);
+			//lr20xx_system_clear_irq_status(NULL,LR20XX_SYSTEM_IRQ_ALL_MASK);
+			//printf("IRQ:0x%08X\r\n",irqstatus);
+			if(irqstatus & LR20XX_SYSTEM_IRQ_TX_DONE) packet_sent = true;
+			if(irqstatus & LR20XX_SYSTEM_IRQ_RX_DONE) packet_received = true;
+			if(irqstatus & LR20XX_SYSTEM_IRQ_CRC_ERROR) crc_error = true;
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_FIFO_RX) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_FIFO_TX) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_TX_TIMESTAMP) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_RX_TIMESTAMP) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_PREAMBLE_DETECTED) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_SYNC_WORD_HEADER_VALID) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_INTRA_PKT_HOP) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_CAD_DETECTED) {};	
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_LORA_RX_HEADER_TIMESTAMP) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_LORA_HEADER_ERROR) {};	
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_LOW_BATTERY) {};	
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_PA_OVP_OCP) {};	
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_ERROR) {};	
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_CMD_ERROR) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_CAD_DONE) {};	
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_TIMEOUT) {};		
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_LEN_ERROR) {};	
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_ADDR_ERROR) {};	
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_INTRA_PKT_HOP) {};	
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_RDY_FOR_NEW_FREQ_TABLE) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_RDY_FOR_NEW_PAYLOAD) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_RESPONDER_RESPONSE_DONE) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_RESPONDER_REQUEST_DISCARDED) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_INITIATOR_EXCHANGE_VALID) {};
+//			if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_INITIATOR_TIMEOUT) {};
+		}
 		break;
 		
 		case 3029:
@@ -1219,7 +1271,7 @@ int8_t radio_rx(void)
     case 1262:
 		{
 			sx126x_pkt_params_lora_t pktparams;
-			pktparams.header_type = radioconfig.header;
+			pktparams.header_type = (sx126x_lora_pkt_len_modes_t)radioconfig.header;
 			pktparams.preamble_len_in_symb = radioconfig.prelen;
 			pktparams.pld_len_in_bytes = radioconfig.paylen;
 			pktparams.crc_is_on = radioconfig.crc;
@@ -1251,9 +1303,9 @@ int8_t radio_rx(void)
 			lr11xx_radio_pkt_params_lora_t pktparams;
 			pktparams.preamble_len_in_symb = radioconfig.prelen;
 			pktparams.pld_len_in_bytes = radioconfig.paylen;
-			pktparams.header_type = radioconfig.header;
-			pktparams.crc = radioconfig.crc;
-			pktparams.iq = radioconfig.invertiq;
+			pktparams.header_type = (lr11xx_radio_lora_pkt_len_modes_t)radioconfig.header;
+			pktparams.crc = (lr11xx_radio_lora_crc_t)radioconfig.crc;
+			pktparams.iq = (lr11xx_radio_lora_iq_t)radioconfig.invertiq;
 			lr11xx_radio_set_lora_pkt_params(NULL,&pktparams);
 			LR112X_setopmode(RADIO_OPMODE_RX);
 			return RADIO_OK;
@@ -1261,7 +1313,15 @@ int8_t radio_rx(void)
 		
 		case 2021:
 		{
-			return RADIO_TODO;
+			lr20xx_radio_lora_pkt_params_t pktparams;
+			pktparams.preamble_len_in_symb = radioconfig.prelen;
+			pktparams.pld_len_in_bytes = radioconfig.paylen;
+			pktparams.pkt_mode = (lr20xx_radio_lora_pkt_mode_t)radioconfig.header;
+			pktparams.crc = (lr20xx_radio_lora_crc_t)radioconfig.crc;
+			pktparams.iq = (lr20xx_radio_lora_iq_t)radioconfig.invertiq;
+			lr20xx_radio_lora_set_packet_params(NULL,&pktparams);
+			LR202x_setopmode(RADIO_OPMODE_RX);
+			return RADIO_OK;
 		}
 		
 		case 3029:
@@ -1302,7 +1362,13 @@ int8_t radio_getrssi(float *dbm)
 		}
 		
 		case 2021:
-		return RADIO_TODO;
+		{
+			int16_t rssi;
+			uint8_t half_dbm_cnt;
+			lr20xx_radio_common_get_rssi_inst(NULL,&rssi,&half_dbm_cnt);
+			*dbm = (rssi*2 + half_dbm_cnt) / 2; //to be checked
+			return RADIO_OK;
+		}
 		
 		case 3029:
 		*dbm = (float)PAN_GetRealTimeRssi();
@@ -1379,7 +1445,26 @@ int8_t radio_stream(uint8_t stream)
     return RADIO_OK;
 		
 		case 2021:
-		return RADIO_TODO;
+    if(stream > 3) return RADIO_INVALID_PARAMETER;
+		//if(txmode != 0) return RADIO_INVALID_MODE;
+		//prevopmode = opmode;
+    if(stream == 1) 
+		{
+			lr20xx_radio_common_set_tx_test_mode(NULL,LR20XX_RADIO_COMMON_TX_TEST_MODE_CONTINUOUS_WAVE);
+			txmode = 1;
+		}
+    else if(stream == 2)
+		{
+			lr20xx_radio_common_set_tx_test_mode(NULL,LR20XX_RADIO_COMMON_TX_TEST_MODE_INFINITE_PREAMBLE);
+			txmode = 2;
+		}
+		else
+		{
+			lr20xx_radio_common_set_tx_test_mode(NULL,LR20XX_RADIO_COMMON_TX_TEST_MODE_PRBS9);
+			txmode = 3;
+		}
+		txled_on();
+    return RADIO_OK;
 		
 		case 3029:
 		if(stream == 1)
@@ -1410,6 +1495,9 @@ int8_t radio_sleep(uint8_t node)
     case 1121:
     return RADIO_TODO;
 		
+		case 2021:
+		return RADIO_TODO;
+		
 		case 3029:
 		return RADIO_TODO;
     
@@ -1430,6 +1518,9 @@ int8_t radio_wakeup(uint8_t mode)
 		
     case 1121:
     return RADIO_TODO;
+		
+		case 2021:
+		return RADIO_TODO;	
 		
 		case 3029:
 		return RADIO_TODO;
@@ -1488,8 +1579,11 @@ int8_t radio_getxotrim(uint8_t *trim)
     case 1121:
     return FEATURE_NOT_SUPPORTED;
 		
+		case 2021:
+		return FEATURE_NOT_SUPPORTED;	
+		
 		case 3029:
-		return RADIO_TODO;
+		return FEATURE_NOT_SUPPORTED;
 
     default:
     return INVALID_CHIP;
@@ -1593,7 +1687,7 @@ int8_t radio_get_chip_version(uint8_t *hw,uint8_t *use_case,uint8_t *fw_major,ui
 {
   switch(radioconfig.chip)
   {
-    case 1262:
+    case 1262: //0x035C, 0x0320
 		return RADIO_TODO;
 
     case 1280:
@@ -1703,6 +1797,11 @@ uint8_t radio_setopmode(uint8_t mode)
 		LR112X_setopmode(mode);
 		opmode = mode;
 		return RADIO_OK;
+		
+		case 2021:
+		LR202x_setopmode(mode);
+		opmode = mode;
+		return RADIO_OK;	
 		
 		case 3029:
 		PAN_setopmode(mode);

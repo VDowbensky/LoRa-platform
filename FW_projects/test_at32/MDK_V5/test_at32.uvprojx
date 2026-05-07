@@ -733,6 +733,11 @@
               <FileType>1</FileType>
               <FilePath>..\radioproc\sx128x_proc.c</FilePath>
             </File>
+            <File>
+              <FileName>lr202x_proc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\radioproc\lr202x_proc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

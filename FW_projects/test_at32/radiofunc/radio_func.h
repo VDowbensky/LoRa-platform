@@ -14,6 +14,7 @@
 
 #include "lr11xx.h"
 #include "lr112x_proc.h"
+#include "lr202x_proc.h"
 
 #include "pan_rf.h"
 #include "pan_proc.h"
