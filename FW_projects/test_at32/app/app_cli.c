@@ -14,7 +14,7 @@ CommandState_t state;
 char ciBuffer[256];
 //uint8_t printmode = 0;
 //uint8_t txmode = 0;
-
+int32_t check_param(int32_t param,const int32_t param_min,const int32_t param_max);
 //General
 void cli_reset(int argc, char **argv);
 void cli_info(int argc, char **argv);
@@ -209,10 +209,13 @@ void cli_getfreq(int argc, char **argv)
 
 void cli_setfreq(int argc, char **argv)
 {
-  radioconfig.freq = ciGetUnsigned(argv[1]) * 1000;
 	uint8_t err = radio_set_freq(ciGetUnsigned(argv[1]));
 	printf("SET_FREQ: ");
-	if(err == RADIO_OK) printf("%u\r\n",radioconfig.freq / 1000);
+	if(err == RADIO_OK) 
+	{
+		radioconfig.freq = ciGetUnsigned(argv[1]) * 1000;
+		printf("%u\r\n",radioconfig.freq / 1000);
+	}
 	else printerror(err); 
 }
 
@@ -223,6 +226,7 @@ void cli_getpower(int argc, char **argv)
 
 void cli_setpower(int argc, char **argv)
 {
+	//check power parameter here!
 	uint8_t err = radio_set_power(ciGetSigned(argv[1]));
 	printf("SET_POWER: ");
 	if(err == RADIO_OK) printf("%d dBm\r\n",radioconfig.txpower);
@@ -242,6 +246,7 @@ void cli_getxotrim(int argc, char **argv)
 void cli_setxotrim(int argc, char **argv)
 {
   uint8_t trim = ciGetUnsigned(argv[1]);
+	check_param(trim,0,94);
   int8_t err = radio_setxotrim(trim);
 	printf("SET_XOTRIM: ");
 	if(err == RADIO_OK) printf("%d\r\n",trim);
@@ -315,11 +320,19 @@ void cli_setmodparams(int argc, char **argv)
 	uint8_t sf = ciGetUnsigned(argv[2]);
 	uint8_t cr = ciGetUnsigned(argv[3]);
 	uint8_t opt = ciGetUnsigned(argv[4]);
+	check_param(bw,7,1600);
+	check_param(sf,5,12);
+	check_param(cr,0,4);
+	check_param(opt,0,1);
 	printf("SET_MODPARAMS: ");
 	int8_t err = radio_setmodparams(bw,sf,cr,opt);
 	if(err == RADIO_OK)
 	{
-    printf("\r\nBW=%u\r\nSF=%d\r\n",SX126X_bw_kHz[radioconfig.bw_index],radioconfig.sf);
+    radioconfig.bw = bw;
+		radioconfig.sf = sf;
+		radioconfig.cr = cr;
+		radioconfig.ldropt = opt;
+		printf("\r\nBW=%u\r\nSF=%d\r\n",radioconfig.bw,radioconfig.sf);
     printf("CR:");
     switch(radioconfig.cr)
     {
@@ -351,7 +364,7 @@ void cli_setmodparams(int argc, char **argv)
 
 void cli_getpacketparams(int argc, char **argv)
 {
-	printf("GET_PACKETPARAMS:\r\nSYNC=0x%04X,PRE_LEN=%d\r\nPAY_LEN=%d\r\nHEADER:",radioconfig.sync,radioconfig.prelen,radioconfig.paylen);
+	printf("GET_PACKETPARAMS:\r\nSYNC=0x%02X,PRE_LEN=%d\r\nPAY_LEN=%d\r\nHEADER:",radioconfig.sync,radioconfig.prelen,radioconfig.paylen);
   if(radioconfig.header == true) printf("IMPLICIT\r\n");
   else printf("EXPLICIT\r\n");
   printf("CRC:");
@@ -364,25 +377,29 @@ void cli_getpacketparams(int argc, char **argv)
 
 void cli_setpacketparams(int argc, char **argv)
 {
-  uint16_t sync;  
+  uint8_t sync;  
 	uint16_t pre;
 	uint8_t pay;
 	uint8_t head;
 	uint8_t crc;
 	uint8_t inviq;
-	sync = ciGetUnsigned(argv[1]) & 0xffff;
+	sync = ciGetUnsigned(argv[1]) & 0xff;
 	pre = ciGetUnsigned(argv[2]) & 0xffff;
 	pay = ciGetUnsigned(argv[3]);
 	head = ciGetUnsigned(argv[4]);
-	if(head > 1) head = 1;
-	crc = ciGetUnsigned(argv[5]);
-	if(crc > 1) head = 1;
-	inviq = ciGetUnsigned(argv[6]);
-	if(inviq > 1) head = 1;
+	check_param(head,0,1);
+	check_param(crc,0,1);
+	check_param(inviq,0,1);
 	int8_t err = radio_setpktparams(sync,pre,pay,head,crc,inviq);
 	printf("SET_PACKETPARAMS: ");
 	if(err == RADIO_OK) 
 	{
+		radioconfig.sync = sync;
+		radioconfig.prelen = pre;
+		radioconfig.paylen = pay;
+		radioconfig.header = head;
+		radioconfig.crc = crc;
+		radioconfig.invertiq = inviq;
 		printf("\r\nSYNC=0x%04X,PRE_LEN=%d\r\nPAY_LEN=%d\r\nHEADER:",radioconfig.sync,radioconfig.prelen,radioconfig.paylen);
     if(radioconfig.header == 1) printf("IMPLICIT\r\n");
     else printf("EXPLICIT\r\n");
@@ -443,8 +460,6 @@ void cli_txstream(int argc, char **argv)
 	}
 	else printerror(err);
 }
-
-
 
 //Device dependent commands
 void cli_getvbat(int argc, char **argv)
@@ -695,6 +710,13 @@ void cli_pan_dumpregs(int argc, char **argv)
 		for(i = startreg; i < stopreg+1; i++) printf("\r\n%d,0x%02X,0x%02X",page,i,PAN_ReadPageReg(page,i));
 		printf("\r\n");
 	}
+}
+
+int32_t check_param(int32_t param,const int32_t param_min,const int32_t param_max)
+{
+	if(param <= param_min) param = param_min;
+	if(param >= param_max) param = param_max;
+	return param;
 }
 
 

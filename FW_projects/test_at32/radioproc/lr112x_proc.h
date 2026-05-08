@@ -11,4 +11,7 @@ void LR112X_RssiCal(uint32_t freq);
 void LR112X_printstatus(void);
 void LR112X_printerrors(void);
 
+extern const lr11xx_radio_pa_cfg_t pa_config_HF;
+extern const lr11xx_radio_pa_cfg_t pa_config_subGHz;
+
 #endif

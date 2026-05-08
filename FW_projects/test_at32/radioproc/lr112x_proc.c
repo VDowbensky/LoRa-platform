@@ -15,6 +15,22 @@ const lr11xx_radio_rssi_calibration_table_t calib_0_600 =     {12,12,14, 0, 1, 3
 const lr11xx_radio_rssi_calibration_table_t calib_600_2000 =  { 2, 2, 2, 3, 3, 4, 5, 4, 4, 6, 5, 5, 6, 6, 6, 7, 6, 0};
 const lr11xx_radio_rssi_calibration_table_t calib_2000_2700 = { 6, 7, 6, 4, 3, 4,14,12,14,12,12,12,12, 8, 8, 9, 9, 2030};
 
+const lr11xx_radio_pa_cfg_t pa_config_HF = 
+{  //1.9G/2.4G
+	.pa_sel = LR11XX_RADIO_PA_SEL_HF, 
+	.pa_reg_supply = LR11XX_RADIO_PA_REG_SUPPLY_VREG, 
+	.pa_duty_cycle = 0x00, 
+	.pa_hp_sel = 0x00 
+};
+
+const lr11xx_radio_pa_cfg_t pa_config_subGHz = 
+{
+	.pa_sel = LR11XX_RADIO_PA_SEL_HP,         				//!< Power Amplifier selection
+	.pa_reg_supply = LR11XX_RADIO_PA_REG_SUPPLY_VBAT, //!< Power Amplifier regulator supply source
+	.pa_duty_cycle = 0x04,  													//!< Power Amplifier duty cycle (Default 0x04)
+	.pa_hp_sel = 0x07      														//!< Number of slices for HPA (Default 0x07)
+};
+
 void LR112X_setopmode(uint8_t mode)
 {
   switch(mode)

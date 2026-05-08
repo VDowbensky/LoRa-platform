@@ -88,3 +88,55 @@ void LR20xx_printerrors(void)
 	printf("Errors: 0x%04X\r\n",errors);
 }
 
+void LR20xx_bsp_get_front_end_calibration_cfg(const void* context, lr20xx_radio_common_front_end_calibration_value_t front_end_calibration_structures[3])
+{
+    lr20xx_radio_common_rx_path_t            rx_path    = LR20XX_RADIO_COMMON_RX_PATH_LF;
+    lr20xx_radio_common_rx_path_boost_mode_t boost_mode = LR20XX_RADIO_COMMON_RX_PATH_BOOST_MODE_NONE;
+
+    uint32_t freq_in_hz[3] = {
+        470000000,   // Frequency 0 (range from 430MHz to 510MHz)
+        897500000,   // Frequency 1 (range from 867MHz to 928MHz)
+        2441000000,  // Frequency 2 (range from 2.403GHz to 2.479GHz)
+    };
+
+    for( uint8_t i = 0; i < 3; i++ )
+    {
+        LR20xx_bsp_get_rx_cfg( context, freq_in_hz[i], &rx_path, &boost_mode );
+        front_end_calibration_structures[i].rx_path = rx_path;
+        front_end_calibration_structures[i].frequency_in_hertz = freq_in_hz[i];
+    };
+}
+
+void LR20xx_bsp_get_rx_cfg( const void* context, const uint32_t freq_in_hz, lr20xx_radio_common_rx_path_t* rx_path,lr20xx_radio_common_rx_path_boost_mode_t* boost_mode )
+{
+    if( freq_in_hz >= 1600000000 )  // 1.6GHz
+    {
+        *rx_path = LR20XX_RADIO_COMMON_RX_PATH_HF;
+    }
+    else
+    {
+        *rx_path = LR20XX_RADIO_COMMON_RX_PATH_LF;
+    }
+
+    *boost_mode = LR20XX_RADIO_COMMON_RX_PATH_BOOST_MODE_NONE;
+}
+
+const lr20xx_radio_common_pa_cfg_t pa_config_lf = 
+{
+	.pa_sel = LR20XX_RADIO_COMMON_PA_SEL_LF,
+	.pa_lf_mode = LR20XX_RADIO_COMMON_PA_LF_MODE_FSM,
+	.pa_lf_duty_cycle = 7,
+	.pa_lf_slices = 6,
+	.pa_hf_duty_cycle = 16
+};
+
+const lr20xx_radio_common_pa_cfg_t pa_config_hf =
+{
+	.pa_sel = LR20XX_RADIO_COMMON_PA_SEL_HF,
+	.pa_lf_mode = LR20XX_RADIO_COMMON_PA_LF_MODE_FSM,
+	.pa_lf_duty_cycle = 7,
+	.pa_lf_slices = 6,
+	.pa_hf_duty_cycle = 16
+};
+
+

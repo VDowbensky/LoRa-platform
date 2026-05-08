@@ -33,6 +33,7 @@
 #define FEATURE_NOT_SUPPORTED         4
 #define RADIO_INVALID_MODE            5
 #define RADIO_INVALID_PARAMETER       6
+
 //etc.
 #define RADIO_TODO                    127
 
@@ -53,11 +54,11 @@ typedef struct radioconfig
   int8_t txpower;
   //modulation
   uint8_t sf; //spreading factor
-  uint8_t bw_index; //bandwidth
+  uint32_t bw; //bandwidth
   uint8_t cr; //coding rate
   uint8_t ldropt;
   //packet
-  uint16_t sync;
+  uint8_t sync;
   uint16_t prelen;
   uint8_t header; //0 - explicit,1 - implicit
   uint8_t paylen;
@@ -87,11 +88,20 @@ typedef struct rx_stats
 //global functions
 int8_t radio_initconfig(uint16_t chip,uint8_t tcxo);
 int8_t radio_init(void);
+int8_t radio_system_init(void);
 int8_t radio_set_freq(uint32_t khz);
 int8_t radio_set_power(int8_t dbm);
+int8_t radio_set_lora(void);
+int8_t radio_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt);
+int8_t radio_set_pkt_params(uint16_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq);
+int8_t radio_specific_settings(void);
+
+int8_t radio_set_rf_freq(uint32_t Hz);
+int8_t radio_set_power_dbm(int8_t dbm);
 int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt);
 int8_t radio_getmodparams(uint16_t *bw_khz,uint8_t *sf,uint8_t *cr,uint8_t *ldropt);
 int8_t radio_setpktparams(uint16_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq);
+
 int8_t radio_sendpacket(uint8_t *buf);
 int8_t radio_getpktstatus(rxpacketstatus_t *status);
 int8_t radio_getpacket(uint8_t *buf);
@@ -118,7 +128,7 @@ int8_t radio_writereg(uint32_t reg,uint32_t val);
 int8_t radio_get_chip_version(uint8_t *hw,uint8_t *use_case,uint8_t *fw_major,uint8_t *fw_minor);
 int8_t radio_get_status(uint8_t *chip_mode,uint8_t *cmd_status);
 
-uint8_t radio_setopmode(uint8_t mode);
+int8_t radio_setopmode(uint8_t mode);
 void radio_irq_handler(void);
 
 

@@ -125,3 +125,5 @@ FW_projects/test_at32/MDK_V5/objects/test_at32.axf
 /fakeTec_pcb-master/Circuit/.history
 /faketec/.history
 /z62_pcb/History
+*.Admin
+FW/mesh_sniffer/FW_AT32/MDK_V5/JLinkLog.txt
