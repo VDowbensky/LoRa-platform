@@ -27,7 +27,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
   radioconfig.id = 0;
 	//modulation
 	radioconfig.sf = SX126X_LORA_SF11;
-	radioconfig.bw = 250; //LORA_BW_250;
+	//radioconfig.bw = 250; //LORA_BW_250;
 	radioconfig.cr = SX126X_LORA_CR_4_5;
 	radioconfig.ldropt = 0;
 	//packet
@@ -44,6 +44,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     case 1262:
     radioconfig.chip = 1262;
 		radioconfig.freq = 433125000;
+		radioconfig.bw = 250; //LORA_BW_250;
     //params[64]; //maybe different
 		if(tcxo) 
 		{
@@ -56,11 +57,13 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 		case 1280:
     radioconfig.chip = 1280;
     radioconfig.freq = 2400000000;
+		radioconfig.bw = 206; //LORA_BW_206;
 		break;
 
     case 1121:
     radioconfig.chip = 1121;
     radioconfig.freq = 433125000;
+		radioconfig.bw = 250; //LORA_BW_250;
 		if(tcxo) 
 		{
 			lr112x_tcxo = 1;
@@ -71,8 +74,8 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 		
     case 2021:
     radioconfig.chip = 2021;
-    radioconfig.id = 0;
     radioconfig.freq = 433125000;
+		radioconfig.bw = 250; //LORA_BW_250;
     //params[64]; //maybe different
 		if(tcxo) 
 		{
@@ -85,6 +88,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     case 3029:
     radioconfig.chip = 3029;
     radioconfig.freq = 433125000;
+		radioconfig.bw = 250; //LORA_BW_250;
 		break;
 
     default:
@@ -153,11 +157,14 @@ int8_t radio_system_init(void)
 		case 1280:
 		{
 			sx128x_status_t err = sx128x_reset(NULL);
+			printf("err:%d\r\n",err);
 			if(err != SX128X_STATUS_OK) return err;
-			err = sx128x_wakeup(NULL);
-			if(err != SX128X_STATUS_OK) return err;
+			//err = sx128x_wakeup(NULL);
+			//printf("err:%d\r\n",err);
+			//if(err != SX128X_STATUS_OK) return err;
 			//SX128X_setopmode(SX128X_OPMODE_STBYRC);
 			err = sx128x_set_reg_mode(NULL,SX128X_REG_MODE_DCDC);
+			printf("err:%d\r\n",err);
 			if(err != SX128X_STATUS_OK) return err;
 			return RADIO_OK;
 		}
@@ -202,46 +209,61 @@ int8_t radio_system_init(void)
 		{
 			lr20xx_system_version_t version;
 			lr20xx_status_t err = lr20xx_system_reset(NULL);
+			printf("err0:%d\r\n",err);
 			if(err != LR20XX_STATUS_OK) return err;
 			//delay_ms(500);
 			// Workaround SIMO
 			const uint32_t freq_val = 2.8e6 * 1.048576;
 			err = lr20xx_regmem_write_regmem32( NULL, 0x80004c, &freq_val, 1 );
+			printf("err1:%d\r\n",err);
 			if(err != LR20XX_STATUS_OK) return err;
 			// Configure the regulator
 			err = lr20xx_system_set_reg_mode(NULL,LR20XX_SYSTEM_REG_MODE_DCDC); // DC-DC
+			printf("err2:%d\r\n",err);
 			if(err != LR20XX_STATUS_OK) return err;
 			//TCXO
 			if(lr202x_tcxo) 
 			{
 				err = lr20xx_system_set_tcxo_mode(NULL,LR20XX_SYSTEM_TCXO_CTRL_3_0V,64000); //check
+				printf("err3:%d\r\n",err);
 				if(err != LR20XX_STATUS_OK) return err;
 			}
 			err = lr20xx_system_cfg_lfclk(NULL, LR20XX_SYSTEM_LFCLK_RC);//32.768
+			
+			printf("err4:%d\r\n",err);
 			if(err != LR20XX_STATUS_OK) return err;
 			uint16_t errors;
 			err = lr20xx_system_get_errors( NULL, &errors );
+			printf("err5:%d\r\n",err);
 			if(err != LR20XX_STATUS_OK) return err;
 			if(errors != 0) 
 			{
 				err = lr20xx_system_clear_errors(NULL);
+				printf("err6:%d\r\n",err);
 				if(err != LR20XX_STATUS_OK) return err;
 			}
 			err = lr20xx_system_clear_irq_status(NULL, LR20XX_SYSTEM_IRQ_ALL_MASK);
+			printf("err7:%d\r\n",err);
 			if(err != LR20XX_STATUS_OK) return err;			
 			//IRQ 
 			err = lr20xx_system_set_dio_function( NULL, LR20XX_SYSTEM_DIO_9, LR20XX_SYSTEM_DIO_FUNC_IRQ, LR20XX_SYSTEM_DIO_DRIVE_PULL_UP );
+			printf("err8:%d\r\n",err);
 			if(err != LR20XX_STATUS_OK) return err;
 			err = lr20xx_system_set_dio_irq_cfg( NULL, LR20XX_SYSTEM_DIO_9, LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR);
+			printf("err9:%d\r\n",err);
 			if(err != LR20XX_STATUS_OK) return err;
 			err = lr20xx_system_cfg_clk_output( NULL, LR20XX_SYSTEM_HF_CLK_SCALING_32_MHZ );
+			printf("err10:%d\r\n",err);
 			if(err != LR20XX_STATUS_OK) return err;
 			//Calibration
 			lr20xx_radio_common_front_end_calibration_value_t front_end_calibration_structures[3] = { 0 };
-			LR20xx_bsp_get_front_end_calibration_cfg( NULL, front_end_calibration_structures );
-			err = lr20xx_radio_common_calibrate_front_end_helper( NULL, front_end_calibration_structures, 3 );
-			if(err != LR20XX_STATUS_OK) return err;
-			err = lr20xx_system_get_version(NULL, &version);	
+			printf("err11:%d\r\n",err);
+			//LR20xx_bsp_get_front_end_calibration_cfg( NULL, front_end_calibration_structures );
+			//err = lr20xx_radio_common_calibrate_front_end_helper( NULL, front_end_calibration_structures, 3 );
+			//printf("err12:%d\r\n",err);
+			//if(err != LR20XX_STATUS_OK) return err;
+			err = lr20xx_system_get_version(NULL, &version);
+			printf("err13:%d\r\n",err);			
 			if(err != LR20XX_STATUS_OK) return err;
 			return RADIO_OK;
 		}
@@ -287,10 +309,17 @@ int8_t radio_set_lora(void)
 	{
 		case 1262: err = (int8_t)sx126x_set_pkt_type(NULL,SX126X_PKT_TYPE_LORA);break;
 		case 1280: err = (int8_t)sx128x_set_pkt_type(NULL,SX128X_PKT_TYPE_LORA);break;
-		case 1121: err = (int8_t)lr11xx_radio_set_pkt_type(NULL,LR11XX_RADIO_PKT_TYPE_LORA);break;
+		case 1121: 
+		{
+			err = (int8_t)lr11xx_radio_set_pkt_type(NULL,LR11XX_RADIO_PKT_TYPE_LORA);
+			if(err != SX128X_STATUS_OK) return err;
+			uint8_t fix[] = SX128X_REG_RSSI_SNR_BUGFIX_BLOB;
+			err = (int8_t)sx128x_write_register(NULL, SX128X_REG_RSSI_SNR_BUGFIX_ADDRESS, fix, sizeof( fix ) );
+			break;
+		}
 		case 2021: err = (int8_t)lr20xx_radio_common_set_pkt_type(NULL, LR20XX_RADIO_COMMON_PKT_TYPE_LORA);break;
-		case 3029: err = RADIO_OK;
-		default: err = INVALID_CHIP;
+		case 3029: err = RADIO_OK;break;
+		default: err = INVALID_CHIP;break;
 //		
 //		case 1262: err = (int8_t)sx126x_set_pkt_type(NULL,SX126X_PKT_TYPE_LORA);break;
 //		case 1280: err = (int8_t)sx128x_set_pkt_type(NULL,SX128X_PKT_TYPE_LORA);break;
@@ -1114,7 +1143,7 @@ int8_t radio_getrssi(float *dbm)
 			uint8_t half_dbm_cnt;
 			err = (int8_t)lr20xx_radio_common_get_rssi_inst(NULL,&rssi,&half_dbm_cnt);
 			if(err != RADIO_OK) return err;
-			*dbm = (rssi*2 + half_dbm_cnt) / 2; //to be checked
+			*dbm = (rssi + half_dbm_cnt) / 2.0f; //to be checked
 			return RADIO_OK;
 		}
 		case 3029:
