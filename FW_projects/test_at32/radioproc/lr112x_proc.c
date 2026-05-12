@@ -6,7 +6,6 @@
 //#define K_FREQ	1.0000051f //-6.8 ppm
 //#define K_FREQ	1.0f
 
-
 void LR112X_printerrors(void);
 void LR112X_printstatus(void);
 void LR112X_configcommon(void);
@@ -30,6 +29,126 @@ const lr11xx_radio_pa_cfg_t pa_config_subGHz =
 	.pa_duty_cycle = 0x04,  													//!< Power Amplifier duty cycle (Default 0x04)
 	.pa_hp_sel = 0x07      														//!< Number of slices for HPA (Default 0x07)
 };
+
+lr11xx_status_t LR112x_init(void)
+{
+	uint16_t errors;	
+	lr11xx_system_version_t version;
+	lr11xx_system_rfswitch_cfg_t rfsw_cfg;
+	lr11xx_status_t err;
+	
+	rfsw_cfg.enable = LR112X_RFSW_ENABLE;
+	rfsw_cfg.standby = LR112X_RFSW_STBY;
+	rfsw_cfg.rx = LR112X_RFSW_RX;
+	rfsw_cfg.tx = LR112X_RFSW_SUBG_TX;
+	rfsw_cfg.tx_hp = LR112X_RFSW_SUBG_TX_HP;
+	rfsw_cfg.tx_hf = LR112X_RFSW_HF_TX;
+	rfsw_cfg.gnss = LR112X_RFSW_GNSS;
+	rfsw_cfg.wifi = LR112X_RFSW_HF_RX; //check
+	
+	err = lr11xx_system_reset(NULL);
+	if(err != LR11XX_STATUS_OK) return err;
+	delay_ms(500);
+	err = lr11xx_system_wakeup(NULL);
+	if(err != LR11XX_STATUS_OK) return err;		
+	err = lr11xx_system_set_reg_mode(NULL,LR11XX_SYSTEM_REG_MODE_DCDC); // DC-DC
+	if(err != LR11XX_STATUS_OK) return err;	
+	err = lr11xx_system_enable_spi_crc(NULL,false);
+	if(err != LR11XX_STATUS_OK) return err;	
+	err = lr11xx_system_set_dio_as_rf_switch(NULL, &rfsw_cfg);
+	if(err != LR11XX_STATUS_OK) return err;			
+	err = lr11xx_system_clear_errors(NULL);
+	if(err != LR11XX_STATUS_OK) return err;	
+	if(lr112x_tcxo) 
+	{
+		err = lr11xx_system_set_tcxo_mode(NULL,LR11XX_SYSTEM_TCXO_CTRL_1_8V,320);
+		if(err != LR11XX_STATUS_OK) return err;	
+	}
+	delay_ms(10);
+	err = lr11xx_system_cfg_lfclk(NULL, LR11XX_SYSTEM_LFCLK_RC, true); //LR11XX_SYSTEM_LFCLK_XTAL
+	if(err != LR11XX_STATUS_OK) return err;	
+	err = lr11xx_system_get_errors(NULL, &errors);
+	if(err != LR11XX_STATUS_OK) return err;	
+	err = lr11xx_system_clear_errors(NULL);
+	if(err != LR11XX_STATUS_OK) return err;	
+	err = lr11xx_system_clear_irq_status(NULL, LR11XX_SYSTEM_IRQ_ALL_MASK);
+	if(err != LR11XX_STATUS_OK) return err;	
+	//err = lr11xx_system_calibrate(NULL, 0x3f);
+	//if(err != LR11XX_STATUS_OK) return err;	
+	err = lr11xx_system_set_standby(NULL,LR11XX_SYSTEM_STANDBY_CFG_XOSC);
+	if(err != LR11XX_STATUS_OK) return err;	
+	delay_ms(10);
+	err = lr11xx_system_get_version(NULL, &version);
+	if(err != LR11XX_STATUS_OK) return err;	
+	err = lr11xx_radio_set_pkt_type(NULL,LR11XX_RADIO_PKT_TYPE_LORA);
+	if(err != LR11XX_STATUS_OK) return err;
+	err = LR112X_set_freq(radioconfig.freq);
+	if(err != LR11XX_STATUS_OK) return err;
+	err = lr11xx_radio_set_tx_params(NULL,radioconfig.txpower,LR11XX_RADIO_RAMP_16_US);
+	if(err != LR11XX_STATUS_OK) return err;
+	err = LR112x_set_mod_params(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
+	if(err != LR11XX_STATUS_OK) return err;
+	err = LR112x_set_packet_params(radioconfig.sync,radioconfig.prelen,radioconfig.paylen,radioconfig.header,radioconfig.crc,radioconfig.invertiq);
+	if(err != LR11XX_STATUS_OK) return err;
+	err = lr11xx_radio_set_rx_tx_fallback_mode(NULL,LR11XX_RADIO_FALLBACK_STDBY_XOSC);
+	if(err != LR11XX_STATUS_OK) return err;
+	err = lr11xx_radio_cfg_rx_boosted(NULL, 0x00);// enable_boost_mode
+	if(err != LR11XX_STATUS_OK) return err;
+	err = lr11xx_system_calibrate_image(NULL,radioconfig.freq / 4000000, radioconfig.freq / 4000000 + 2); //must be rewritted
+	if(err != LR11XX_STATUS_OK) return err;
+	//calibrate RSSI
+	LR112X_RssiCal(radioconfig.freq);
+	err = lr11xx_system_set_dio_irq_params(NULL,LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR,LR11XX_SYSTEM_IRQ_NONE);
+	if(err != LR11XX_STATUS_OK) return err;
+	LR112X_setopmode(RADIO_OPMODE_RX);
+	return LR11XX_STATUS_OK;
+}
+
+lr11xx_status_t LR112X_set_freq(uint32_t Hz)
+{
+	lr11xx_status_t err = lr11xx_radio_set_rf_freq(NULL, Hz);
+	if(err != LR11XX_STATUS_OK) return err;
+	if (Hz < 1900000000) return lr11xx_radio_set_pa_cfg(NULL, &pa_config_subGHz);
+	else return lr11xx_radio_set_pa_cfg(NULL, &pa_config_HF);
+}
+
+lr11xx_status_t LR112x_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
+{
+	uint8_t bw_value;
+	lr11xx_radio_mod_params_lora_t modparams;
+	
+	if(bw_khz <= 11) bw_value = LR11XX_RADIO_LORA_BW_10;
+	else if(bw_khz <= 16) bw_value = LR11XX_RADIO_LORA_BW_15;
+	else if(bw_khz <= 21) bw_value = LR11XX_RADIO_LORA_BW_20;
+	else if(bw_khz <= 32) bw_value = LR11XX_RADIO_LORA_BW_31;
+	else if(bw_khz <= 42) bw_value = LR11XX_RADIO_LORA_BW_41;
+	else if(bw_khz <= 63) bw_value = LR11XX_RADIO_LORA_BW_62;
+	else if(bw_khz <= 125) bw_value = LR11XX_RADIO_LORA_BW_125;
+	else if(bw_khz <= 204) bw_value = LR11XX_RADIO_LORA_BW_200;
+	else if(bw_khz <= 251) bw_value = LR11XX_RADIO_LORA_BW_250;
+	else if(bw_khz <= 407) bw_value = LR11XX_RADIO_LORA_BW_400;
+	else if(bw_khz <= 501) bw_value = LR11XX_RADIO_LORA_BW_500;
+	else bw_value = LR11XX_RADIO_LORA_BW_800;
+	modparams.bw = (lr11xx_radio_lora_bw_t)bw_value;
+	modparams.sf = (lr11xx_radio_lora_sf_t)radioconfig.sf;
+	modparams.cr = (lr11xx_radio_lora_cr_t)radioconfig.cr;
+	modparams.ldro = radioconfig.ldropt;
+	return lr11xx_radio_set_lora_mod_params(NULL,&modparams);
+}
+
+lr11xx_status_t LR112x_set_packet_params(uint8_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq)
+{
+	lr11xx_radio_pkt_params_lora_t pktparams;
+	pktparams.preamble_len_in_symb = radioconfig.prelen;
+	pktparams.pld_len_in_bytes = radioconfig.paylen;
+	pktparams.header_type = (lr11xx_radio_lora_pkt_len_modes_t)radioconfig.header;
+	pktparams.crc = (lr11xx_radio_lora_crc_t)radioconfig.crc;
+	pktparams.iq = (lr11xx_radio_lora_iq_t)radioconfig.invertiq;
+	lr11xx_status_t err = lr11xx_radio_set_lora_pkt_params(NULL,&pktparams);
+	if(err != LR11XX_STATUS_OK) return (int8_t)err;
+	return lr11xx_radio_set_lora_sync_word(NULL,radioconfig.sync & 0xff);
+}
+
 
 void LR112X_setopmode(uint8_t mode)
 {
@@ -68,7 +187,7 @@ void LR112X_setopmode(uint8_t mode)
     case RADIO_OPMODE_RX:
     default:
 		opmode = RADIO_OPMODE_RX;
-    lr11xx_radio_set_rx(NULL,0xffffff); //temp.
+    lr11xx_radio_set_rx(NULL,0); //temp.
     break;
 
     case RADIO_OPMODE_TXSTREAMCW:

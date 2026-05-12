@@ -1,5 +1,66 @@
 #include "pan_proc.h"
 
+int8_t PAN3029_init(void)
+{
+	int8_t err = PAN_Init(radioconfig.freq);
+	if(err != PAN_OK) return RADIO_INVALID_MODE; //in STB3 state
+	PAN_setpower(radioconfig.txpower);
+	PAN_SetFreq(radioconfig.freq);          /* Set the frequency */
+	PAN_set_mod_params(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
+	PAN_set_packet_params(radioconfig.sync,radioconfig.prelen,radioconfig.paylen,radioconfig.header,radioconfig.crc,radioconfig.invertiq);
+	PAN_SetRegulatorMode(USE_LDO);         /* Set the chip to LDO power mode */
+	//PAN_SetChipMode(CHIPMODE_MODE0);
+	//PAN_SetChipMode(CHIPMODE_MODE1);       /* Set the chip mode to MODE1 */
+	//enable interrupts
+	PAN_SetPageRegBits(0,0x58,PAN_IRQ_TX_DONE | PAN_IRQ_RX_DONE | PAN_IRQ_CRC_ERR);
+	PAN_setopmode(RADIO_OPMODE_RX);
+	return RADIO_OK;
+}
+
+//		if(PAN_Init(radioconfig.freq) != PAN_OK) return RADIO_INVALID_MODE; //in STB3 state
+//		//PAN_SetTxPower(radioconfig.txpower);                    /* Set the power level */
+//		PAN_setpower(radioconfig.txpower);
+//		PAN_SetFreq(radioconfig.freq);          /* Set the frequency */
+//		PAN_SetBW(PAN_bw[radioconfig.bw_index]);              /* Set the bandwidth */
+//		PAN_SetSF(radioconfig.sf);              /* Set the spreading factor */
+//		PAN_SetCR(radioconfig.cr);              /* Set the channel coding rate */
+//		PAN_SetCRC(radioconfig.crc);            /* Set the CRC check. Disable for regular LoRa compatibility! */
+//		PAN_SetLDR(radioconfig.ldropt);            /* Set the low-rate mode */
+//		PAN_SetPreamLen(radioconfig.prelen);  /* Set the preamble length */
+//		PAN_SetInvertIQ(radioconfig.invertiq); /* Set IQ to non-inverted */
+//		PAN_SetSyncWord(radioconfig.sync & 0xff);
+//		PAN_SetRegulatorMode(USE_LDO);         /* Set the chip to LDO power mode */
+//		//PAN_SetChipMode(CHIPMODE_MODE0);
+//		//PAN_SetChipMode(CHIPMODE_MODE1);       /* Set the chip mode to MODE1 */
+//		//enable interrupts
+//		PAN_SetPageRegBits(0,0x58,PAN_IRQ_TX_DONE | PAN_IRQ_RX_DONE | PAN_IRQ_CRC_ERR);
+//		//PAN_SetPageRegBits(0,0x58,0xff);
+//		//STB3 now
+//		radio_rx();
+
+int8_t PAN_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
+{
+	uint8_t bw_value;
+	if(bw_khz <= 63) bw_value = PAN_BW_062K;
+	else if(bw_khz <= 125) bw_value = PAN_BW_125K;
+	else if(bw_khz <= 250) bw_value = PAN_BW_250K;
+	else bw_value = PAN_BW_500K;
+	PAN_SetBW(bw_value);              /* Set the bandwidth */
+	PAN_SetSF(radioconfig.sf);              /* Set the spreading factor */
+	PAN_SetCR(radioconfig.cr);              /* Set the channel coding rate */
+	PAN_SetLDR(radioconfig.ldropt);            /* Set the low-rate mode */
+	return RADIO_OK;
+}
+
+int8_t PAN_set_packet_params(uint8_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq)
+{
+	PAN_SetCRC(crc);            /* Set the CRC check. Disable for regular LoRa compatibility! */
+	PAN_SetPreamLen(prelen);  /* Set the preamble length */
+	PAN_SetInvertIQ(invertiq); /* Set IQ to non-inverted */
+	PAN_SetSyncWord(sync);
+	return RADIO_OK;
+}
+
 void PAN_setopmode(uint8_t mode) 
 {
 //* - PAN_STATE_DEEPSLEEP
@@ -11,7 +72,7 @@ void PAN_setopmode(uint8_t mode)
   {
     case RADIO_OPMODE_SLEEP:
 		opmode = RADIO_OPMODE_SLEEP;
-    PAN_SetOperateState(PAN_STATE_SLEEP);
+    PAN_SetRfState(PAN_STATE_SLEEP);
     break;
 
     case RADIO_OPMODE_STBYRC:
@@ -19,20 +80,18 @@ void PAN_setopmode(uint8_t mode)
 
     case RADIO_OPMODE_STBYXOSC:
 		opmode = RADIO_OPMODE_STBYXOSC;
-		PAN_SetOperateState(PAN_STATE_STB3);
+		PAN_EnterStandbyState();
     break;
 
     case RADIO_OPMODE_FS:
     break;
 
     case RADIO_OPMODE_TX:
-		opmode = RADIO_OPMODE_SLEEP;
-    PAN_SetOperateState(PAN_STATE_TX);
-    break;
+		break;
 
     case RADIO_OPMODE_RX:
 		opmode = RADIO_OPMODE_RX;
-    PAN_SetOperateState(PAN_STATE_RX);
+		PAN_EnterContinousRxState();
     break;
 
     case RADIO_OPMODE_TXSTREAMCW:
@@ -59,8 +118,6 @@ const uint8_t PAN_powerlevels[21] = {5,6,   //0,1
 
 void PAN_setpower(int8_t power)
 {
-	if(power < 0) power = 0;
-	if(power > 20) power = 20;
 	PAN_SetTxPower(PAN_powerlevels[power]);
 }
 

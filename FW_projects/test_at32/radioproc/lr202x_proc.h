@@ -6,6 +6,11 @@
 
 #define LR20XX_SEPARATION_FREQ 950000000UL
 
+lr20xx_status_t LR202x_init(void);
+lr20xx_status_t LR202x_set_freq(uint32_t Hz);
+lr20xx_status_t LR202x_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt);
+lr20xx_status_t LR202x_set_packet_params(uint16_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq);
+
 void LR202x_setopmode(uint8_t mode);
 void LR202x_RssiCal(uint32_t freq);
 void LR20xx_bsp_get_front_end_calibration_cfg(const void* context, lr20xx_radio_common_front_end_calibration_value_t front_end_calibration_structures[3]);

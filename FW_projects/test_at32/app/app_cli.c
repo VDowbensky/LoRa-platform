@@ -280,38 +280,32 @@ void cli_getmodparams(int argc, char **argv)
 	uint8_t cr;
 	uint8_t ldropt;
 	
-	printf("GET_MODPARAMS: ");
-	int8_t err = radio_getmodparams(&bw_khz,&sf,&cr,&ldropt);
-	if(err == RADIO_OK)
+	printf("GET_MODPARAMS: \r\nBW=%u\r\nSF=%d\r\n",radioconfig.bw,radioconfig.sf);
+	printf("CR:");
+	switch(radioconfig.cr)
 	{
-		printf("\r\nBW=%u\r\nSF=%d\r\n",bw_khz,radioconfig.sf);
-		printf("CR:");
-    switch(cr)
-    {
-      case 0:
-      printf("OFF\r\n");
-      break;
-      case 1:
-      printf("4_5\r\n");
-      break;
-      case 2:
-      printf("4_6\r\n");
-      break;
-      case 3:
-      printf("4_7\r\n");
-      break;
-      case 4:
-      printf("4_8\r\n");
-      break;
-      default:
-      printf("INVALID\r\n");
-      break;
-    }
-		printf("LDROPT:");
-		if(radioconfig.ldropt == 1) printf("ON\r\n");
-		else printf("OFF\r\n");
+	case 0:
+	printf("OFF\r\n");
+	break;
+	case 1:
+	printf("4_5\r\n");
+	break;
+	case 2:
+	printf("4_6\r\n");
+	break;
+	case 3:
+	printf("4_7\r\n");
+	break;
+	case 4:
+	printf("4_8\r\n");
+	break;
+	default:
+	printf("INVALID\r\n");
+	break;
 	}
-  else printerror(err);
+	printf("LDROPT:");
+	if(radioconfig.ldropt == 1) printf("ON\r\n");
+	else printf("OFF\r\n");
 }
 
 void cli_setmodparams(int argc, char **argv)

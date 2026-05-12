@@ -5,9 +5,145 @@
 void LR202x_printerrors(void);
 void LR202x_printstatus(void);
 
-//const lr11xx_radio_rssi_calibration_table_t calib_0_600 =     {12,12,14, 0, 1, 3, 4, 4, 3, 6, 6, 6, 6, 6, 6, 6, 6, 0};
-//const lr11xx_radio_rssi_calibration_table_t calib_600_2000 =  { 2, 2, 2, 3, 3, 4, 5, 4, 4, 6, 5, 5, 6, 6, 6, 7, 6, 0};
-//const lr11xx_radio_rssi_calibration_table_t calib_2000_2700 = { 6, 7, 6, 4, 3, 4,14,12,14,12,12,12,12, 8, 8, 9, 9, 2030};
+lr20xx_status_t LR202x_init(void)
+{
+	lr20xx_system_version_t version;
+	lr20xx_status_t err = lr20xx_system_reset(NULL);
+	//printf("err0:%d\r\n",err);
+	if(err != LR20XX_STATUS_OK) return err;
+	//delay_ms(500);
+	// Workaround SIMO
+	const uint32_t freq_val = 2.8e6 * 1.048576;
+	err = lr20xx_regmem_write_regmem32( NULL, 0x80004c, &freq_val, 1 );
+	//printf("err1:%d\r\n",err);
+	if(err != LR20XX_STATUS_OK) return err;
+	// Configure the regulator
+	err = lr20xx_system_set_reg_mode(NULL,LR20XX_SYSTEM_REG_MODE_DCDC); // DC-DC
+	//printf("err2:%d\r\n",err);
+	if(err != LR20XX_STATUS_OK) return err;
+	//TCXO
+	if(lr202x_tcxo) 
+	{
+		err = lr20xx_system_set_tcxo_mode(NULL,LR20XX_SYSTEM_TCXO_CTRL_3_0V,64000); //check
+		//printf("err3:%d\r\n",err);
+		if(err != LR20XX_STATUS_OK) return err;
+	}
+	err = lr20xx_system_cfg_lfclk(NULL, LR20XX_SYSTEM_LFCLK_RC);//32.768
+	//printf("err4:%d\r\n",err);
+	if(err != LR20XX_STATUS_OK) return err;
+	uint16_t errors;
+	err = lr20xx_system_get_errors( NULL, &errors );
+	//printf("err5:%d\r\n",err);
+	if(err != LR20XX_STATUS_OK) return err;
+	if(errors != 0) 
+	{
+		err = lr20xx_system_clear_errors(NULL);
+		//printf("err6:%d\r\n",err);
+		if(err != LR20XX_STATUS_OK) return err;
+	}
+	err = lr20xx_system_clear_irq_status(NULL, LR20XX_SYSTEM_IRQ_ALL_MASK);
+	//printf("err7:%d\r\n",err);
+	if(err != LR20XX_STATUS_OK) return err;			
+	//IRQ 
+	err = lr20xx_system_set_dio_function( NULL, LR20XX_SYSTEM_DIO_9, LR20XX_SYSTEM_DIO_FUNC_IRQ, LR20XX_SYSTEM_DIO_DRIVE_PULL_UP );
+	//printf("err8:%d\r\n",err);
+	if(err != LR20XX_STATUS_OK) return err;
+	err = lr20xx_system_set_dio_irq_cfg( NULL, LR20XX_SYSTEM_DIO_9, LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR);
+	//printf("err9:%d\r\n",err);
+	if(err != LR20XX_STATUS_OK) return err;
+	err = lr20xx_system_cfg_clk_output( NULL, LR20XX_SYSTEM_HF_CLK_SCALING_32_MHZ );
+	//printf("err10:%d\r\n",err);
+	if(err != LR20XX_STATUS_OK) return err;
+	//Calibration
+	lr20xx_radio_common_front_end_calibration_value_t front_end_calibration_structures[3] = { 0 };
+	printf("err11:%d\r\n",err);
+	//LR20xx_bsp_get_front_end_calibration_cfg( NULL, front_end_calibration_structures );
+	//err = lr20xx_radio_common_calibrate_front_end_helper( NULL, front_end_calibration_structures, 3 );
+	//printf("err12:%d\r\n",err);
+	//if(err != LR20XX_STATUS_OK) return err;
+	err = lr20xx_system_get_version(NULL, &version);
+	//printf("err13:%d\r\n",err);			
+	if(err != LR20XX_STATUS_OK) return err;
+	err = LR202x_set_freq(radioconfig.freq);
+	if(err != LR20XX_STATUS_OK) return err;
+	err = lr20xx_radio_common_set_tx_params(NULL,radioconfig.txpower*2, LR20XX_RADIO_COMMON_RAMP_32_US);
+	if(err != LR20XX_STATUS_OK) return err;
+	err = lr20xx_radio_common_set_pkt_type(NULL, LR20XX_RADIO_COMMON_PKT_TYPE_LORA);
+	if(err != LR20XX_STATUS_OK) return err;
+	err = LR202x_set_mod_params(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
+	if(err != LR20XX_STATUS_OK) return err;
+	err = LR202x_set_packet_params(radioconfig.sync,radioconfig.prelen,radioconfig.paylen,radioconfig.header,radioconfig.crc,radioconfig.invertiq);
+	if(err != LR20XX_STATUS_OK) return err;
+	err = lr20xx_radio_common_set_rx_tx_fallback_mode(NULL, LR20XX_RADIO_FALLBACK_STDBY_XOSC);	//???
+	if(err != LR20XX_STATUS_OK) return err;
+	//DIO,IRQ
+	
+	LR202x_setopmode(RADIO_OPMODE_RX);
+	return RADIO_OK;
+}
+
+lr20xx_status_t LR202x_set_freq(uint32_t Hz)
+{
+	lr20xx_status_t err = lr20xx_radio_common_set_rf_freq(NULL, Hz);
+	if(err != LR20XX_STATUS_OK) return err;
+	if (Hz < 1900000000) 
+	{ // SubGHz
+		err = lr20xx_radio_common_set_pa_cfg(NULL, &pa_config_lf);
+		if(err != LR20XX_STATUS_OK) return err;
+		err = lr20xx_radio_common_set_rx_path( NULL,LR20XX_RADIO_COMMON_RX_PATH_LF,LR20XX_RADIO_COMMON_RX_PATH_BOOST_MODE_NONE);
+		if(err != LR20XX_STATUS_OK) return err;
+	}
+	else 
+	{
+		err = lr20xx_radio_common_set_pa_cfg(NULL, &pa_config_hf);
+		if(err != LR20XX_STATUS_OK) return err;
+		err = lr20xx_radio_common_set_rx_path( NULL,LR20XX_RADIO_COMMON_RX_PATH_HF,LR20XX_RADIO_COMMON_RX_PATH_BOOST_MODE_NONE);
+		if(err != LR20XX_STATUS_OK) return err;
+	}
+	return LR20XX_STATUS_OK;
+}
+
+lr20xx_status_t LR202x_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
+{
+	uint8_t bw_value;
+	lr20xx_radio_lora_mod_params_t modparams;
+	
+	if(bw_khz <= 8) bw_value = LR20XX_RADIO_LORA_BW_7;
+	else if(bw_khz <= 11) bw_value = LR20XX_RADIO_LORA_BW_10;
+	else if(bw_khz <= 16) bw_value = LR20XX_RADIO_LORA_BW_15;
+	else if(bw_khz <= 21) bw_value = LR20XX_RADIO_LORA_BW_20;
+	else if(bw_khz <= 32) bw_value = LR20XX_RADIO_LORA_BW_31;
+	else if(bw_khz <= 42) bw_value = LR20XX_RADIO_LORA_BW_41;
+	else if(bw_khz <= 63) bw_value = LR20XX_RADIO_LORA_BW_62;
+	else if(bw_khz <= 84) bw_value = LR20XX_RADIO_LORA_BW_83;
+	else if(bw_khz <= 102) bw_value = LR20XX_RADIO_LORA_BW_101;
+	else if(bw_khz <= 125) bw_value = LR11XX_RADIO_LORA_BW_125;
+	else if(bw_khz <= 204) bw_value = LR20XX_RADIO_LORA_BW_203;
+	else if(bw_khz <= 251) bw_value = LR11XX_RADIO_LORA_BW_250;
+	else if(bw_khz <= 407) bw_value = LR20XX_RADIO_LORA_BW_406;
+	else if(bw_khz <= 501) bw_value = LR11XX_RADIO_LORA_BW_500;
+	else if(bw_khz <= 813) bw_value = LR20XX_RADIO_LORA_BW_812;
+	else bw_value = LR20XX_RADIO_LORA_BW_1000;
+	modparams.bw = (lr20xx_radio_lora_bw_t)bw_value;
+	modparams.sf = (lr20xx_radio_lora_sf_t)sf;
+	modparams.cr = (lr20xx_radio_lora_cr_t)cr;
+	modparams.ppm = (lr20xx_radio_lora_ppm_t)ldropt; //??? LR20XX_RADIO_LORA_NO_PPM  = 0x00,  //!< No PPM offset: use full range of modulation LR20XX_RADIO_LORA_PPM_1_4 = 0x01
+	return (int8_t)lr20xx_radio_lora_set_modulation_params(NULL,&modparams);
+}
+
+lr20xx_status_t LR202x_set_packet_params(uint16_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq)
+{
+	lr20xx_radio_lora_pkt_params_t pktparams;
+	
+	pktparams.preamble_len_in_symb = prelen;
+	pktparams.pld_len_in_bytes = paylen;
+	pktparams.pkt_mode = (lr20xx_radio_lora_pkt_mode_t)header;
+	pktparams.crc = (lr20xx_radio_lora_crc_t)crc;
+	pktparams.iq = (lr20xx_radio_lora_iq_t)invertiq;
+	lr20xx_status_t err = lr20xx_radio_lora_set_packet_params(NULL,&pktparams);
+	if(err != LR20XX_STATUS_OK) return err;
+	return (int8_t)lr20xx_radio_lora_set_syncword(NULL,sync);
+}
 
 void LR202x_setopmode(uint8_t mode)
 {

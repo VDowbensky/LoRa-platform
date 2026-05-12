@@ -5,6 +5,10 @@
 #include "flash.h"
 #include "sx126x.h"
 
+sx126x_status_t SX126x_init(void);
+sx126x_status_t SX126x_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt);
+sx126x_status_t SX126x_set_packet_params(uint8_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq);
+
 void SX126X_setopmode(uint8_t mode);
 void SX126X_LNAboost(bool boost);
 

@@ -1,20 +1,83 @@
 #include "sx126x_proc.h"
 
-//uint8_t opmode = 0;
-//uint8_t prevopmode = 0;
-//uint16_t irqflags = 0;
-//uint8_t rfstatus = 0;
+sx126x_status_t SX126x_init(void)
+{
+	sx126x_status_t err = sx126x_reset(NULL);
+	if(err != SX126X_STATUS_OK) return err;
+	err = sx126x_wakeup(NULL);
+	if(err != SX126X_STATUS_OK) return err;
+	delay_ms(10);
+	err = sx126x_set_standby(NULL,SX126X_STANDBY_CFG_RC);
+	if(err != SX126X_STATUS_OK) return err;
+	err = sx126x_set_reg_mode(NULL,SX126X_REG_MODE_DCDC);
+	if(err != SX126X_STATUS_OK) return err;
+	//set TCXO here if needed
+	if(sx126x_tcxo != 0)
+	{
+		err = sx126x_set_dio3_as_tcxo_ctrl(NULL,(sx126x_tcxo_ctrl_voltages_t)sx126x_tcxo_voltage,1000); //check
+		if(err != SX126X_STATUS_OK) return err;
+		err = sx126x_cal(NULL,SX126X_CAL_ALL);
+		if(err != SX126X_STATUS_OK) return err;
+	}
+	err = sx126x_set_rf_freq(NULL,radioconfig.freq);
+	if(err != SX126X_STATUS_OK) return err;
+	err = sx126x_set_tx_params(NULL,radioconfig.txpower,SX126X_RAMP_10_US);
+	if(err != SX126X_STATUS_OK) return err;
+	err = (int8_t)sx126x_set_pkt_type(NULL,SX126X_PKT_TYPE_LORA);
+	if(err != SX126X_STATUS_OK) return err;
+	err = SX126x_set_mod_params(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
+	if(err != SX126X_STATUS_OK) return err;
+	err = SX126x_set_packet_params(radioconfig.sync,radioconfig.prelen,radioconfig.paylen,radioconfig.header,radioconfig.crc,radioconfig.invertiq);
+	if(err != SX126X_STATUS_OK) return err;
+	SX126X_CalibrateIR();
+	if(sx126x_tcxo == 0) //TCXO off
+	{
+		err = (int8_t)sx126x_set_trimming_capacitor_values(NULL,sx126x_xtatrim,sx126x_xtbtrim);
+		if(err != RADIO_OK) return err;
+	}
+	err = (int8_t)sx126x_cfg_rx_boosted(NULL,true);
+	if(err != RADIO_OK) return err;
+	err = (int8_t)sx126x_set_dio2_as_rf_sw_ctrl(NULL,true);
+	if(err != RADIO_OK) return err;
+	err = (int8_t)sx126x_set_dio_irq_params(NULL,SX126X_IRQ_TX_DONE | SX126X_IRQ_RX_DONE | SX126X_IRQ_CRC_ERROR,SX126X_IRQ_TX_DONE | SX126X_IRQ_RX_DONE,SX126X_IRQ_NONE,SX126X_IRQ_NONE);
+	if(err != RADIO_OK) return err;
+	SX126X_setopmode(RADIO_OPMODE_RX);
+	return SX126X_STATUS_OK;
+}
 
-/*
-#define OPMODE_SLEEP            0
-#define OPMODE_STBYRC           1
-#define OPMODE_STBYXOSC         2
-#define OPMODE_FS               3
-#define OPMODE_TX               4
-#define OPMODE_RX               5
-#define OPMODE_TXSTREAMCW       6
-#define OPMODE_TXSTREAMPRE      7
-*/
+sx126x_status_t SX126x_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
+{
+	uint8_t bw_value;
+	sx126x_mod_params_lora_t modparams;
+	if(bw_khz <= 8) bw_value = SX126X_LORA_BW_007;
+	else if(bw_khz <= 11) bw_value = SX126X_LORA_BW_010;
+	else if(bw_khz <= 16) bw_value = SX126X_LORA_BW_015;
+	else if(bw_khz <= 21) bw_value = SX126X_LORA_BW_020;
+	else if(bw_khz <= 32) bw_value = SX126X_LORA_BW_031;
+	else if(bw_khz <= 42) bw_value = SX126X_LORA_BW_041;
+	else if(bw_khz <= 63) bw_value = SX126X_LORA_BW_062;
+	else if(bw_khz <= 125) bw_value = SX126X_LORA_BW_125;
+	else if(bw_khz <= 250) bw_value = SX126X_LORA_BW_250;
+	else bw_value = SX126X_LORA_BW_500;
+	modparams.bw = (sx126x_lora_bw_t)bw_value;
+	modparams.cr = (sx126x_lora_cr_t)cr;
+	modparams.sf = (sx126x_lora_sf_t)sf;
+	modparams.ldro = ldropt;
+	return sx126x_set_lora_mod_params(NULL,&modparams);
+}
+
+sx126x_status_t SX126x_set_packet_params(uint8_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq)
+{
+	sx126x_pkt_params_lora_t pktparams;
+	pktparams.header_type = (sx126x_lora_pkt_len_modes_t)header;
+	pktparams.preamble_len_in_symb = prelen;
+	pktparams.pld_len_in_bytes = paylen;
+	pktparams.crc_is_on = crc;
+	pktparams.invert_iq_is_on = invertiq;
+	sx126x_status_t err = sx126x_set_lora_pkt_params(NULL,&pktparams);
+	if(err != SX126X_STATUS_OK) return err;
+	return sx126x_set_lora_sync_word(NULL,radioconfig.sync);
+}
 
 
 void SX126X_setopmode(uint8_t mode)

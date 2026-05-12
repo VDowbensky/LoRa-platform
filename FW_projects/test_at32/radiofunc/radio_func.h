@@ -88,18 +88,10 @@ typedef struct rx_stats
 //global functions
 int8_t radio_initconfig(uint16_t chip,uint8_t tcxo);
 int8_t radio_init(void);
-int8_t radio_system_init(void);
+
 int8_t radio_set_freq(uint32_t khz);
 int8_t radio_set_power(int8_t dbm);
-int8_t radio_set_lora(void);
-int8_t radio_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt);
-int8_t radio_set_pkt_params(uint16_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq);
-int8_t radio_specific_settings(void);
-
-int8_t radio_set_rf_freq(uint32_t Hz);
-int8_t radio_set_power_dbm(int8_t dbm);
 int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt);
-int8_t radio_getmodparams(uint16_t *bw_khz,uint8_t *sf,uint8_t *cr,uint8_t *ldropt);
 int8_t radio_setpktparams(uint16_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq);
 
 int8_t radio_sendpacket(uint8_t *buf);
