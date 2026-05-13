@@ -32,7 +32,7 @@ lr11xx_hal_status_t lr11xx_hal_read(const void* context,const uint8_t* command,c
   retval = lr11xx_hal_wait_on_busy(context);
   if(retval != LR11XX_HAL_STATUS_OK) return retval;
   lr11xx_select(context);
-  for(i = 0; i < 2; i++) lr11xx_spi_transfer(context,0); //drop status
+	lr11xx_spi_transfer(context,0);
   if(data != NULL && data_length > 0)
   {
     for(i = 0; i < data_length; i++) data[i] = lr11xx_spi_transfer(context,0);	

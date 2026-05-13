@@ -343,7 +343,6 @@ lr11xx_status_t lr11xx_radio_get_rssi_inst( const void* context, int8_t* rssi_in
         ( uint8_t ) ( LR11XX_RADIO_GET_RSSI_INST_OC >> 0 ),
     };
     uint8_t rssi = 0;
-
     const lr11xx_status_t status = ( lr11xx_status_t ) lr11xx_hal_read(
         context, cbuffer, LR11XX_RADIO_GET_RSSI_INST_CMD_LENGTH, &rssi, sizeof( rssi ) );
 

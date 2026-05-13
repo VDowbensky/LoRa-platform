@@ -13,7 +13,6 @@ lr11xx_hal_status_t lr11xx_hal_reset(const void* context)
 
 lr11xx_hal_status_t lr11xx_hal_wait_on_busy(const void* context)
 {
-  //while(gpio_input_data_bit_read(RF_BUSY_GPIO_PORT,RF_BUSY_PIN) == SET);
   uint32_t attempts = LR11XX_BUSY_TIMEOUT;
 	while(attempts--)
 	{

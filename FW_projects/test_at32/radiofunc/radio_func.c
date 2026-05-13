@@ -34,7 +34,6 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 	radioconfig.sync = 0x2b; //0x24b4;
 	radioconfig.prelen = 16;
 	radioconfig.header = 0;
-	radioconfig.paylen = 0;
 	radioconfig.crc = 1;
 	radioconfig.invertiq = 0;
 	radioconfig.txpower = 10;
@@ -45,6 +44,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     radioconfig.chip = 1262;
 		radioconfig.freq = 433125000;
 		radioconfig.bw = 250; //LORA_BW_250;
+		radioconfig.paylen = 0;
     //params[64]; //maybe different
 		if(tcxo) 
 		{
@@ -58,12 +58,14 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     radioconfig.chip = 1280;
     radioconfig.freq = 2400000000;
 		radioconfig.bw = 206; //LORA_BW_206;
+		radioconfig.paylen = 0;
 		break;
 
     case 1121:
     radioconfig.chip = 1121;
     radioconfig.freq = 433125000;
 		radioconfig.bw = 250; //LORA_BW_250;
+		radioconfig.paylen = 255;
 		if(tcxo) 
 		{
 			lr112x_tcxo = 1;
@@ -76,6 +78,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     radioconfig.chip = 2021;
     radioconfig.freq = 433125000;
 		radioconfig.bw = 250; //LORA_BW_250;
+		radioconfig.paylen = 255;
     //params[64]; //maybe different
 		if(tcxo) 
 		{
@@ -89,6 +92,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
     radioconfig.chip = 3029;
     radioconfig.freq = 433125000;
 		radioconfig.bw = 250; //LORA_BW_250;
+		radioconfig.paylen = 0;
 		break;
 
     default:
@@ -665,7 +669,6 @@ int8_t radio_getrssi(float *dbm)
 		{
 			int8_t rssi;
 			err = (int8_t)lr11xx_radio_get_rssi_inst(NULL,&rssi);
-			printf("err=%d,rssi=%d\r\n",err,rssi);
 			if(err != RADIO_OK) return err;
 			*dbm = rssi;
 			return RADIO_OK;

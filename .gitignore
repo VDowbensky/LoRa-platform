@@ -131,3 +131,4 @@ FW/mesh_sniffer/FW_AT32/MDK_V5/JLinkLog.txt
 *.txt
 /FW/mesh_sniffer/FW_AT32/MDK_V5/objects
 *.Admin
+/FW/mesh_sniffer/FW_AT32/MDK_V5/objects

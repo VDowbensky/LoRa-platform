@@ -1260,7 +1260,7 @@ int8_t radio_get_chip_version(uint8_t *hw,uint8_t *use_case,uint8_t *fw_major,ui
   }
 }
 
-int8_t radio_get_status(uint8_t *stat1,uint8_t *stat2)
+int8_t radio_get_status(uint8_t *chip_mode,uint8_t *cmd_status)
 {
   switch(radioconfig.chip)
   {
@@ -1271,8 +1271,14 @@ int8_t radio_get_status(uint8_t *stat1,uint8_t *stat2)
 		return RADIO_TODO;
 		
     case 1121:
-		LR112X_GetStatus(stat1,stat2);
-		return RADIO_OK;
+		{
+			uint8_t stat1,stat2;
+			LR112X_GetStatus(&stat1,&stat2);
+			*chip_mode = (stat2 & 0x0f) >> 1;
+			*cmd_status = stat1 >> 1;
+			return RADIO_OK;
+		}
+		
 		
 		case 3029:
 		return RADIO_TODO;

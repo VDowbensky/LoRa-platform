@@ -53,8 +53,8 @@ lr11xx_status_t LR112x_init(void)
 	if(err != LR11XX_STATUS_OK) return err;		
 	err = lr11xx_system_set_reg_mode(NULL,LR11XX_SYSTEM_REG_MODE_DCDC); // DC-DC
 	if(err != LR11XX_STATUS_OK) return err;	
-	err = lr11xx_system_enable_spi_crc(NULL,false);
-	if(err != LR11XX_STATUS_OK) return err;	
+	//err = lr11xx_system_enable_spi_crc(NULL,false);
+	//if(err != LR11XX_STATUS_OK) return err;	
 	err = lr11xx_system_set_dio_as_rf_switch(NULL, &rfsw_cfg);
 	if(err != LR11XX_STATUS_OK) return err;			
 	err = lr11xx_system_clear_errors(NULL);
@@ -67,38 +67,47 @@ lr11xx_status_t LR112x_init(void)
 	delay_ms(10);
 	err = lr11xx_system_cfg_lfclk(NULL, LR11XX_SYSTEM_LFCLK_RC, true); //LR11XX_SYSTEM_LFCLK_XTAL
 	if(err != LR11XX_STATUS_OK) return err;	
-	err = lr11xx_system_get_errors(NULL, &errors);
+	err = lr11xx_system_clear_irq_status(NULL, LR11XX_SYSTEM_IRQ_ALL_MASK);
 	if(err != LR11XX_STATUS_OK) return err;	
+	err = lr11xx_system_set_standby(NULL,LR11XX_SYSTEM_STANDBY_CFG_XOSC);
+	if(err != LR11XX_STATUS_OK) return err;	
+	delay_ms(10);
+	err = lr11xx_system_get_errors(NULL, &errors);
+	if(err != LR11XX_STATUS_OK) return err;
+	err = lr11xx_system_clear_errors(NULL);
+	if(err != LR11XX_STATUS_OK) return err;	
+	
+	err = lr11xx_system_calibrate(NULL, 0x3f);
+	if(err != LR11XX_STATUS_OK) return err;	
+	
 	err = lr11xx_system_clear_errors(NULL);
 	if(err != LR11XX_STATUS_OK) return err;	
 	err = lr11xx_system_clear_irq_status(NULL, LR11XX_SYSTEM_IRQ_ALL_MASK);
 	if(err != LR11XX_STATUS_OK) return err;	
-	//err = lr11xx_system_calibrate(NULL, 0x3f);
-	//if(err != LR11XX_STATUS_OK) return err;	
-	err = lr11xx_system_set_standby(NULL,LR11XX_SYSTEM_STANDBY_CFG_XOSC);
-	if(err != LR11XX_STATUS_OK) return err;	
-	delay_ms(10);
+	
 	err = lr11xx_system_get_version(NULL, &version);
 	if(err != LR11XX_STATUS_OK) return err;	
+	
 	err = lr11xx_radio_set_pkt_type(NULL,LR11XX_RADIO_PKT_TYPE_LORA);
-	if(err != LR11XX_STATUS_OK) return err;
-	err = LR112X_set_freq(radioconfig.freq);
-	if(err != LR11XX_STATUS_OK) return err;
-	err = lr11xx_radio_set_tx_params(NULL,radioconfig.txpower,LR11XX_RADIO_RAMP_16_US);
 	if(err != LR11XX_STATUS_OK) return err;
 	err = LR112x_set_mod_params(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
 	if(err != LR11XX_STATUS_OK) return err;
 	err = LR112x_set_packet_params(radioconfig.sync,radioconfig.prelen,radioconfig.paylen,radioconfig.header,radioconfig.crc,radioconfig.invertiq);
 	if(err != LR11XX_STATUS_OK) return err;
-	err = lr11xx_radio_set_rx_tx_fallback_mode(NULL,LR11XX_RADIO_FALLBACK_STDBY_XOSC);
+	err = LR112X_set_freq(radioconfig.freq); //PA config here
 	if(err != LR11XX_STATUS_OK) return err;
-	err = lr11xx_radio_cfg_rx_boosted(NULL, 0x00);// enable_boost_mode
+	err = lr11xx_radio_set_tx_params(NULL,radioconfig.txpower,LR11XX_RADIO_RAMP_16_US);
 	if(err != LR11XX_STATUS_OK) return err;
 	err = lr11xx_system_calibrate_image(NULL,radioconfig.freq / 4000000, radioconfig.freq / 4000000 + 2); //must be rewritted
 	if(err != LR11XX_STATUS_OK) return err;
 	//calibrate RSSI
 	LR112X_RssiCal(radioconfig.freq);
+	
 	err = lr11xx_system_set_dio_irq_params(NULL,LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR,LR11XX_SYSTEM_IRQ_NONE);
+	if(err != LR11XX_STATUS_OK) return err;
+	err = lr11xx_radio_set_rx_tx_fallback_mode(NULL,LR11XX_RADIO_FALLBACK_STDBY_XOSC);
+	if(err != LR11XX_STATUS_OK) return err;
+	err = lr11xx_radio_cfg_rx_boosted(NULL, 0x00);// enable_boost_mode
 	if(err != LR11XX_STATUS_OK) return err;
 	LR112X_setopmode(RADIO_OPMODE_RX);
 	return LR11XX_STATUS_OK;
@@ -192,7 +201,7 @@ void LR112X_setopmode(uint8_t mode)
     case RADIO_OPMODE_RX:
     default:
 		opmode = RADIO_OPMODE_RX;
-    lr11xx_radio_set_rx(NULL,0); //temp.
+    lr11xx_radio_set_rx(NULL,0xffffff); //temp.
     break;
 
     case RADIO_OPMODE_TXSTREAMCW:
