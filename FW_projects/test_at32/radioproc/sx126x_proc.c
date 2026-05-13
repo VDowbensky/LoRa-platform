@@ -19,22 +19,37 @@ sx126x_status_t SX126x_init(void)
 		err = sx126x_cal(NULL,SX126X_CAL_ALL);
 		if(err != SX126X_STATUS_OK) return err;
 	}
+	err = (int8_t)sx126x_set_pkt_type(NULL,SX126X_PKT_TYPE_LORA);
+	if(err != SX126X_STATUS_OK) return err;
 	err = sx126x_set_rf_freq(NULL,radioconfig.freq);
 	if(err != SX126X_STATUS_OK) return err;
-	err = sx126x_set_tx_params(NULL,radioconfig.txpower,SX126X_RAMP_10_US);
-	if(err != SX126X_STATUS_OK) return err;
-	err = (int8_t)sx126x_set_pkt_type(NULL,SX126X_PKT_TYPE_LORA);
+	err = sx126x_set_buffer_base_address(NULL,0,0);
 	if(err != SX126X_STATUS_OK) return err;
 	err = SX126x_set_mod_params(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
 	if(err != SX126X_STATUS_OK) return err;
 	err = SX126x_set_packet_params(radioconfig.sync,radioconfig.prelen,radioconfig.paylen,radioconfig.header,radioconfig.crc,radioconfig.invertiq);
 	if(err != SX126X_STATUS_OK) return err;
+	err = sx126x_set_rx_with_timeout_in_rtc_step(NULL,0xffffff);
+	if(err != SX126X_STATUS_OK) return err;
 	SX126X_CalibrateIR();
+	//err = sx126x_cal_img_in_mhz( const void* context, const uint16_t freq1_in_mhz, const uint16_t freq2_in_mhz )
+	//if(err != SX126X_STATUS_OK) return err;
 	if(sx126x_tcxo == 0) //TCXO off
 	{
-		err = (int8_t)sx126x_set_trimming_capacitor_values(NULL,sx126x_xtatrim,sx126x_xtbtrim);
+		err = sx126x_set_trimming_capacitor_values(NULL,sx126x_xtatrim,sx126x_xtbtrim);
 		if(err != RADIO_OK) return err;
 	}
+	sx126x_pa_cfg_params_t pa_cfg;
+	pa_cfg.device_sel = 0;
+	pa_cfg.hp_max = 7;
+	pa_cfg.pa_duty_cycle = 4;
+	pa_cfg.pa_lut = 1;
+	err = sx126x_set_pa_cfg(NULL,&pa_cfg);
+	if(err != SX126X_STATUS_OK) return err;
+	err = sx126x_set_ocp_value(NULL,56); //140mA
+	if(err != SX126X_STATUS_OK) return err;
+	err = sx126x_set_tx_params(NULL,radioconfig.txpower,SX126X_RAMP_10_US);
+	if(err != SX126X_STATUS_OK) return err;
 	err = (int8_t)sx126x_cfg_rx_boosted(NULL,true);
 	if(err != RADIO_OK) return err;
 	err = (int8_t)sx126x_set_dio2_as_rf_sw_ctrl(NULL,true);
@@ -47,6 +62,7 @@ sx126x_status_t SX126x_init(void)
 
 sx126x_status_t SX126x_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
 {
+	sx126x_status_t err;
 	uint8_t bw_value;
 	sx126x_mod_params_lora_t modparams;
 	if(bw_khz <= 8) bw_value = SX126X_LORA_BW_007;
@@ -63,7 +79,9 @@ sx126x_status_t SX126x_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint
 	modparams.cr = (sx126x_lora_cr_t)cr;
 	modparams.sf = (sx126x_lora_sf_t)sf;
 	modparams.ldro = ldropt;
-	return sx126x_set_lora_mod_params(NULL,&modparams);
+	err = sx126x_set_lora_mod_params(NULL,&modparams);
+	if(err != RADIO_OK) return err;
+	return sx126x_tx_modulation_workaround(NULL,SX126X_PKT_TYPE_LORA,(sx126x_lora_bw_t)bw_value);
 }
 
 sx126x_status_t SX126x_set_packet_params(uint8_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq)

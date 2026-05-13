@@ -227,9 +227,14 @@ void cli_getpower(int argc, char **argv)
 void cli_setpower(int argc, char **argv)
 {
 	//check power parameter here!
-	uint8_t err = radio_set_power(ciGetSigned(argv[1]));
+	int8_t dbm = ciGetSigned(argv[1]);
+	uint8_t err = radio_set_power(dbm);
 	printf("SET_POWER: ");
-	if(err == RADIO_OK) printf("%d dBm\r\n",radioconfig.txpower);
+	if(err == RADIO_OK) 
+	{
+		radioconfig.txpower = dbm;
+		printf("%d dBm\r\n",dbm);
+	}
   else printerror(err);
 }
 

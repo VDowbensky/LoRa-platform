@@ -173,23 +173,33 @@ int8_t radio_set_power(int8_t dbm)
 	switch(radioconfig.chip)
 	{
 		case 1262:
-		err = (int8_t)sx126x_set_tx_params(NULL,dbm,SX126X_RAMP_10_US);
+		if((dbm < -9) || (dbm > 22)) err = RADIO_INVALID_PARAMETER;
+		else err = (int8_t)sx126x_set_tx_params(NULL,dbm,SX126X_RAMP_10_US);
 		break;
 		
 		case 1280:
-		err = (int8_t)sx128x_set_tx_params(NULL,dbm,SX128X_RAMP_02_US);
+		if((dbm < -18) || (dbm > 13)) err = RADIO_INVALID_PARAMETER;
+		else err = (int8_t)sx128x_set_tx_params(NULL,dbm,SX128X_RAMP_10_US);
 		break;
 		
 		case 1121:
-		err = (int8_t)lr11xx_radio_set_tx_params(NULL,dbm,LR11XX_RADIO_RAMP_16_US);
+//		- 17dBm (0xEF) to +14dBm (0x0E) by steps of 1dB if the low power PA is selected
+//		- 9dBm (0xF7) to +22dBm (0x16) by steps of 1dB if the high power PA is selected
+//		-18dBm (0xEE) to +13dBm (0x0F) by steps of 1dB if the high frequency PA is selected
+		if((dbm < -18) || (dbm > 22)) err = RADIO_INVALID_PARAMETER; //must be corrected
+		else err = (int8_t)lr11xx_radio_set_tx_params(NULL,dbm,LR11XX_RADIO_RAMP_16_US);
 		break;
 		
 		case 2021:
-		err = (int8_t)lr20xx_radio_common_set_tx_params(NULL,dbm*2, LR20XX_RADIO_COMMON_RAMP_32_US);
+//		PA_LF: [-19: 44] corresponding to output power range of [-9.5:22]dBm
+//		PA_HF: [-39: 24] corresponding to output power range of [-19.5:12]dBm
+		if((dbm < -19) || (dbm > 22)) err = RADIO_INVALID_PARAMETER; //must be corrected
+		else err = (int8_t)lr20xx_radio_common_set_tx_params(NULL,dbm*2, LR20XX_RADIO_COMMON_RAMP_16_US);
 		break;
 		
 		case 3029:
-		PAN_setpower(dbm);
+		if((dbm < 0) || (dbm > 20)) err = RADIO_INVALID_PARAMETER;
+		else PAN_setpower(dbm);
 		break;
 		
 		default:

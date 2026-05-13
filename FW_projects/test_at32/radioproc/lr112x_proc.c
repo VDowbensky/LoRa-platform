@@ -108,8 +108,13 @@ lr11xx_status_t LR112X_set_freq(uint32_t Hz)
 {
 	lr11xx_status_t err = lr11xx_radio_set_rf_freq(NULL, Hz);
 	if(err != LR11XX_STATUS_OK) return err;
-	if (Hz < 1900000000) return lr11xx_radio_set_pa_cfg(NULL, &pa_config_subGHz);
-	else return lr11xx_radio_set_pa_cfg(NULL, &pa_config_HF);
+	if (Hz < 1900000000) err = lr11xx_radio_set_pa_cfg(NULL, &pa_config_subGHz);
+	else err = lr11xx_radio_set_pa_cfg(NULL, &pa_config_HF);
+	if(err != LR11XX_STATUS_OK) return err;
+	if(Hz < 600000000) err = lr11xx_radio_set_rssi_calibration(NULL,&calib_0_600);
+	else if(Hz < 2000000000) err = lr11xx_radio_set_rssi_calibration(NULL,&calib_600_2000);
+	else err = lr11xx_radio_set_rssi_calibration(NULL,&calib_2000_2700);
+	return err;
 }
 
 lr11xx_status_t LR112x_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
