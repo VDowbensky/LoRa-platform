@@ -3,92 +3,148 @@
 #include "radio_proc.h"
 
 void LR202x_printerrors(void);
-void LR202x_printstatus(void);
+void LR20xx_printstatus(void);
+
+const lr20xx_radio_common_pa_cfg_t pa_config_lf = 
+{
+	.pa_sel = LR20XX_RADIO_COMMON_PA_SEL_LF,
+	.pa_lf_mode = LR20XX_RADIO_COMMON_PA_LF_MODE_FSM,
+	.pa_lf_duty_cycle = 7,
+	.pa_lf_slices = 6,
+	.pa_hf_duty_cycle = 16
+};
+
+const lr20xx_radio_common_pa_cfg_t pa_config_hf =
+{
+	.pa_sel = LR20XX_RADIO_COMMON_PA_SEL_HF,
+	.pa_lf_mode = LR20XX_RADIO_COMMON_PA_LF_MODE_FSM,
+	.pa_lf_duty_cycle = 7,
+	.pa_lf_slices = 6,
+	.pa_hf_duty_cycle = 16
+};
+
+//typedef struct
+//{
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g1;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g2;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g3;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g4;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g5;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g6;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g7;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g8;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g9;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g10;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g11;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g12_boost0;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g12_boost1;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g12_boost2;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g12_boost3;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g12_boost4;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g12_boost5;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g12_boost6;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g12_boost7;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g13_boost0;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g13_boost1;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g13_boost2;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g13_boost3;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g13_boost4;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g13_boost5;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g13_boost6;
+//    lr20xx_radio_common_rssi_calibration_gain_item_t g13_boost7;
+//} lr20xx_radio_common_rssi_calibration_gain_table_t;
+
+//typedef struct
+//{
+//    uint16_t gain_value;    //!< Gain value expressed on 10 bits fix point decimal format 8.2
+//    uint8_t  noise_figure;  //!< Noise figure value expressed on 8 bits unsigned fix point decimal format 6.2
+//} lr20xx_radio_common_rssi_calibration_gain_item_t;
+
+
+const lr20xx_radio_common_rssi_calibration_gain_table_t rssi_cal_table_lf = 
+{
+	
+};
+
+const lr20xx_radio_common_rssi_calibration_gain_table_t rssi_cal_table_hf =
+{
+	
+};
 
 lr20xx_status_t LR202x_init(void)
 {
+	//system init
 	lr20xx_system_version_t version;
 	lr20xx_status_t err = lr20xx_system_reset(NULL);
-	printf("err0:%d\r\n",err);
 	if(err != LR20XX_STATUS_OK) return err;
 	//delay_ms(500);
 	// Workaround SIMO
 	const uint32_t freq_val = 2.8e6 * 1.048576;
 	err = lr20xx_regmem_write_regmem32( NULL, 0x80004c, &freq_val, 1 );
-	printf("err1:%d\r\n",err);
 	if(err != LR20XX_STATUS_OK) return err;
 	// Configure the regulator
 	err = lr20xx_system_set_reg_mode(NULL,LR20XX_SYSTEM_REG_MODE_DCDC); // DC-DC
-	printf("err2:%d\r\n",err);
 	if(err != LR20XX_STATUS_OK) return err;
 	err = lr20xx_system_cfg_lfclk(NULL, LR20XX_SYSTEM_LFCLK_RC);//32.768
-	printf("err3:%d\r\n",err);
 	if(err != LR20XX_STATUS_OK) return err;
 	uint16_t errors;
 	err = lr20xx_system_get_errors( NULL, &errors );
-	printf("err4:%d\r\n",err);
 	if(err != LR20XX_STATUS_OK) return err;
 	if(errors != 0) 
 	{
 		err = lr20xx_system_clear_errors(NULL);
-		printf("err5:%d\r\n",err);
 		if(err != LR20XX_STATUS_OK) return err;
 	}
 	err = lr20xx_system_clear_irq_status(NULL, LR20XX_SYSTEM_IRQ_ALL_MASK);
-	printf("err7:%d\r\n",err);
 	if(err != LR20XX_STATUS_OK) return err;
-	lr20xx_system_set_dio_function( NULL, LR20XX_SYSTEM_DIO_9, LR20XX_SYSTEM_DIO_FUNC_IRQ, LR20XX_SYSTEM_DIO_DRIVE_PULL_UP );
-	lr20xx_system_set_dio_irq_cfg( NULL, LR20XX_SYSTEM_DIO_9,  NULL, LR20XX_SYSTEM_DIO_9, LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR);
-	lr20xx_system_cfg_clk_output( NULL, LR20XX_SYSTEM_HF_CLK_SCALING_32_MHZ );
+	err = lr20xx_system_set_dio_function( NULL, LR20XX_SYSTEM_DIO_9, LR20XX_SYSTEM_DIO_FUNC_IRQ, LR20XX_SYSTEM_DIO_DRIVE_PULL_UP );
+	if(err != LR20XX_STATUS_OK) return err;
+	err = lr20xx_system_set_dio_irq_cfg( NULL, LR20XX_SYSTEM_DIO_9,LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR);
+	if(err != LR20XX_STATUS_OK) return err;
+	err = lr20xx_system_cfg_clk_output( NULL, LR20XX_SYSTEM_HF_CLK_SCALING_32_MHZ );
+	if(err != LR20XX_STATUS_OK) return err;
 	
-	//TCXO
-	if(lr202x_tcxo) 
-	{
-		err = lr20xx_system_set_tcxo_mode(NULL,LR20XX_SYSTEM_TCXO_CTRL_3_0V,64000); //check
-		printf("err3:%d\r\n",err);
-		if(err != LR20XX_STATUS_OK) return err;
-	}
+	//TCXO - not needed
+//	if(lr202x_tcxo) 
+//	{
+//		err = lr20xx_system_set_tcxo_mode(NULL,LR20XX_SYSTEM_TCXO_CTRL_3_0V,64000); //check
+//		printf("err3:%d\r\n",err);
+//		if(err != LR20XX_STATUS_OK) return err;
+//	}
 	
 	//IRQ 
 	err = lr20xx_system_set_dio_function( NULL, LR20XX_SYSTEM_DIO_9, LR20XX_SYSTEM_DIO_FUNC_IRQ, LR20XX_SYSTEM_DIO_DRIVE_PULL_UP );
-	printf("err8:%d\r\n",err);
 	if(err != LR20XX_STATUS_OK) return err;
 	err = lr20xx_system_set_dio_irq_cfg( NULL, LR20XX_SYSTEM_DIO_9, LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR);
-	printf("err9:%d\r\n",err);
 	if(err != LR20XX_STATUS_OK) return err;
 	err = lr20xx_system_cfg_clk_output( NULL, LR20XX_SYSTEM_HF_CLK_SCALING_32_MHZ );
-	printf("err10:%d\r\n",err);
 	if(err != LR20XX_STATUS_OK) return err;
 	//Calibration
 	lr20xx_radio_common_front_end_calibration_value_t front_end_calibration_structures[3] = { 0 };
-	LR20xx_bsp_get_front_end_calibration_cfg( NULL, front_end_calibration_structures );
-	err = lr20xx_radio_common_calibrate_front_end_helper( NULL, front_end_calibration_structures, 3 );
-	printf("err11:%d\r\n",err);
-	
+	LR20xx_bsp_get_front_end_calibration_cfg(NULL,front_end_calibration_structures);
+	err = lr20xx_radio_common_calibrate_front_end_helper(NULL,front_end_calibration_structures,3);
 	if(err != LR20XX_STATUS_OK) return err;
+	
+	err = lr20xx_radio_common_set_rssi_calibration(NULL,&rssi_cal_table_lf,&rssi_cal_table_hf);
+	if(err != LR20XX_STATUS_OK) return err;
+	
 	err = lr20xx_system_get_version(NULL, &version);
-	printf("err12:%d\r\n",err);			
+	if(err != LR20XX_STATUS_OK) return err;
+	
+//radio init	
+	err = lr20xx_radio_common_set_pkt_type(NULL, LR20XX_RADIO_COMMON_PKT_TYPE_LORA);
 	if(err != LR20XX_STATUS_OK) return err;
 	err = LR202x_set_freq(radioconfig.freq);
-	printf("err13:%d\r\n",err);	
-	if(err != LR20XX_STATUS_OK) return err;
+	if(err != LR20XX_STATUS_OK) return err; //PA config and RX path also
 	err = lr20xx_radio_common_set_tx_params(NULL,radioconfig.txpower*2, LR20XX_RADIO_COMMON_RAMP_16_US);
-	printf("err14:%d\r\n",err);	
-	if(err != LR20XX_STATUS_OK) return err;
-	err = lr20xx_radio_common_set_pkt_type(NULL, LR20XX_RADIO_COMMON_PKT_TYPE_LORA);
-	printf("err15:%d\r\n",err);	
-	if(err != LR20XX_STATUS_OK) return err;
-	err = LR202x_set_mod_params(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
-	printf("err16:%d\r\n",err);	
-	if(err != LR20XX_STATUS_OK) return err;
-	err = LR202x_set_packet_params(radioconfig.sync,radioconfig.prelen,radioconfig.paylen,radioconfig.header,radioconfig.crc,radioconfig.invertiq);
-	printf("err17:%d\r\n",err);	
 	if(err != LR20XX_STATUS_OK) return err;
 	err = lr20xx_radio_common_set_rx_tx_fallback_mode(NULL, LR20XX_RADIO_FALLBACK_STDBY_XOSC);	//???
-	printf("err18:%d\r\n",err);	
 	if(err != LR20XX_STATUS_OK) return err;
-	//DIO,IRQ
-	
+	err = LR202x_set_mod_params(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
+	if(err != LR20XX_STATUS_OK) return err;
+	err = LR202x_set_packet_params(radioconfig.sync,radioconfig.prelen,radioconfig.paylen,radioconfig.header,radioconfig.crc,radioconfig.invertiq);
+	if(err != LR20XX_STATUS_OK) return err;
+
 	LR202x_setopmode(RADIO_OPMODE_RX);
 	return RADIO_OK;
 }
@@ -97,7 +153,7 @@ lr20xx_status_t LR202x_set_freq(uint32_t Hz)
 {
 	lr20xx_status_t err = lr20xx_radio_common_set_rf_freq(NULL, Hz);
 	if(err != LR20XX_STATUS_OK) return err;
-	if (Hz < 1900000000) 
+	if (Hz < LR20XX_SEPARATION_FREQ) 
 	{ // SubGHz
 		err = lr20xx_radio_common_set_pa_cfg(NULL, &pa_config_lf);
 		if(err != LR20XX_STATUS_OK) return err;
@@ -193,7 +249,8 @@ void LR202x_setopmode(uint8_t mode)
     case RADIO_OPMODE_RX:
     default:
 		opmode = RADIO_OPMODE_RX;
-    lr20xx_radio_common_set_rx(NULL,0xffffff); //temp.
+    lr20xx_radio_common_set_rx(NULL,0); //temp.
+		lr20xx_radio_fifo_clear_rx(NULL);
     break;
 
     case RADIO_OPMODE_TXSTREAMCW:
@@ -237,53 +294,29 @@ void LR20xx_printerrors(void)
 
 void LR20xx_bsp_get_front_end_calibration_cfg(const void* context, lr20xx_radio_common_front_end_calibration_value_t *front_end_calibration_structures)
 {
-    lr20xx_radio_common_rx_path_t            rx_path    = LR20XX_RADIO_COMMON_RX_PATH_LF;
-    lr20xx_radio_common_rx_path_boost_mode_t boost_mode = LR20XX_RADIO_COMMON_RX_PATH_BOOST_MODE_NONE;
-
-    uint32_t freq_in_hz[3] = {
-        470000000,   // Frequency 0 (range from 430MHz to 510MHz)
-        897500000,   // Frequency 1 (range from 867MHz to 928MHz)
-        2441000000,  // Frequency 2 (range from 2.403GHz to 2.479GHz)
-    };
-
-    for( uint8_t i = 0; i < 3; i++ )
-    {
-        LR20xx_bsp_get_rx_cfg( context, freq_in_hz[i], &rx_path, &boost_mode );
-        front_end_calibration_structures[i].rx_path = rx_path;
-        front_end_calibration_structures[i].frequency_in_hertz = freq_in_hz[i];
-    };
+	lr20xx_radio_common_rx_path_t rx_path = LR20XX_RADIO_COMMON_RX_PATH_LF;
+	lr20xx_radio_common_rx_path_boost_mode_t boost_mode = LR20XX_RADIO_COMMON_RX_PATH_BOOST_MODE_NONE;
+	uint32_t freq_in_hz[3] = 
+	{
+		470000000,   // Frequency 0 (range from 430MHz to 510MHz)
+		897500000,   // Frequency 1 (range from 867MHz to 928MHz)
+		2441000000,  // Frequency 2 (range from 2.403GHz to 2.479GHz)
+	};
+	for( uint8_t i = 0; i < 3; i++ )
+	{
+		LR20xx_bsp_get_rx_cfg( context, freq_in_hz[i], &rx_path, &boost_mode );
+		front_end_calibration_structures[i].rx_path = rx_path;
+		front_end_calibration_structures[i].frequency_in_hertz = freq_in_hz[i];
+	};
 }
 
 void LR20xx_bsp_get_rx_cfg( const void* context, const uint32_t freq_in_hz, lr20xx_radio_common_rx_path_t* rx_path,lr20xx_radio_common_rx_path_boost_mode_t* boost_mode )
 {
-    if( freq_in_hz >= 1600000000 )  // 1.6GHz
-    {
-        *rx_path = LR20XX_RADIO_COMMON_RX_PATH_HF;
-    }
-    else
-    {
-        *rx_path = LR20XX_RADIO_COMMON_RX_PATH_LF;
-    }
-
-    *boost_mode = LR20XX_RADIO_COMMON_RX_PATH_BOOST_MODE_NONE;
+	if( freq_in_hz >= 1600000000 ) *rx_path = LR20XX_RADIO_COMMON_RX_PATH_HF; // 1.6GHz
+	else *rx_path = LR20XX_RADIO_COMMON_RX_PATH_LF;
+	*boost_mode = LR20XX_RADIO_COMMON_RX_PATH_BOOST_MODE_NONE;
 }
 
-const lr20xx_radio_common_pa_cfg_t pa_config_lf = 
-{
-	.pa_sel = LR20XX_RADIO_COMMON_PA_SEL_LF,
-	.pa_lf_mode = LR20XX_RADIO_COMMON_PA_LF_MODE_FSM,
-	.pa_lf_duty_cycle = 7,
-	.pa_lf_slices = 6,
-	.pa_hf_duty_cycle = 16
-};
 
-const lr20xx_radio_common_pa_cfg_t pa_config_hf =
-{
-	.pa_sel = LR20XX_RADIO_COMMON_PA_SEL_HF,
-	.pa_lf_mode = LR20XX_RADIO_COMMON_PA_LF_MODE_FSM,
-	.pa_lf_duty_cycle = 7,
-	.pa_lf_slices = 6,
-	.pa_hf_duty_cycle = 16
-};
 
 

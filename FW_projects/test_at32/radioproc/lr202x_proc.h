@@ -4,7 +4,7 @@
 #include "bsp.h"
 #include "lr20xx.h"
 
-#define LR20XX_SEPARATION_FREQ 950000000UL
+#define LR20XX_SEPARATION_FREQ 1000000000UL
 
 lr20xx_status_t LR202x_init(void);
 lr20xx_status_t LR202x_set_freq(uint32_t Hz);

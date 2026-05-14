@@ -18,6 +18,8 @@ sx126x_status_t SX126x_init(void)
 		if(err != SX126X_STATUS_OK) return err;
 		err = sx126x_cal(NULL,SX126X_CAL_ALL);
 		if(err != SX126X_STATUS_OK) return err;
+		err = sx126x_clear_device_errors(NULL);
+		if(err != SX126X_STATUS_OK) return err;
 	}
 	err = (int8_t)sx126x_set_pkt_type(NULL,SX126X_PKT_TYPE_LORA);
 	if(err != SX126X_STATUS_OK) return err;
