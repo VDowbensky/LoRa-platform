@@ -242,6 +242,38 @@ void LR112X_printerrors(void)
 	printf("Errors: 0x%04X\r\n",errors);
 }
 
+void LR112X_irq_handler(void)
+{
+	//read status
+	uint32_t irqstatus;
+	lr11xx_system_get_irq_status(NULL,&irqstatus);
+	lr11xx_system_clear_irq_status(NULL,LR11XX_SYSTEM_IRQ_ALL_MASK);
+	//printf("IRQ:0x%08X\r\n",irqstatus);
+	if(irqstatus & LR11XX_SYSTEM_IRQ_TX_DONE) packet_sent = true;
+	if(irqstatus & LR11XX_SYSTEM_IRQ_RX_DONE) packet_received = true;
+	if(irqstatus & LR11XX_SYSTEM_IRQ_CRC_ERROR) crc_error = true;
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_PREAMBLE_DETECTED) {};
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_SYNC_WORD_HEADER_VALID) {};
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_HEADER_ERROR) {};
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_CAD_DONE) {};
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_CAD_DETECTED) {};
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_TIMEOUT) {};
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_LR_FHSS_INTRA_PKT_HOP) {};
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_REQ_VALID) {};	
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_REQ_DISCARDED) {};	
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_RESP_DONE) {};	
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_EXCH_VALID) {};	
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_TIMEOUT) {};		
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_GNSS_SCAN_DONE) {};		
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_WIFI_SCAN_DONE) {};	
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_EOL) {};	
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_CMD_ERROR) {};		
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_ERROR) {};	
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_FSK_LEN_ERROR) {};	
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_FSK_ADDR_ERROR) {};	
+	//if(irqstatus & LR11XX_SYSTEM_IRQ_LORA_RX_TIMESTAMP) {};	
+}
+
 //GainOffset: Global offset added to the Gain Tune values. The offset is a 12-bit signed value, where 1lsb = 0.5dB.
 //The power seen by the LR1121 analog front-end is affected by external components such as the matching network, or RF switches. An incorrect RSSI results in a sensitivity degradation in (G)FSK mode and an incorrect gain selection in LoRa and GFSK mode. An incorrect gain can result in a missed detection (packet loss) or decreased resistance to interference.
 //By default, the chip is calibrated for the 868-915MHz band on the LR1121 EVK.

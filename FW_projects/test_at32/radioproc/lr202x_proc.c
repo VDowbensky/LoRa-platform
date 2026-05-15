@@ -115,7 +115,7 @@ lr20xx_status_t LR202x_init(void)
 	//IRQ 
 	err = lr20xx_system_set_dio_function( NULL, LR20XX_SYSTEM_DIO_9, LR20XX_SYSTEM_DIO_FUNC_IRQ, LR20XX_SYSTEM_DIO_DRIVE_PULL_UP );
 	if(err != LR20XX_STATUS_OK) return err;
-	err = lr20xx_system_set_dio_irq_cfg( NULL, LR20XX_SYSTEM_DIO_9, LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR);
+	err = lr20xx_system_set_dio_irq_cfg( NULL, LR20XX_SYSTEM_DIO_9, LR20XX_SYSTEM_IRQ_TX_DONE | LR20XX_SYSTEM_IRQ_RX_DONE | LR20XX_SYSTEM_IRQ_CRC_ERROR);
 	if(err != LR20XX_STATUS_OK) return err;
 	err = lr20xx_system_cfg_clk_output( NULL, LR20XX_SYSTEM_HF_CLK_SCALING_32_MHZ );
 	if(err != LR20XX_STATUS_OK) return err;
@@ -124,9 +124,11 @@ lr20xx_status_t LR202x_init(void)
 	LR20xx_bsp_get_front_end_calibration_cfg(NULL,front_end_calibration_structures);
 	err = lr20xx_radio_common_calibrate_front_end_helper(NULL,front_end_calibration_structures,3);
 	if(err != LR20XX_STATUS_OK) return err;
-	
-	err = lr20xx_radio_common_set_rssi_calibration(NULL,&rssi_cal_table_lf,&rssi_cal_table_hf);
-	if(err != LR20XX_STATUS_OK) return err;
+//	
+//	err = lr20xx_radio_common_set_rssi_calibration(NULL,&rssi_cal_table_lf,&rssi_cal_table_hf);
+//	if(err != LR20XX_STATUS_OK) return err;
+//	err = lr20xx_radio_common_set_agc_gain(NULL,LR20XX_RADIO_COMMON_GAIN_STEP_AUTO); //LR20XX_RADIO_COMMON_GAIN_STEP_G10); //LR20XX_RADIO_COMMON_GAIN_STEP_AUTO = 0x00
+//	if(err != LR20XX_STATUS_OK) return err;
 	
 	err = lr20xx_system_get_version(NULL, &version);
 	if(err != LR20XX_STATUS_OK) return err;
@@ -315,6 +317,41 @@ void LR20xx_bsp_get_rx_cfg( const void* context, const uint32_t freq_in_hz, lr20
 	if( freq_in_hz >= 1600000000 ) *rx_path = LR20XX_RADIO_COMMON_RX_PATH_HF; // 1.6GHz
 	else *rx_path = LR20XX_RADIO_COMMON_RX_PATH_LF;
 	*boost_mode = LR20XX_RADIO_COMMON_RX_PATH_BOOST_MODE_NONE;
+}
+
+void LR20xx_irq_handler(void)
+{
+	//read status
+	uint32_t irqstatus;
+	lr20xx_system_get_and_clear_irq_status(NULL,&irqstatus);
+	if(irqstatus & LR20XX_SYSTEM_IRQ_TX_DONE) packet_sent = true;
+	if(irqstatus & LR20XX_SYSTEM_IRQ_RX_DONE) packet_received = true;
+	if(irqstatus & LR20XX_SYSTEM_IRQ_CRC_ERROR) crc_error = true;
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_FIFO_RX) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_FIFO_TX) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_TX_TIMESTAMP) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_RX_TIMESTAMP) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_PREAMBLE_DETECTED) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_SYNC_WORD_HEADER_VALID) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_INTRA_PKT_HOP) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_CAD_DETECTED) {};	
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_LORA_RX_HEADER_TIMESTAMP) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_LORA_HEADER_ERROR) {};	
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_LOW_BATTERY) {};	
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_PA_OVP_OCP) {};	
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_ERROR) {};	
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_CMD_ERROR) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_CAD_DONE) {};	
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_TIMEOUT) {};		
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_LEN_ERROR) {};	
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_ADDR_ERROR) {};	
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_INTRA_PKT_HOP) {};	
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_RDY_FOR_NEW_FREQ_TABLE) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_RDY_FOR_NEW_PAYLOAD) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_RESPONDER_RESPONSE_DONE) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_RESPONDER_REQUEST_DISCARDED) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_INITIATOR_EXCHANGE_VALID) {};
+	//if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_INITIATOR_TIMEOUT) {};
 }
 
 

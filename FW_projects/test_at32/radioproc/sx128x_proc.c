@@ -140,3 +140,27 @@ void SX128X_CalcPreamble(uint32_t prelen,uint8_t *m,uint8_t *e)
 	*m = preamble_m;
 	*e = preamble_e;
 }
+
+void SX128X_irq_handler(void)
+{
+	//read status
+	uint16_t irqstatus;
+	sx128x_get_irq_status(NULL,&irqstatus);
+	sx128x_clear_irq_status(NULL,SX128X_IRQ_ALL);
+	if(irqstatus & SX128X_IRQ_TX_DONE) packet_sent = true;
+	if(irqstatus & SX128X_IRQ_RX_DONE) packet_received = true;
+	if(irqstatus & SX128X_IRQ_CRC_ERROR) crc_error = true;
+	//if(irqstatus & SX128X_IRQ_SYNCWORD_VALID) {};
+	//if(irqstatus & SX128X_IRQ_SYNCWORD_ERROR) {};
+	//if(irqstatus & SX128X_IRQ_HEADER_VALID) {};
+	//if(irqstatus & SX128X_IRQ_HEADER_ERROR) {};
+	//if(irqstatus & SX128X_IRQ_RANGING_SLAVE_RESPONSE_DONE) {};
+	//if(irqstatus & SX128X_IRQ_RANGING_SLAVE_REQUEST_DISCARDED) {};
+	//if(irqstatus & SX128X_IRQ_RANGING_MASTER_RESULT_VALID) {};
+	//if(irqstatus & SX128X_IRQ_RANGING_MASTER_RESULT_TIMEOUT) {};
+	//if(irqstatus & SX128X_IRQ_RANGING_SLAVE_REQUEST_VALID) {};
+	//if(irqstatus & SX128X_IRQ_CAD_DONE) {};
+	//if(irqstatus & SX128X_IRQ_CAD_ACTIVITY_DETECTED) {};
+	//if(irqstatus & SX128X_IRQ_RX_TX_TIMEOUT) {};
+	//if(irqstatus & SX128X_IRQ_PREAMBLE_DETECTED) {};
+}

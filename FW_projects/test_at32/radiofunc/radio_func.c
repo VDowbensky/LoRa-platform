@@ -365,7 +365,7 @@ int8_t radio_getpktstatus(rxpacketstatus_t *status)
 			err = (int8_t)lr20xx_radio_lora_get_packet_status(NULL,&pktstatus);
 			if(err != RADIO_OK) return err;
 			status->rssi_pkt = pktstatus.rssi_pkt_in_dbm;
-			status->snr_pkt = pktstatus.snr_pkt_raw;
+			status->snr_pkt = pktstatus.snr_pkt_raw / 4.0;
 			status->signal_rssi_pkt = pktstatus.rssi_signal_pkt_in_dbm;
 			return RADIO_OK;
 		}
@@ -511,120 +511,18 @@ void radio_irq_handler(void)
   switch(radioconfig.chip)
   {
     case 1262:
-		{
-			//read SX126x status
-			uint16_t irqstatus;
-			sx126x_get_irq_status(NULL,&irqstatus);
-			sx126x_clear_irq_status(NULL,SX126X_IRQ_ALL);
-			//printf("Flags:0x%02X\r\n",irqstatus);
-			if(irqstatus & SX126X_IRQ_TX_DONE) packet_sent = true;
-			if(irqstatus & SX126X_IRQ_RX_DONE) packet_received = true;
-			if(irqstatus & SX126X_IRQ_CRC_ERROR) crc_error = true;
-//			if(irqstatus & SX126X_IRQ_PREAMBLE_DETECTED) {};
-//			if(irqstatus & SX126X_IRQ_SYNC_WORD_VALID) {};
-//			if(irqstatus & SX126X_IRQ_HEADER_VALID) {};
-//			if(irqstatus & SX126X_IRQ_HEADER_ERROR) {};
-//			if(irqstatus & SX126X_IRQ_CAD_DONE) {};
-//			if(irqstatus & SX126X_IRQ_CAD_DETECTED) {};
-//			if(irqstatus & SX126X_IRQ_TIMEOUT) {};
-//			if(irqstatus & SX126X_IRQ_LR_FHSS_HOP) {};
-			break;   
-		}
-		
+		SX126X_irq_handler();
+		break;  
+
     case 1280:
-		{
-			//read status
-			uint16_t irqstatus;
-			sx128x_get_irq_status(NULL,&irqstatus);
-			sx128x_clear_irq_status(NULL,SX128X_IRQ_ALL);
-			if(irqstatus & SX128X_IRQ_TX_DONE) packet_sent = true;
-			if(irqstatus & SX128X_IRQ_RX_DONE) packet_received = true;
-			if(irqstatus & SX128X_IRQ_CRC_ERROR) crc_error = true;
-//			if(irqstatus & SX128X_IRQ_SYNCWORD_VALID) {};
-//			if(irqstatus & SX128X_IRQ_SYNCWORD_ERROR) {};
-//			if(irqstatus & SX128X_IRQ_HEADER_VALID) {};
-//			if(irqstatus & SX128X_IRQ_HEADER_ERROR) {};
-//			if(irqstatus & SX128X_IRQ_RANGING_SLAVE_RESPONSE_DONE) {};
-//			if(irqstatus & SX128X_IRQ_RANGING_SLAVE_REQUEST_DISCARDED) {};
-//			if(irqstatus & SX128X_IRQ_RANGING_MASTER_RESULT_VALID) {};
-//			if(irqstatus & SX128X_IRQ_RANGING_MASTER_RESULT_TIMEOUT) {};
-//			if(irqstatus & SX128X_IRQ_RANGING_SLAVE_REQUEST_VALID) {};
-//			if(irqstatus & SX128X_IRQ_CAD_DONE) {};
-//			if(irqstatus & SX128X_IRQ_CAD_ACTIVITY_DETECTED) {};
-//			if(irqstatus & SX128X_IRQ_RX_TX_TIMEOUT) {};
-//			if(irqstatus & SX128X_IRQ_PREAMBLE_DETECTED) {};
-			break;   
-		}
+		SX128X_irq_handler();
+		break;
 		
     case 1121:
-		{
-			//read status
-			uint32_t irqstatus;
-			lr11xx_system_get_irq_status(NULL,&irqstatus);
-			lr11xx_system_clear_irq_status(NULL,LR11XX_SYSTEM_IRQ_ALL_MASK);
-			//printf("IRQ:0x%08X\r\n",irqstatus);
-			if(irqstatus & LR11XX_SYSTEM_IRQ_TX_DONE) packet_sent = true;
-			if(irqstatus & LR11XX_SYSTEM_IRQ_RX_DONE) packet_received = true;
-			if(irqstatus & LR11XX_SYSTEM_IRQ_CRC_ERROR) crc_error = true;
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_PREAMBLE_DETECTED) {};
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_SYNC_WORD_HEADER_VALID) {};
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_HEADER_ERROR) {};
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_CAD_DONE) {};
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_CAD_DETECTED) {};
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_TIMEOUT) {};
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_LR_FHSS_INTRA_PKT_HOP) {};
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_REQ_VALID) {};	
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_REQ_DISCARDED) {};	
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_RESP_DONE) {};	
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_EXCH_VALID) {};	
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_RTTOF_TIMEOUT) {};		
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_GNSS_SCAN_DONE) {};		
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_WIFI_SCAN_DONE) {};	
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_EOL) {};	
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_CMD_ERROR) {};		
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_ERROR) {};	
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_FSK_LEN_ERROR) {};	
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_FSK_ADDR_ERROR) {};	
-//			if(irqstatus & LR11XX_SYSTEM_IRQ_LORA_RX_TIMESTAMP) {};		
-			break;   
-		}
+		LR112X_irq_handler();
 		
 		case 2021:
-		{
-			//read status
-			uint32_t irqstatus;
-			lr20xx_system_get_and_clear_irq_status(NULL,&irqstatus);
-			//lr20xx_system_clear_irq_status(NULL,LR20XX_SYSTEM_IRQ_ALL_MASK);
-			//printf("IRQ:0x%08X\r\n",irqstatus);
-			if(irqstatus & LR20XX_SYSTEM_IRQ_TX_DONE) packet_sent = true;
-			if(irqstatus & LR20XX_SYSTEM_IRQ_RX_DONE) packet_received = true;
-			if(irqstatus & LR20XX_SYSTEM_IRQ_CRC_ERROR) crc_error = true;
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_FIFO_RX) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_FIFO_TX) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_TX_TIMESTAMP) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_RX_TIMESTAMP) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_PREAMBLE_DETECTED) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_SYNC_WORD_HEADER_VALID) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_INTRA_PKT_HOP) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_CAD_DETECTED) {};	
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_LORA_RX_HEADER_TIMESTAMP) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_LORA_HEADER_ERROR) {};	
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_LOW_BATTERY) {};	
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_PA_OVP_OCP) {};	
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_ERROR) {};	
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_CMD_ERROR) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_CAD_DONE) {};	
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_TIMEOUT) {};		
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_LEN_ERROR) {};	
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_ADDR_ERROR) {};	
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_INTRA_PKT_HOP) {};	
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_RDY_FOR_NEW_FREQ_TABLE) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_LR_FHSS_RDY_FOR_NEW_PAYLOAD) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_RESPONDER_RESPONSE_DONE) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_RESPONDER_REQUEST_DISCARDED) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_INITIATOR_EXCHANGE_VALID) {};
-//			if(irqstatus & LR20XX_SYSTEM_IRQ_RTTOF_INITIATOR_TIMEOUT) {};
-		}
+		LR20xx_irq_handler();
 		break;
 		
 		case 3029:
@@ -679,7 +577,7 @@ int8_t radio_getrssi(float *dbm)
 			uint8_t half_dbm_cnt;
 			err = (int8_t)lr20xx_radio_common_get_rssi_inst(NULL,&rssi,&half_dbm_cnt);
 			if(err != RADIO_OK) return err;
-			*dbm = (rssi + half_dbm_cnt) / 2.0f; //to be checked
+			*dbm = rssi - half_dbm_cnt / 2.0f; //to be checked
 			return RADIO_OK;
 		}
 		case 3029:

@@ -11,8 +11,8 @@ sx126x_status_t SX126x_set_packet_params(uint8_t sync,uint16_t prelen,uint8_t pa
 
 void SX126X_setopmode(uint8_t mode);
 void SX126X_LNAboost(bool boost);
-
 void SX126X_CalibrateIR(void);
+void SX126X_irq_handler(void);
 
 extern uint8_t opmode;
 extern uint8_t prevopmode;

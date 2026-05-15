@@ -177,6 +177,25 @@ void SX126X_CalibrateIR(void)
   //restore Ctune needed
 }
 
+void SX126X_irq_handler(void)
+{
+	//read SX126x status
+	uint16_t irqstatus;
+	sx126x_get_irq_status(NULL,&irqstatus);
+	sx126x_clear_irq_status(NULL,SX126X_IRQ_ALL);
+	//printf("Flags:0x%02X\r\n",irqstatus);
+	if(irqstatus & SX126X_IRQ_TX_DONE) packet_sent = true;
+	if(irqstatus & SX126X_IRQ_RX_DONE) packet_received = true;
+	if(irqstatus & SX126X_IRQ_CRC_ERROR) crc_error = true;
+	//if(irqstatus & SX126X_IRQ_PREAMBLE_DETECTED) {};
+	//if(irqstatus & SX126X_IRQ_SYNC_WORD_VALID) {};
+	//if(irqstatus & SX126X_IRQ_HEADER_VALID) {};
+	//if(irqstatus & SX126X_IRQ_HEADER_ERROR) {};
+	//if(irqstatus & SX126X_IRQ_CAD_DONE) {};
+	//if(irqstatus & SX126X_IRQ_CAD_DETECTED) {};
+	//if(irqstatus & SX126X_IRQ_TIMEOUT) {};
+	//if(irqstatus & SX126X_IRQ_LR_FHSS_HOP) {};
+}
 
 
 
