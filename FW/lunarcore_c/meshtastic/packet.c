@@ -1,75 +1,10 @@
 #include "packet.h"
  
 
-// Required type definitions from parent module
-typedef enum 
-{
-  PRIORITY_DEFAULT,
-  PRIORITY_HIGH,
-  PRIORITY_LOW
-} Priority;
-
-// Maximum capacity for heapless Vec equivalent
-#define VEC_MAX_CAPACITY 256
-
-// Vec structure to replace heapless::Vec
-typedef struct 
-{
-  uint8_t data[VEC_MAX_CAPACITY];
-  size_t len;
-  size_t capacity;
-} Vec;
-
-// PacketPayload enum and union
-typedef enum 
-{
-  PACKET_PAYLOAD_ENCRYPTED,
-  PACKET_PAYLOAD_DECRYPTED
-} PacketPayloadType;
-
-typedef struct 
-{
-  PacketPayloadType type;
-  Vec data;
-} PacketPayload;
-
-// MeshPacket structure
-typedef struct 
-{
-  uint32_t from;
-  uint32_t to;
-  uint8_t channel;
-  uint32_t id;
-  uint8_t hop_limit;
-  bool want_ack;
-  Priority priority;
-  uint32_t rx_time;
-  float rx_snr;
-  int32_t rx_rssi;
-  PacketPayload payload;
-} MeshPacket;
-
-// Constants from parent module
-#define LORA_HEADER_SIZE 17
-#define MAX_LORA_PAYLOAD 237
-#define MIC_SIZE 4
-#define DEFAULT_HOP_LIMIT 3
 
 // SHA256 hash function declaration
 void sha256_hash(const uint8_t* data, size_t len, uint8_t* hash);
 
-// Constants
-#define OFFSET_TO 0
-#define OFFSET_FROM 4
-#define OFFSET_ID 8
-#define OFFSET_FLAGS 12
-#define OFFSET_CHANNEL_HASH 13
-
-#define FLAG_WANT_ACK 0x01
-#define FLAG_HOP_LIMIT_MASK 0x0E
-#define FLAG_HOP_LIMIT_SHIFT 1
-#define FLAG_CHANNEL_MASK 0xF0
-#define FLAG_CHANNEL_SHIFT 4
 
 // Vec helper functions
 static void vec_init(Vec* vec) 
@@ -218,14 +153,6 @@ bool build_lora_packet(uint32_t from,uint32_t to,uint32_t id,uint8_t channel,uin
   return true;
 }
 
-// PacketCache structure and functions
-#define PACKET_CACHE_SIZE 32
-
-typedef struct 
-{
-  uint32_t entries[PACKET_CACHE_SIZE][3]; // [from, packet_id, timestamp]
-  size_t index;
-} PacketCache;
 
 // Initialize PacketCache
 void packet_cache_init(PacketCache* cache) 
@@ -282,13 +209,6 @@ void packet_cache_clear_old(PacketCache* cache, uint32_t current_time, uint32_t 
   }
 }
 
-// RoutingDecision enum
-typedef enum 
-{
-  ROUTING_DECISION_LOCAL,    // Packet is for us
-  ROUTING_DECISION_FORWARD,  // Forward the packet
-  ROUTING_DECISION_DROP      // Drop the packet
-} RoutingDecision;
 
 // Route packet and determine what to do with it
 RoutingDecision route_packet(const MeshPacket* packet,uint32_t our_node_id,PacketCache* cache,uint32_t timestamp) 
@@ -316,19 +236,6 @@ bool create_forward_packet(const MeshPacket* original,const uint8_t* payload,siz
                             original->want_ack,payload,payload_len,out_packet);
 }
 
-// PacketStats structure
-typedef struct 
-{
-  uint32_t rx_total;          // Total packets received
-  uint32_t rx_local;          // Packets for us
-  uint32_t rx_forwarded;      // Packets forwarded
-  uint32_t rx_dropped_dup;    // Packets dropped (duplicate)
-  uint32_t rx_dropped_expired;// Packets dropped (expired)
-  uint32_t rx_bad;            // Bad packets
-  uint32_t tx_total;          // Total packets transmitted
-  uint32_t tx_retransmit;     // Retransmission count
-  uint32_t tx_fail;           // Failed transmissions
-} PacketStats;
 
 // Initialize PacketStats
 void packet_stats_init(PacketStats* stats) 
@@ -383,27 +290,6 @@ void packet_stats_record_retransmit(PacketStats* stats)
 {
   stats->tx_retransmit++;
 }
-
-// PendingAck structure
-typedef struct 
-{
-  uint32_t packet_id;           // Packet ID
-  uint32_t to;                  // Destination node
-  Vec packet_data;              // Packet data for retransmission
-  uint8_t tx_count;             // Transmission count
-  uint8_t max_retransmit;       // Maximum retransmission attempts
-  uint32_t last_tx_time;        // Last transmission time
-  uint32_t retransmit_timeout;  // Timeout for retransmission
-} PendingAck;
-
-// AckTracker structure
-#define ACK_TRACKER_SIZE 8
-
-typedef struct 
-{
-  PendingAck pending[ACK_TRACKER_SIZE];
-  bool pending_valid[ACK_TRACKER_SIZE]; // Track which slots are valid
-} AckTracker;
 
 // Initialize AckTracker
 void ack_tracker_init(AckTracker* tracker) 

@@ -1,21 +1,5 @@
 #include "power.h"
 
-// Constants
-#define MIN_DEEP_SLEEP_US 1000ULL
-#define MAX_DEEP_SLEEP_US 86400000000ULL
-#define DEFAULT_LIGHT_SLEEP_MS 100U
-#define LOW_BATTERY_THRESHOLD_MV 3400U
-#define CRITICAL_BATTERY_THRESHOLD_MV 3200U
-
-// PowerMode enum
-typedef enum 
-{
-  POWER_MODE_PERFORMANCE,
-  POWER_MODE_BALANCED,
-  POWER_MODE_LOW_POWER,
-  POWER_MODE_ULTRA_LOW
-} PowerMode;
-
 // PowerMode default
 static inline PowerMode power_mode_default(void) 
 {
@@ -42,129 +26,90 @@ static const WakeSources WAKE_SOURCES_EXT1 = { 1 << 8 };
 static const WakeSources WAKE_SOURCES_ALL = { 0x1FF };
 
 // WakeSources methods
-static inline WakeSources wake_sources_or(WakeSources self, WakeSources other) 
+WakeSources wake_sources_or(WakeSources self, WakeSources other) 
 {
   WakeSources result = { self.value | other.value };
   return result;
 }
 
-static inline bool wake_sources_has(WakeSources self, WakeSources source) 
+bool wake_sources_has(WakeSources self, WakeSources source) 
 {
   return (self.value & source.value) != 0;
 }
 
-static inline WakeSources wake_sources_bitor(WakeSources self, WakeSources rhs) 
+WakeSources wake_sources_bitor(WakeSources self, WakeSources rhs) 
 {
   WakeSources result = { self.value | rhs.value };
   return result;
 }
 
-// WakeCause enum with tagged union
-typedef enum 
-{
-  WAKE_CAUSE_POWER_ON,
-  WAKE_CAUSE_TIMER,
-  WAKE_CAUSE_GPIO,
-  WAKE_CAUSE_UART,
-  WAKE_CAUSE_TOUCH,
-  WAKE_CAUSE_ULP,
-  WAKE_CAUSE_BLE,
-  WAKE_CAUSE_WIFI,
-  WAKE_CAUSE_EXT0,
-  WAKE_CAUSE_EXT1,
-  WAKE_CAUSE_UNKNOWN
-} WakeCauseType;
-
-typedef struct 
-{
-  WakeCauseType type;
-  union 
-  {
-    uint8_t gpio_pin;
-  } data;
-} WakeCause;
-
 // WakeCause constructors
-static inline WakeCause wake_cause_power_on(void) 
+WakeCause wake_cause_power_on(void) 
 {
   WakeCause cause = { WAKE_CAUSE_POWER_ON, {0} };
   return cause;
 }
 
-static inline WakeCause wake_cause_timer(void) 
+WakeCause wake_cause_timer(void) 
 {
   WakeCause cause = { WAKE_CAUSE_TIMER, {0} };
   return cause;
 }
 
-static inline WakeCause wake_cause_gpio(uint8_t pin) 
+WakeCause wake_cause_gpio(uint8_t pin) 
 {
   WakeCause cause = { WAKE_CAUSE_GPIO, {0} };
   cause.data.gpio_pin = pin;
   return cause;
 }
 
-static inline WakeCause wake_cause_uart(void) 
+WakeCause wake_cause_uart(void) 
 {
   WakeCause cause = { WAKE_CAUSE_UART, {0} };
   return cause;
 }
 
-static inline WakeCause wake_cause_touch(void) 
+WakeCause wake_cause_touch(void) 
 {
   WakeCause cause = { WAKE_CAUSE_TOUCH, {0} };
   return cause;
 }
 
-static inline WakeCause wake_cause_ulp(void) 
+WakeCause wake_cause_ulp(void) 
 {
   WakeCause cause = { WAKE_CAUSE_ULP, {0} };
   return cause;
 }
 
-static inline WakeCause wake_cause_ble(void) 
+WakeCause wake_cause_ble(void) 
 {
   WakeCause cause = { WAKE_CAUSE_BLE, {0} };
   return cause;
 }
 
-static inline WakeCause wake_cause_wifi(void) 
+WakeCause wake_cause_wifi(void) 
 {
   WakeCause cause = { WAKE_CAUSE_WIFI, {0} };
   return cause;
 }
 
-static inline WakeCause wake_cause_ext0(void) 
+WakeCause wake_cause_ext0(void) 
 {
   WakeCause cause = { WAKE_CAUSE_EXT0, {0} };
   return cause;
 }
 
-static inline WakeCause wake_cause_ext1(void) 
+WakeCause wake_cause_ext1(void) 
 {
   WakeCause cause = { WAKE_CAUSE_EXT1, {0} };
   return cause;
 }
 
-static inline WakeCause wake_cause_unknown(void) 
+WakeCause wake_cause_unknown(void) 
 {
   WakeCause cause = { WAKE_CAUSE_UNKNOWN, {0} };
   return cause;
 }
-
-// GpioWakeConfig struct
-typedef struct 
-{
-  uint8_t pin;
-  bool level_high;
-} GpioWakeConfig;
-
-// Option<GpioWakeConfig> implementation
-typedef struct 
-{
-  bool is_some;
-  GpioWakeConfig value;
-} OptionGpioWakeConfig;
 
 static inline OptionGpioWakeConfig option_gpio_wake_config_none(void) 
 {
@@ -178,29 +123,6 @@ static inline OptionGpioWakeConfig option_gpio_wake_config_some(GpioWakeConfig v
   return opt;
 }
 
-// PowerError enum
-typedef enum 
-{
-  POWER_ERROR_OK = 0,
-  POWER_ERROR_INVALID_FREQUENCY,
-  POWER_ERROR_CONFIG_FAILED,
-  POWER_ERROR_INVALID_DURATION,
-  POWER_ERROR_SLEEP_FAILED,
-  POWER_ERROR_TOO_MANY_WAKE_PINS
-} PowerError;
-
-// PowerManager struct
-typedef struct 
-{
-  PowerMode mode;
-  WakeSources light_sleep_wake;
-  WakeSources deep_sleep_wake;
-  OptionGpioWakeConfig gpio_wake_pins[8];
-  uint32_t cpu_freq_mhz;
-  WakeCause last_wake_cause;
-  uint64_t total_sleep_us;
-  uint32_t sleep_count;
-} PowerManager;
 
 // Forward declarations for internal functions
 static WakeCause power_manager_read_wake_cause(const PowerManager* self);
@@ -210,7 +132,7 @@ static void power_manager_enable_wifi_power_save(const PowerManager* self);
 static void power_manager_disable_wifi_power_save(const PowerManager* self);
 
 // PowerManager constructor
-static inline PowerManager power_manager_new(void) 
+PowerManager power_manager_new(void) 
 {
   PowerManager pm;
   pm.mode = POWER_MODE_BALANCED;
@@ -244,7 +166,7 @@ PowerError power_manager_set_mode(PowerManager* self, PowerMode mode)
 }
 
 // PowerManager apply_mode (internal)
-static PowerError power_manager_apply_mode(PowerManager* self) 
+static PowerError power_manager_apply_mode(PowerManager* self) //ESP specific, must be fully rewritten
 {
   uint32_t cpu_freq;
   bool wifi_ps;
@@ -292,7 +214,7 @@ static PowerError power_manager_apply_mode(PowerManager* self)
 }
 
 // PowerManager set_cpu_frequency
-PowerError power_manager_set_cpu_frequency(PowerManager* self, uint32_t mhz) 
+PowerError power_manager_set_cpu_frequency(PowerManager* self, uint32_t mhz) //ESP specific, must be fully rewritten 
 {
   // Validate frequency
   switch (mhz) 

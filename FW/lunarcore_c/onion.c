@@ -1,89 +1,18 @@
 #include "onion.h"
 
-// Dependencies from crypto module
-extern void x25519(const uint8_t private_key[32], const uint8_t public_key[32], uint8_t shared[32]);
-extern void x25519_base(const uint8_t private_key[32], uint8_t public_key[32]);
-extern void hkdf_derive(const uint8_t *input_key, size_t input_key_len,
-                        const uint8_t *salt, size_t salt_len,
-                        const uint8_t *info, size_t info_len,
-                        uint8_t *output, size_t output_len);
-extern void sha256_hash(const uint8_t *data, size_t len, uint8_t output[32]);
-extern void aes256_new(const uint8_t key[32], void **aes_ctx);
-extern void aes256_encrypt_block(void *aes_ctx, uint8_t block[16]);
-extern void aes256_free(void *aes_ctx);
+static const uint8_t ONION_KEY_INFO[] = "lunarpunk-onion-key-v1";
+static const size_t ONION_KEY_INFO_LEN = 22;
+static const uint8_t ONION_BLIND_INFO[] = "lunarpunk-onion-blind-v1";
+static const size_t ONION_BLIND_INFO_LEN = 24;
 
-// Dependencies from transport module
-#define NODE_HINT_SIZE 2
-#define AUTH_TAG_SIZE 16
-
-// HeaplessVec implementation for uint8_t with max capacity 256
-typedef struct 
-{
-  uint8_t data[256];
-  size_t len;
-  size_t capacity;
-} HeaplessVec_u8_256;
-
-static inline bool heapless_vec_u8_256_init(HeaplessVec_u8_256 *vec) 
-{
-  vec->len = 0;
-  vec->capacity = 256;
-  memset(vec->data, 0, 256);
-  return true;
-}
-
-static inline bool heapless_vec_u8_256_push(HeaplessVec_u8_256 *vec, uint8_t val) 
-{
-  if (vec->len >= vec->capacity) return false;
-  vec->data[vec->len] = val;
-  vec->len++;
-  return true;
-}
-
-static inline bool heapless_vec_u8_256_extend_from_slice(HeaplessVec_u8_256 *vec, const uint8_t *data, size_t len) 
-{
-  if (vec->len + len > vec->capacity) return false;
-  memcpy(&vec->data[vec->len], data, len);
-  vec->len += len;
-  return true;
-}
-
-static inline uint8_t* heapless_vec_u8_256_as_slice(HeaplessVec_u8_256 *vec) 
-{
-  return vec->data;
-}
-
-static inline size_t heapless_vec_u8_256_len(const HeaplessVec_u8_256 *vec) 
-{
-  return vec->len;
-}
-
-// HeaplessVec implementation for uint8_t with max capacity 320
-typedef struct 
-{
-  uint8_t data[320];
-  size_t len;
-  size_t capacity;
-} HeaplessVec_u8_320;
-
-static inline bool heapless_vec_u8_320_init(HeaplessVec_u8_320 *vec) 
-{
-  vec->len = 0;
-  vec->capacity = 320;
-  memset(vec->data, 0, 320);
-  return true;
-}
-
-static inline bool heapless_vec_u8_320_extend_from_slice(HeaplessVec_u8_320 *vec, const uint8_t *data, size_t len) 
-{
-  if (vec->len + len > vec->capacity) return false;
-  memcpy(&vec->data[vec->len], data, len);
-  vec->len += len;
-  return true;
-}
+// Forward declarations for OnionRouter helper functions
+bool onion_router_encrypt_layer(OnionRouter *self, const uint8_t key[32],const uint8_t *data, size_t data_len,HeaplessVec_u8_256 *output);
+bool onion_router_decrypt_layer(OnionRouter *self, const uint8_t key[32],const uint8_t *data, size_t data_len,HeaplessVec_u8_256 *output);
+void onion_router_compute_tag(OnionRouter *self, const uint8_t key[32],const uint8_t *data, size_t data_len,uint8_t tag[16]);
+bool constant_time_eq(const uint8_t *a, size_t a_len, const uint8_t *b, size_t b_len);
 
 // Constant time equality check
-static inline bool constant_time_eq(const uint8_t *a, size_t a_len, const uint8_t *b, size_t b_len) 
+bool constant_time_eq(const uint8_t *a, size_t a_len, const uint8_t *b, size_t b_len) 
 {
   if (a_len != b_len) return false;
   uint8_t result = 0;
@@ -93,33 +22,7 @@ static inline bool constant_time_eq(const uint8_t *a, size_t a_len, const uint8_
   return volatile_result == 0;
 }
 
-// Constants
-#define MAX_HOPS 7
-#define MIN_HOPS 3
-#define HOP_OVERHEAD (NODE_HINT_SIZE + AUTH_TAG_SIZE)
-
-static const uint8_t ONION_KEY_INFO[] = "lunarpunk-onion-key-v1";
-static const size_t ONION_KEY_INFO_LEN = 22;
-
-static const uint8_t ONION_BLIND_INFO[] = "lunarpunk-onion-blind-v1";
-static const size_t ONION_BLIND_INFO_LEN = 24;
-
-// RouteHop structure
-typedef struct 
-{
-  uint16_t hint;
-  uint8_t public_key[32];
-} RouteHop;
-
-// HeaplessVec for RouteHop with max capacity MAX_HOPS
-typedef struct 
-{
-  RouteHop data[MAX_HOPS];
-  size_t len;
-  size_t capacity;
-} HeaplessVec_RouteHop_MAX_HOPS;
-
-static inline bool heapless_vec_routehop_init(HeaplessVec_RouteHop_MAX_HOPS *vec) 
+bool heapless_vec_routehop_init(HeaplessVec_RouteHop_MAX_HOPS *vec) 
 {
   vec->len = 0;
   vec->capacity = MAX_HOPS;
@@ -127,7 +30,7 @@ static inline bool heapless_vec_routehop_init(HeaplessVec_RouteHop_MAX_HOPS *vec
   return true;
 }
 
-static inline bool heapless_vec_routehop_push(HeaplessVec_RouteHop_MAX_HOPS *vec, const RouteHop *hop) 
+bool heapless_vec_routehop_push(HeaplessVec_RouteHop_MAX_HOPS *vec, const RouteHop *hop) 
 {
   if (vec->len >= vec->capacity) return false;
   memcpy(&vec->data[vec->len], hop, sizeof(RouteHop));
@@ -135,26 +38,20 @@ static inline bool heapless_vec_routehop_push(HeaplessVec_RouteHop_MAX_HOPS *vec
   return true;
 }
 
-static inline const RouteHop* heapless_vec_routehop_first(const HeaplessVec_RouteHop_MAX_HOPS *vec) 
+const RouteHop* heapless_vec_routehop_first(const HeaplessVec_RouteHop_MAX_HOPS *vec) 
 {
   if (vec->len == 0) return NULL;
   return &vec->data[0];
 }
 
-static inline const RouteHop* heapless_vec_routehop_last(const HeaplessVec_RouteHop_MAX_HOPS *vec) 
+const RouteHop* heapless_vec_routehop_last(const HeaplessVec_RouteHop_MAX_HOPS *vec) 
 {
   if (vec->len == 0) return NULL;
   return &vec->data[vec->len - 1];
 }
 
-// OnionRoute structure
-typedef struct 
-{
-  HeaplessVec_RouteHop_MAX_HOPS hops;
-} OnionRoute;
-
 // OnionRoute functions
-static inline bool onion_route_new(OnionRoute *route, const RouteHop *hops, size_t hops_len) 
+bool onion_route_new(OnionRoute *route, const RouteHop *hops, size_t hops_len) 
 {
   if (hops_len < MIN_HOPS || hops_len > MAX_HOPS) return false;
   heapless_vec_routehop_init(&route->hops);
@@ -165,62 +62,38 @@ static inline bool onion_route_new(OnionRoute *route, const RouteHop *hops, size
   return true;
 }
 
-static inline size_t onion_route_len(const OnionRoute *route) 
+size_t onion_route_len(const OnionRoute *route) 
 {
   return route->hops.len;
 }
 
-static inline bool onion_route_is_empty(const OnionRoute *route) 
+bool onion_route_is_empty(const OnionRoute *route) 
 {
   return route->hops.len == 0;
 }
 
-static inline uint16_t onion_route_entry_hint(const OnionRoute *route) 
+uint16_t onion_route_entry_hint(const OnionRoute *route) 
 {
   const RouteHop *first = heapless_vec_routehop_first(&route->hops);
   if (first == NULL) return 0;
   return first->hint;
 }
 
-static inline uint16_t onion_route_exit_hint(const OnionRoute *route) 
+uint16_t onion_route_exit_hint(const OnionRoute *route) 
 {
   const RouteHop *last = heapless_vec_routehop_last(&route->hops);
   if (last == NULL) return 0;
   return last->hint;
 }
 
-static inline size_t onion_route_overhead(const OnionRoute *route) 
+size_t onion_route_overhead(const OnionRoute *route) 
 {
   return route->hops.len * HOP_OVERHEAD;
 }
 
-// OnionPacket structure
-typedef struct 
-{
-  HeaplessVec_u8_256 data;
-  uint8_t num_layers;
-} OnionPacket;
-
-// OnionError enumeration
-typedef enum 
-{
-  ONION_ERROR_INVALID_ROUTE,
-  ONION_ERROR_PACKET_TOO_LARGE,
-  ONION_ERROR_AUTHENTICATION_FAILED,
-  ONION_ERROR_DECRYPTION_FAILED,
-  ONION_ERROR_NO_MORE_LAYERS
-} OnionError;
-
-// OnionRouter structure
-typedef struct 
-{
-  uint8_t our_private[32];
-  uint8_t our_public[32];
-  uint16_t our_hint;
-} OnionRouter;
 
 // OnionRouter constructor
-static inline void onion_router_new(OnionRouter *router, const uint8_t private_key[32]) 
+void onion_router_new(OnionRouter *router, const uint8_t private_key[32]) 
 {
   memcpy(router->our_private, private_key, 32);
   x25519_base(private_key, router->our_public);
@@ -229,21 +102,8 @@ static inline void onion_router_new(OnionRouter *router, const uint8_t private_k
   router->our_hint = ((uint16_t)hint_hash[0] << 8) | (uint16_t)hint_hash[1];
 }
 
-// Forward declarations for OnionRouter helper functions
-static bool onion_router_encrypt_layer(OnionRouter *self, const uint8_t key[32], 
-                                       const uint8_t *data, size_t data_len,
-                                       HeaplessVec_u8_256 *output);
-static bool onion_router_decrypt_layer(OnionRouter *self, const uint8_t key[32],
-                                       const uint8_t *data, size_t data_len,
-                                       HeaplessVec_u8_256 *output);
-static void onion_router_compute_tag(OnionRouter *self, const uint8_t key[32],
-                                     const uint8_t *data, size_t data_len,
-                                     uint8_t tag[16]);
-
 // OnionRouter wrap function
-static inline bool onion_router_wrap(OnionRouter *self, const uint8_t *payload, size_t payload_len,
-                                     const OnionRoute *route, OnionPacket *packet,
-                                     OnionError *error) 
+bool onion_router_wrap(OnionRouter *self,const uint8_t *payload, size_t payload_len,const OnionRoute *route, OnionPacket *packet,OnionError *error) 
 {
   if (route->hops.len < MIN_HOPS || route->hops.len > MAX_HOPS) 
   {
@@ -328,10 +188,8 @@ static inline bool onion_router_wrap(OnionRouter *self, const uint8_t *payload, 
 }
 
 // OnionRouter unwrap function
-static inline bool onion_router_unwrap(OnionRouter *self, const OnionPacket *packet,
-                                      const uint8_t sender_public[32],
-                                      uint16_t *next_hint_out, OnionPacket *inner_packet_out,
-                                      OnionError *error) 
+bool onion_router_unwrap(OnionRouter *self, const OnionPacket *packet,const uint8_t sender_public[32],
+                          uint16_t *next_hint_out, OnionPacket *inner_packet_out,OnionError *error) 
 {
   if (packet->data.len < HOP_OVERHEAD) 
   {
@@ -384,7 +242,7 @@ static inline bool onion_router_unwrap(OnionRouter *self, const OnionPacket *pac
 }
 
 // OnionRouter unwrap_final function
-static inline bool onion_router_unwrap_final(OnionRouter *self, const OnionPacket *packet,
+bool onion_router_unwrap_final(OnionRouter *self, const OnionPacket *packet,
                                              const uint8_t sender_public[32],
                                              HeaplessVec_u8_256 *payload_out,
                                              OnionError *error) 
@@ -428,9 +286,7 @@ static inline bool onion_router_unwrap_final(OnionRouter *self, const OnionPacke
 }
 
 // OnionRouter encrypt_layer implementation
-static bool onion_router_encrypt_layer(OnionRouter *self, const uint8_t key[32],
-                                       const uint8_t *data, size_t data_len,
-                                       HeaplessVec_u8_256 *output) 
+bool onion_router_encrypt_layer(OnionRouter *self, const uint8_t key[32],const uint8_t *data, size_t data_len,HeaplessVec_u8_256 *output) 
 {
   heapless_vec_u8_256_init(output);
   if (!heapless_vec_u8_256_extend_from_slice(output, data, data_len)) return false;
@@ -458,7 +314,7 @@ static bool onion_router_encrypt_layer(OnionRouter *self, const uint8_t key[32],
 }
 
 // OnionRouter decrypt_layer implementation (same as encrypt due to CTR mode)
-static bool onion_router_decrypt_layer(OnionRouter *self, const uint8_t key[32],
+bool onion_router_decrypt_layer(OnionRouter *self, const uint8_t key[32],
                                        const uint8_t *data, size_t data_len,
                                        HeaplessVec_u8_256 *output) 
 {
@@ -467,9 +323,7 @@ static bool onion_router_decrypt_layer(OnionRouter *self, const uint8_t key[32],
 }
 
 // OnionRouter compute_tag implementation (HMAC-SHA256 truncated to 16 bytes)
-static void onion_router_compute_tag(OnionRouter *self, const uint8_t key[32],
-                                     const uint8_t *data, size_t data_len,
-                                     uint8_t tag[16]) 
+void onion_router_compute_tag(OnionRouter *self, const uint8_t key[32],const uint8_t *data, size_t data_len,uint8_t tag[16]) 
 {
   // HMAC-SHA256 implementation
   uint8_t inner[64];
@@ -501,18 +355,18 @@ static void onion_router_compute_tag(OnionRouter *self, const uint8_t key[32],
 }
 
 // OnionRouter getter functions
-static inline uint16_t onion_router_our_hint(const OnionRouter *router) 
+uint16_t onion_router_our_hint(const OnionRouter *router) 
 {
   return router->our_hint;
 }
 
-static inline const uint8_t* onion_router_our_public(const OnionRouter *router) 
+const uint8_t* onion_router_our_public(const OnionRouter *router) 
 {
   return router->our_public;
 }
 
 // OnionRouter derive_blinded_hint function
-static inline uint16_t onion_router_derive_blinded_hint(const OnionRouter *router, uint64_t epoch) 
+uint16_t onion_router_derive_blinded_hint(const OnionRouter *router, uint64_t epoch) 
 {
   uint8_t input[40];
   memcpy(input, router->our_public, 32);
@@ -524,15 +378,8 @@ static inline uint16_t onion_router_derive_blinded_hint(const OnionRouter *route
   return ((uint16_t)blinded[0] << 8) | (uint16_t)blinded[1];
 }
 
-// HeaplessVec for RouteHop with max capacity 32
-typedef struct 
-{
-  RouteHop data[32];
-  size_t len;
-  size_t capacity;
-} HeaplessVec_RouteHop_32;
 
-static inline bool heapless_vec_routehop_32_init(HeaplessVec_RouteHop_32 *vec) 
+bool heapless_vec_routehop_32_init(HeaplessVec_RouteHop_32 *vec) 
 {
   vec->len = 0;
   vec->capacity = 32;
@@ -540,7 +387,7 @@ static inline bool heapless_vec_routehop_32_init(HeaplessVec_RouteHop_32 *vec)
   return true;
 }
 
-static inline bool heapless_vec_routehop_32_push(HeaplessVec_RouteHop_32 *vec, const RouteHop *hop) 
+bool heapless_vec_routehop_32_push(HeaplessVec_RouteHop_32 *vec, const RouteHop *hop) 
 {
   if (vec->len >= vec->capacity) return false;
   memcpy(&vec->data[vec->len], hop, sizeof(RouteHop));
@@ -548,20 +395,15 @@ static inline bool heapless_vec_routehop_32_push(HeaplessVec_RouteHop_32 *vec, c
   return true;
 }
 
-// RouteBuilder structure
-typedef struct 
-{
-  HeaplessVec_RouteHop_32 relays;
-} RouteBuilder;
 
 // RouteBuilder constructor
-static inline void route_builder_new(RouteBuilder *builder) 
+void route_builder_new(RouteBuilder *builder) 
 {
   heapless_vec_routehop_32_init(&builder->relays);
 }
 
 // RouteBuilder add_relay function
-static inline bool route_builder_add_relay(RouteBuilder *builder, uint16_t hint, const uint8_t public_key[32]) 
+bool route_builder_add_relay(RouteBuilder *builder, uint16_t hint, const uint8_t public_key[32]) 
 {
   RouteHop hop;
   hop.hint = hint;
@@ -570,7 +412,7 @@ static inline bool route_builder_add_relay(RouteBuilder *builder, uint16_t hint,
 }
 
 // RouteBuilder build_route function
-static inline bool route_builder_build_route(const RouteBuilder *builder, const RouteHop *destination,
+bool route_builder_build_route(const RouteBuilder *builder, const RouteHop *destination,
                                              size_t num_hops, OnionRoute *route_out) 
 {
   if (num_hops < MIN_HOPS || num_hops > MAX_HOPS) return false;
@@ -591,13 +433,13 @@ static inline bool route_builder_build_route(const RouteBuilder *builder, const 
 }
 
 // RouteBuilder relay_count function
-static inline size_t route_builder_relay_count(const RouteBuilder *builder) 
+size_t route_builder_relay_count(const RouteBuilder *builder) 
 {
   return builder->relays.len;
 }
 
 // RouteBuilder default constructor
-static inline void route_builder_default(RouteBuilder *builder) 
+void route_builder_default(RouteBuilder *builder) 
 {
   route_builder_new(builder);
 }

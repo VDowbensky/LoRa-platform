@@ -1,14 +1,6 @@
 #include"protocol_router.h"
 
-// Protocol enum definition
-typedef enum 
-{
-  PROTOCOL_UNKNOWN,
-  PROTOCOL_MESHCORE,
-  PROTOCOL_MESHTASTIC,
-  PROTOCOL_RNODE,
-  PROTOCOL_ATCOMMAND
-} Protocol;
+
 
 // Function to get protocol name
 const char* protocol_name(Protocol protocol) 
@@ -35,51 +27,7 @@ const char* protocol_name(Protocol protocol)
   }
 }
 
-// Magic constants module
-#define MESHCORE_SYNC1 0xAA
-#define MESHCORE_SYNC2 0x55
-#define MESHTASTIC_SYNC1 0x94
-#define MESHTASTIC_SYNC2 0xC3
-#define KISS_FEND 0xC0
-static const uint8_t AT_PREFIX[2] = {'A', 'T'};
 
-// DetectState enum definition
-typedef enum 
-{
-  DETECT_STATE_IDLE,
-  DETECT_STATE_MESHCORE1,
-  DETECT_STATE_MESHTASTIC1,
-  DETECT_STATE_AT1
-} DetectState;
-
-// Sync timeout constant
-#define SYNC_TIMEOUT_BYTES 256
-
-// ProtocolDetector structure
-typedef struct 
-{
-  DetectState state;
-  Protocol detected;
-  uint16_t bytes_seen;
-  uint8_t lock_threshold;
-  uint8_t lock_count;
-  uint16_t state_bytes;
-  uint32_t last_detect_ms;
-} ProtocolDetector;
-
-// ProtocolDetector constructor
-ProtocolDetector protocol_detector_new(void) 
-{
-  ProtocolDetector detector;
-  detector.state = DETECT_STATE_IDLE;
-  detector.detected = PROTOCOL_UNKNOWN;
-  detector.bytes_seen = 0;
-  detector.lock_threshold = 3;
-  detector.lock_count = 0;
-  detector.state_bytes = 0;
-  detector.last_detect_ms = 0;
-  return detector;
-}
 
 // ProtocolDetector reset method
 void protocol_detector_reset(ProtocolDetector* self) 
@@ -145,12 +93,6 @@ static void protocol_detector_check_timeout(ProtocolDetector* self)
   }
 }
 
-// Option type for Protocol
-typedef struct 
-{
-  bool has_value;
-  Protocol value;
-} OptionProtocol;
 
 // Helper to create None option
 static OptionProtocol option_protocol_none(void) 
@@ -247,24 +189,7 @@ OptionProtocol protocol_detector_feed(ProtocolDetector* self, uint8_t byte)
   return option_protocol_none();
 }
 
-// Maximum transports constant
-#define MAX_TRANSPORTS 3
 
-// TransportType enum definition
-typedef enum 
-{
-  TRANSPORT_TYPE_USB_SERIAL,
-  TRANSPORT_TYPE_BLE,
-  TRANSPORT_TYPE_WIFI
-} TransportType;
-
-// TransportState structure
-typedef struct 
-{
-  TransportType transport;
-  ProtocolDetector detector;
-  bool active;
-} TransportState;
 
 // TransportState constructor
 TransportState transport_state_new(TransportType transport) 
@@ -276,12 +201,6 @@ TransportState transport_state_new(TransportType transport)
   return state;
 }
 
-// Option type for TransportType
-typedef struct 
-{
-  bool has_value;
-  TransportType value;
-} OptionTransportType;
 
 // Helper to create None option for TransportType
 static OptionTransportType option_transport_type_none(void) 
@@ -301,14 +220,6 @@ static OptionTransportType option_transport_type_some(TransportType value)
   return opt;
 }
 
-// ProtocolRouter structure
-typedef struct 
-{
-  TransportState transports[MAX_TRANSPORTS];
-  Protocol lora_protocol;
-  bool lora_shared;
-  OptionTransportType priority_transport;
-} ProtocolRouter;
 
 // ProtocolRouter constructor
 ProtocolRouter protocol_router_new(void) 
@@ -451,13 +362,6 @@ bool protocol_router_resolve_conflict(ProtocolRouter* self, TransportType transp
   return true;
 }
 
-// Status tuple structure
-typedef struct 
-{
-  TransportType transport;
-  Protocol protocol;
-  bool active;
-} TransportStatus;
 
 // ProtocolRouter status method
 void protocol_router_status(const ProtocolRouter* self, TransportStatus status[MAX_TRANSPORTS]) 
@@ -472,20 +376,6 @@ void protocol_router_status(const ProtocolRouter* self, TransportStatus status[M
   status[2].protocol = protocol_detector_protocol(&self->transports[2].detector);
   status[2].active = self->transports[2].active;
 }
-
-// Vec implementation for u8 with capacity 256
-typedef struct 
-{
-  uint8_t data[256];
-  size_t len;
-} VecU8_256;
-
-// Vec implementation for u8 with capacity 237
-typedef struct 
-{
-  uint8_t data[237];
-  size_t len;
-} VecU8_237;
 
 // VecU8_256 constructor
 VecU8_256 vec_u8_256_new(void) 
@@ -505,14 +395,6 @@ VecU8_237 vec_u8_237_new(void)
   return vec;
 }
 
-// LoRaPacket structure
-typedef struct 
-{
-  Protocol protocol;
-  VecU8_256 data;
-  int16_t rssi;
-  int8_t snr;
-} LoRaPacket;
 
 // LoRaPacket detect_protocol method
 Protocol lora_packet_detect_protocol(const uint8_t* data, size_t data_len) 
@@ -553,18 +435,6 @@ Protocol lora_packet_detect_protocol(const uint8_t* data, size_t data_len)
   return PROTOCOL_UNKNOWN;
 }
 
-// UnifiedPacket structure
-typedef struct 
-{
-  Protocol source_protocol;
-  Protocol dest_protocol;
-  VecU8_237 payload;
-  uint8_t source_addr[32];
-  uint8_t dest_addr[32];
-  uint8_t hops;
-  int16_t rssi;
-  int8_t snr;
-} UnifiedPacket;
 
 // UnifiedPacket constructor
 UnifiedPacket unified_packet_new(void) 
