@@ -663,6 +663,11 @@
               <FileType>1</FileType>
               <FilePath>..\app\usb_app.c</FilePath>
             </File>
+            <File>
+              <FileName>keypad.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\keypad.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

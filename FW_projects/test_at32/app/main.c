@@ -136,6 +136,7 @@ int main(void)
 	txled_on();
 	rxled_on();
 	delay_ms(3000); //for USB enumeration
+	keypad_init(); //maybe not needed
 #if OLED_ENABLED
 	SSD1306_Init();
 	SSD1306_Clear(0);
@@ -178,6 +179,7 @@ int main(void)
     /* add user code begin 3 */
 		radio_proc();
 		cli_proc();
+		keypad_proc();
     /* add user code end 3 */
   }
 }

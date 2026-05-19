@@ -14,6 +14,9 @@
 #include "test.h"
 #include "wk_spi.h"
 
+#include "radio_proc.h"
+#include "keypad.h"
+
 #define HW_VERSION				1
 #define FW_VERSION				0
 #define FW_REVISION				1
@@ -31,5 +34,9 @@ void rxled_on(void);
 void rxled_off(void);
 void bsp_reset_proc(void);
 uint64_t bsp_get_uid(void);
+
+void bsp_timing_irq(void);
+
+extern volatile uint32_t adc_ticks;
 
 #endif
