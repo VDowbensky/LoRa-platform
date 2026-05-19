@@ -52,6 +52,7 @@ uint64_t bsp_get_uid(void)
 
 void bsp_timing_irq(void)
 {
+	wk_usb_app_task();
 	if(master)
 	{
 	 pkt_timecnt++;
@@ -85,6 +86,7 @@ void bsp_timing_irq(void)
 		kick_adc();
 		adc_ticks = VBAT_MEAS_TIME;
 	}
+	keypad_scan();
 }
 
 
