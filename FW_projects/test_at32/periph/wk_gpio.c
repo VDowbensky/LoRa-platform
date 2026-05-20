@@ -56,20 +56,14 @@ void wk_gpio_config(void)
   gpio_init(RF_BUSY_GPIO_PORT, &gpio_init_struct);
 
   gpio_init_struct.gpio_mode = GPIO_MODE_INPUT;
-  gpio_init_struct.gpio_pins = C3_PIN;
-  gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
-  gpio_init(C3_GPIO_PORT, &gpio_init_struct);
-
-  gpio_init_struct.gpio_mode = GPIO_MODE_INPUT;
-  gpio_init_struct.gpio_pins = C2_PIN | C1_PIN | C0_PIN | PTT_PIN;
+  gpio_init_struct.gpio_pins =  PTT_PIN;
   gpio_init_struct.gpio_pull = GPIO_PULL_UP;
   gpio_init(GPIOB, &gpio_init_struct);
 
   /* gpio output config */
   gpio_bits_set(RF_CS_GPIO_PORT, RF_CS_PIN);
-  gpio_bits_reset(GPIOB, R3_PIN | R1_PIN | R0_PIN | OLED_DC_PIN | RED_PIN | 
-                  GREEN_PIN);
-  gpio_bits_set(GPIOB, R2_PIN | RF_RST_PIN | OLED_CS_PIN | OLED_RST_PIN);
+  gpio_bits_reset(GPIOB, OLED_DC_PIN | RED_PIN | GREEN_PIN);
+  gpio_bits_set(GPIOB, RF_RST_PIN | OLED_CS_PIN | OLED_RST_PIN);
   gpio_bits_reset(GPIOA, RF_EN_PIN | BATT_MEAS_PIN);
 
   gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_STRONGER;
@@ -82,8 +76,7 @@ void wk_gpio_config(void)
   gpio_init_struct.gpio_drive_strength = GPIO_DRIVE_STRENGTH_MODERATE;
   gpio_init_struct.gpio_out_type = GPIO_OUTPUT_PUSH_PULL;
   gpio_init_struct.gpio_mode = GPIO_MODE_OUTPUT;
-  gpio_init_struct.gpio_pins = R3_PIN | R2_PIN | R1_PIN | R0_PIN | RF_RST_PIN | 
-                               OLED_CS_PIN | OLED_DC_PIN | OLED_RST_PIN | RED_PIN | GREEN_PIN;
+  gpio_init_struct.gpio_pins = RF_RST_PIN | OLED_CS_PIN | OLED_DC_PIN | OLED_RST_PIN | RED_PIN | GREEN_PIN;
   gpio_init_struct.gpio_pull = GPIO_PULL_NONE;
   gpio_init(GPIOB, &gpio_init_struct);
 

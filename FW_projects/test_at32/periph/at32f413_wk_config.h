@@ -130,22 +130,30 @@ extern "C" {
 #define MOSI1_GPIO_PORT    GPIOA
 #define RF_INT_PIN    GPIO_PINS_0
 #define RF_INT_GPIO_PORT    GPIOB
-#define C3_PIN    GPIO_PINS_1
+
+#define C3_PIN    GPIO_PINS_15 
 #define C3_GPIO_PORT    GPIOB
-#define C2_PIN    GPIO_PINS_2
+#define C2_PIN    GPIO_PINS_14 
 #define C2_GPIO_PORT    GPIOB
-#define C1_PIN    GPIO_PINS_10
+
+#define C1_PIN    GPIO_PINS_13 
 #define C1_GPIO_PORT    GPIOB
-#define C0_PIN    GPIO_PINS_11
+
+#define C0_PIN    GPIO_PINS_12 
 #define C0_GPIO_PORT    GPIOB
-#define R3_PIN    GPIO_PINS_12
+#define R3_PIN    GPIO_PINS_11
 #define R3_GPIO_PORT    GPIOB
-#define R2_PIN    GPIO_PINS_13
+
+#define R2_PIN    GPIO_PINS_10
 #define R2_GPIO_PORT    GPIOB
-#define R1_PIN    GPIO_PINS_14
+
+#define R1_PIN    GPIO_PINS_2
 #define R1_GPIO_PORT    GPIOB
-#define R0_PIN    GPIO_PINS_15
+#define R0_PIN    GPIO_PINS_1
 #define R0_GPIO_PORT    GPIOB
+
+
+
 #define RF_EN_PIN    GPIO_PINS_8
 #define RF_EN_GPIO_PORT    GPIOA
 #define TXD1_PIN    GPIO_PINS_9

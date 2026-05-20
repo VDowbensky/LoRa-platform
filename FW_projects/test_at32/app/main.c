@@ -136,7 +136,7 @@ int main(void)
 	txled_on();
 	rxled_on();
 	delay_ms(3000); //for USB enumeration
-	keypad_init(); //maybe not needed
+	Keypad_Init(); 
 #if OLED_ENABLED
 	SSD1306_Init();
 	SSD1306_Clear(0);
@@ -174,12 +174,14 @@ int main(void)
 #endif
   while(1)
   {
-    //wk_usb_app_task();
-
     /* add user code begin 3 */
 		radio_proc();
 		cli_proc();
-		keypad_proc();
+		char key = Keypad_GetKey();
+		if(key != KEY_NONE)
+		{
+			printf("Key pressed: %c\r\n",key); 
+		}
     /* add user code end 3 */
   }
 }

@@ -86,7 +86,7 @@ void bsp_timing_irq(void)
 		kick_adc();
 		adc_ticks = VBAT_MEAS_TIME;
 	}
-	keypad_scan();
+	Keypad_Scan_ISR();
 }
 
 
