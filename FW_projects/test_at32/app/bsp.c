@@ -1,6 +1,8 @@
 #include "bsp.h"
 
+volatile uint32_t 	ms_cnt = 0;
 volatile uint32_t adc_ticks = VBAT_MEAS_TIME;
+volatile bool SecFlag = false;
 
 void radio_power_on(void)
 {
@@ -87,6 +89,12 @@ void bsp_timing_irq(void)
 		adc_ticks = VBAT_MEAS_TIME;
 	}
 	Keypad_Scan_ISR();
+	ms_cnt++;
+	if(ms_cnt >=1000)
+	{
+		ms_cnt = 0;
+		SecFlag = true;
+	}
 }
 
 

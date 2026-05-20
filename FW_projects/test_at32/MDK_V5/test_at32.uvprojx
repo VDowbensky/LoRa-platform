@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>AT32F413CBT7,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\app;..\cli;..\libraries\drivers\inc;..\libraries\cmsis\cm4\core_support;..\libraries\cmsis\cm4\device_support;..\mesh;..\middlewares\usbd_class\cdc;..\middlewares\usbd_drivers\inc;..\periph;..\SSD1306;..\radiohal;..\radioproc;..\radiofunc;..\..\radiodriver\llcc68;..\..\radiodriver\lr11xx;..\..\radiodriver\lr20xx;..\..\radiodriver\pan3029;..\..\radiodriver\sx126x;..\..\radiodriver\sx128x</IncludePath>
+              <IncludePath>..\app;..\cli;..\libraries\drivers\inc;..\libraries\cmsis\cm4\core_support;..\libraries\cmsis\cm4\device_support;..\mesh;..\middlewares\usbd_class\cdc;..\middlewares\usbd_drivers\inc;..\periph;..\SSD1306;..\radiohal;..\radioproc;..\radiofunc;..\..\radiodriver\llcc68;..\..\radiodriver\lr11xx;..\..\radiodriver\lr20xx;..\..\radiodriver\pan3029;..\..\radiodriver\sx126x;..\..\radiodriver\sx128x;..\..\radiodriver\sx127x</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -668,6 +668,11 @@
               <FileType>1</FileType>
               <FilePath>..\app\keypad.c</FilePath>
             </File>
+            <File>
+              <FileName>menu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\menu.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -742,41 +747,6 @@
               <FileName>lr202x_proc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\radioproc\lr202x_proc.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>sx126x</GroupName>
-          <Files>
-            <File>
-              <FileName>lr_fhss_mac.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\radiodriver\sx126x\lr_fhss_mac.c</FilePath>
-            </File>
-            <File>
-              <FileName>sx126x.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\radiodriver\sx126x\sx126x.c</FilePath>
-            </File>
-            <File>
-              <FileName>sx126x_bpsk.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\radiodriver\sx126x\sx126x_bpsk.c</FilePath>
-            </File>
-            <File>
-              <FileName>sx126x_driver_version.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\radiodriver\sx126x\sx126x_driver_version.c</FilePath>
-            </File>
-            <File>
-              <FileName>sx126x_lr_fhss.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\radiodriver\sx126x\sx126x_lr_fhss.c</FilePath>
-            </File>
-            <File>
-              <FileName>sx126x_hal.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\radiodriver\sx126x\sx126x_hal.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -999,6 +969,44 @@
               <FilePath>..\radiohal\sx128x_interface.c</FilePath>
             </File>
           </Files>
+        </Group>
+        <Group>
+          <GroupName>sx126x</GroupName>
+          <Files>
+            <File>
+              <FileName>lr_fhss_mac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\radiodriver\sx126x\lr_fhss_mac.c</FilePath>
+            </File>
+            <File>
+              <FileName>sx126x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\radiodriver\sx126x\sx126x.c</FilePath>
+            </File>
+            <File>
+              <FileName>sx126x_bpsk.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\radiodriver\sx126x\sx126x_bpsk.c</FilePath>
+            </File>
+            <File>
+              <FileName>sx126x_driver_version.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\radiodriver\sx126x\sx126x_driver_version.c</FilePath>
+            </File>
+            <File>
+              <FileName>sx126x_hal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\radiodriver\sx126x\sx126x_hal.c</FilePath>
+            </File>
+            <File>
+              <FileName>sx126x_lr_fhss.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\radiodriver\sx126x\sx126x_lr_fhss.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>sx127x</GroupName>
         </Group>
       </Groups>
     </Target>

@@ -1816,48 +1816,4 @@ void SX1276OnDio5Irq( void )
 }
 
 
-//一些和硬件相关写死的内容
 
-//切换射频输出口
-uint8_t SX1276GetPaSelect( uint32_t channel )
-{
-	//硬件上都连接到 PABOOST 上了，没有使用RFO，所以统一返回 RF_PACONFIG_PASELECT_PABOOST
-	return RF_PACONFIG_PASELECT_PABOOST;
-    /*if( channel < RF_MID_BAND_THRESH )
-    {
-        return RF_PACONFIG_PASELECT_PABOOST;
-    }
-    else
-    {
-        return RF_PACONFIG_PASELECT_RFO;
-    }*/
-}
-
-void SX1276AntSwInit( void )
-{
-		/* 我们的RA-01/02模组的天线切换开关由硬件自动控制，不需要软件控制
-    GpioInit( &AntSwitchLf, RADIO_ANT_SWITCH_LF, PIN_OUTPUT, PIN_PUSH_PULL, PIN_PULL_UP, 1 );
-    GpioInit( &AntSwitchHf, RADIO_ANT_SWITCH_HF, PIN_OUTPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );*/
-}
-
-void SX1276AntSwDeInit( void )
-{
-    /* 我们的RA-01/02模组的天线切换开关由硬件自动控制，不需要软件控制
-		GpioInit( &AntSwitchLf, RADIO_ANT_SWITCH_LF, PIN_OUTPUT, PIN_OPEN_DRAIN, PIN_NO_PULL, 0 );
-    GpioInit( &AntSwitchHf, RADIO_ANT_SWITCH_HF, PIN_OUTPUT, PIN_OPEN_DRAIN, PIN_NO_PULL, 0 );*/
-}
-
-void SX1276SetAntSw( uint8_t rxTx )
-{
-		/* 我们的RA-01/02模组的天线切换开关由硬件自动控制，不需要软件控制
-    if( rxTx != 0 ) // 1: TX, 0: RX
-    {
-        GpioWrite( &AntSwitchLf, 0 );
-        GpioWrite( &AntSwitchHf, 1 );
-    }
-    else
-    {
-        GpioWrite( &AntSwitchLf, 1 );
-        GpioWrite( &AntSwitchHf, 0 );
-    }*/
-}

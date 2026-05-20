@@ -44,6 +44,7 @@
 #include "radio_proc.h"
 #include "flash.h"
 #include "bsp.h"
+#include "menu.h"
 
 /* add user code end private includes */
 
@@ -177,11 +178,7 @@ int main(void)
     /* add user code begin 3 */
 		radio_proc();
 		cli_proc();
-		char key = Keypad_GetKey();
-		if(key != KEY_NONE)
-		{
-			printf("Key pressed: %c\r\n",key); 
-		}
+		menu_proc();
     /* add user code end 3 */
   }
 }

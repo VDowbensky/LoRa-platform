@@ -38,5 +38,6 @@ uint64_t bsp_get_uid(void);
 void bsp_timing_irq(void);
 
 extern volatile uint32_t adc_ticks;
+extern volatile bool SecFlag;
 
 #endif
