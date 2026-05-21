@@ -167,18 +167,16 @@ int main(void)
 	radio_rx();
   /* add user code end 2 */
 #if OLED_ENABLED
-	GUI_ShowString(0,0,"MESH SNIFFER",8,1);
-	sprintf(strbuffer,"Chip:%d",radioconfig.chip);
-	GUI_ShowString(0,8,strbuffer,8,1);
-	sprintf(strbuffer,"Freq:%d",radioconfig.freq/1000);
-	GUI_ShowString(0,16,strbuffer,8,1);
+	display_main_screen();
 #endif
   while(1)
   {
     /* add user code begin 3 */
 		radio_proc();
 		cli_proc();
-		menu_proc();
+//		char key = Keypad_GetKey();
+//		if(key != KEY_NONE) printf("%c\r\n",key);
+		if(Keypad_GetKey() == '#') menu_proc();
     /* add user code end 3 */
   }
 }

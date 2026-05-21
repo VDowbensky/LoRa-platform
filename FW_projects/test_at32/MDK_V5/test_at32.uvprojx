@@ -673,6 +673,11 @@
               <FileType>1</FileType>
               <FilePath>..\app\menu.c</FilePath>
             </File>
+            <File>
+              <FileName>num_input.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\num_input.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
