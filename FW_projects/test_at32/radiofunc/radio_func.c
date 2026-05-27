@@ -38,6 +38,20 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 	radioconfig.invertiq = 0;
 	radioconfig.txpower = 10;
 	
+	radioconfig.txstartfreq = 400000;
+	radioconfig.txstopfreq = 1000000;
+	radioconfig.txstep = 100;
+	radioconfig.txinterval = 10;
+	radioconfig.txmodulation = TXMOD_CW; //CW
+	//scanner parameters
+	radioconfig.rxstartfreq = 400000;
+	radioconfig.rxstopfreq = 1000000;
+	radioconfig.rxstep = 100;
+	radioconfig.rxinterval = 100;
+	radioconfig.rssitr = -100.0;
+	radioconfig.workmode = WORK_MODE_SNIFFER;
+	radioconfig.pktformat = PKT_MESHTASTIC; //meshtastic
+	
 	switch(chip)
   {
     case 1262:

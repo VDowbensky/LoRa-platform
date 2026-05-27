@@ -90,7 +90,7 @@ static bool skipped_keys_map_insert(SkippedKeysMap* map, const uint8_t key_prefi
       return true;
     }
   }
-    return false;
+  return false;
 }
 
 static bool skipped_keys_map_remove(SkippedKeysMap* map, const uint8_t key_prefix[8],uint64_t message_num, uint8_t message_key[32]) 

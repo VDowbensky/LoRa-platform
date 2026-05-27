@@ -174,9 +174,10 @@ int main(void)
     /* add user code begin 3 */
 		radio_proc();
 		cli_proc();
-//		char key = Keypad_GetKey();
+		char key = Keypad_GetKey();
 //		if(key != KEY_NONE) printf("%c\r\n",key);
-		if(Keypad_GetKey() == '#') menu_proc();
+		if(key == '#') menu_proc();
+		//check work mode changing (sniffer/scanner/jammer/test)
     /* add user code end 3 */
   }
 }

@@ -2,40 +2,29 @@
 
 // Hardware register addresses
 static const uint32_t RNG_DATA_REG = 0x60035110;
-
 static const uint32_t WIFI_MAC_TIME_REG = 0x60033010;
-
 // Health check constants
 static const uint32_t MAX_REPETITION_COUNT = 8;
-
 static const uint32_t APT_WINDOW_SIZE = 512;
-
 static const uint32_t APT_CUTOFF = 20;
-
 static const uint32_t MIN_SAMPLES_FOR_HEALTH = 64;
-
 static const uint32_t MIN_ENTROPY_SCALED = 24;
-
 // Global state with atomic access
 static _Atomic bool RNG_HEALTHY = false;
-
 static _Atomic uint32_t SAMPLE_COUNT = 0;
-
 static _Atomic uint32_t REPETITION_COUNT = 0;
-
 static _Atomic uint32_t LAST_VALUE = 0;
-
 static _Atomic uint32_t FAILURE_COUNT = 0;
-
-static _Atomic uint32_t BIT_COUNTS[32] = {
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
+static _Atomic uint32_t BIT_COUNTS[32] = 
+{
+  0, 0, 0, 0,
+  0, 0, 0, 0,
+  0, 0, 0, 0,
+  0, 0, 0, 0,
+  0, 0, 0, 0,
+  0, 0, 0, 0,
+  0, 0, 0, 0,
+  0, 0, 0, 0,
 };
 
 static _Atomic bool INITIALIZED = false;
@@ -55,7 +44,6 @@ static inline uint32_t mix_entropy(uint32_t a, uint32_t b, uint32_t c);
 // Public struct definition
 typedef struct RngHealthStats 
 {
-  
   bool healthy;// Indicates if RNG is healthy
   uint32_t sample_count;// Total number of samples collected
   uint32_t failure_count;// Number of health check failures

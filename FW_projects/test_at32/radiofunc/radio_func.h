@@ -46,6 +46,20 @@
 #define RADIO_OPMODE_TXSTREAMCW       6
 #define RADIO_OPMODE_TXSTREAMPRE      7
 
+#define WORK_MODE_SNIFFER							0
+#define WORK_MODE_SCANNER							1
+#define WORK_MODE_JAMMER							2
+
+#define TXMOD_CW											0
+#define TXMOD_PRE											1
+#define TXMOD_ALTERNATING							2 //0101
+#define TXMOD_PN9											3
+
+#define PKT_MESHTASTIC								0
+#define PKT_MESHCORE									1
+#define PKT_KISS											2
+#define PKT_TESTING										3 //my own
+
 typedef struct radioconfig
 {
   uint16_t chip;
@@ -64,8 +78,23 @@ typedef struct radioconfig
   uint8_t paylen;
   uint8_t crc;
   uint8_t invertiq;
+	//TCXO usage and voltage, XO trim values etc.
   uint8_t userdata[64]; //maybe different
-  //TCXO usage and voltage, XO trim values etc.
+	//jammer parameters
+	uint32_t txstartfreq;
+	uint32_t txstopfreq;
+	uint32_t txstep;
+	uint32_t txinterval;
+	uint32_t txmodulation;
+	//scanner parameters
+	uint32_t rxstartfreq;
+	uint32_t rxstopfreq;
+	uint32_t rxstep;
+	uint32_t rxinterval;
+	float rssitr;
+	uint8_t workmode;
+	uint8_t pktformat;
+	uint8_t reserved[2];
 }radioconfig_t;
 
 //incoming packet status

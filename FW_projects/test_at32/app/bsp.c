@@ -3,6 +3,7 @@
 volatile uint32_t 	ms_cnt = 0;
 volatile uint32_t adc_ticks = VBAT_MEAS_TIME;
 volatile bool SecFlag = false;
+volatile bool usb_flag = false;
 
 void radio_power_on(void)
 {
@@ -54,7 +55,11 @@ uint64_t bsp_get_uid(void)
 
 void bsp_timing_irq(void)
 {
-	//wk_usb_app_task();
+	if(usb_flag)
+	{
+		usb_flag = false;
+		wk_usb_app_task();
+	}
 	if(master)
 	{
 	 pkt_timecnt++;

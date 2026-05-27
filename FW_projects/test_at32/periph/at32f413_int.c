@@ -267,7 +267,7 @@ void USBFS_MAPL_IRQHandler(void)
   wk_usbfs_irq_handler();
 
   /* add user code begin USBFS_MAPL_IRQ 1 */
-	//wk_usb_app_task();
+	usb_flag = true;
   /* add user code end USBFS_MAPL_IRQ 1 */
 }
 

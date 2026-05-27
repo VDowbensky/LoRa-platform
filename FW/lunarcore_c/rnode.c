@@ -1029,572 +1029,401 @@ void rnode_handler_process_lora_packet(RNodeHandler* handler, const uint8_t* dat
 #define TFESC 0xDD
 
 /* KISS Commands */
-typedef enum {
-    KissCommandDataFrame = 0x00,
-    KissCommandUnknown   = 0xFF
+typedef enum 
+{
+  KissCommandDataFrame = 0x00,
+  KissCommandUnknown   = 0xFF
 } KissCommand;
 
 /* RNode Commands */
-typedef enum {
-    RNodeCommandDetect          = 0x01,
-    RNodeCommandFrequency       = 0x02,
-    RNodeCommandBandwidth       = 0x03,
-    RNodeCommandSpreadingFactor = 0x04,
-    RNodeCommandCodingRate      = 0x05,
-    RNodeCommandTxPower         = 0x06,
-    RNodeCommandReady           = 0x07,
-    RNodeCommandFwVersion       = 0x08,
-    RNodeCommandPlatform        = 0x09,
+typedef enum 
+{
+  RNodeCommandDetect          = 0x01,
+  RNodeCommandFrequency       = 0x02,
+  RNodeCommandBandwidth       = 0x03,
+  RNodeCommandSpreadingFactor = 0x04,
+  RNodeCommandCodingRate      = 0x05,
+  RNodeCommandTxPower         = 0x06,
+  RNodeCommandReady           = 0x07,
+  RNodeCommandFwVersion       = 0x08,
+  RNodeCommandPlatform        = 0x09,
 } RNodeCommand;
 
 /* RNode States */
-typedef enum {
-    RNodeStateOffline,
-    RNodeStateOnline,
-    RNodeStateLocked
+typedef enum 
+{
+  RNodeStateOffline,
+  RNodeStateOnline,
+  RNodeStateLocked
 } RNodeState;
 
 /* KISS Frame Structure */
 #define MAX_KISS_DATA_LEN 512
-typedef struct {
-    uint8_t command;
-    uint8_t data[MAX_KISS_DATA_LEN];
-    size_t data_len;
+typedef struct 
+{
+  uint8_t command;
+  uint8_t data[MAX_KISS_DATA_LEN];
+  size_t data_len;
 } KissFrame;
 
 /* RNode Configuration Structure */
-typedef struct {
-    uint32_t frequency;
-    uint32_t bandwidth;
-    uint8_t spreading_factor;
-    uint8_t coding_rate;
-    int8_t tx_power;
+typedef struct 
+{
+  uint32_t frequency;
+  uint32_t bandwidth;
+  uint8_t spreading_factor;
+  uint8_t coding_rate;
+  int8_t tx_power;
 } RNodeConfig;
 
 /* RNode Statistics Structure */
-typedef struct {
-    uint64_t rx_count;
-    uint64_t rx_bytes;
-    uint64_t tx_count;
-    uint64_t tx_bytes;
-    uint64_t airtime_used;
-    uint64_t channel_busy;
-    int16_t last_rssi;
-    int16_t last_snr;
+typedef struct 
+{
+  uint64_t rx_count;
+  uint64_t rx_bytes;
+  uint64_t tx_count;
+  uint64_t tx_bytes;
+  uint64_t airtime_used;
+  uint64_t channel_busy;
+  int16_t last_rssi;
+  int16_t last_snr;
 } RNodeStats;
 
 /* RNode Identity Structure */
-typedef struct {
-    uint8_t serial[16];
+typedef struct 
+{
+  uint8_t serial[16];
 } RNodeIdentity;
 
 /* Main RNode Handler Structure */
-typedef struct {
-    RNodeStats stats;
-    RNodeConfig config;
-    RNodeState state;
-    RNodeIdentity identity;
-    bool locked;
-    bool promiscuous;
-    uint64_t airtime_limit;
+typedef struct 
+{
+  RNodeStats stats;
+  RNodeConfig config;
+  RNodeState state;
+  RNodeIdentity identity;
+  bool locked;
+  bool promiscuous;
+  uint64_t airtime_limit;
 } RNodeHandler;
 
 /* --- KissFrame Implementation --- */
 
-void kiss_frame_init(KissFrame* frame, uint8_t command) {
-    frame->command = command;
-    frame->data_len = 0;
+void kiss_frame_init(KissFrame* frame, uint8_t command) 
+{
+  frame->command = command;
+  frame->data_len = 0;
 }
 
-KissFrame kiss_frame_new(uint8_t command) {
-    KissFrame frame;
-    kiss_frame_init(&frame, command);
-    return frame;
+KissFrame kiss_frame_new(uint8_t command) 
+{
+  KissFrame frame;
+  kiss_frame_init(&frame, command);
+  return frame;
 }
 
-bool kiss_frame_push_data(KissFrame* frame, uint8_t b) {
-    if (frame->data_len < MAX_KISS_DATA_LEN) {
-        frame->data[frame->data_len++] = b;
-        return true;
-    }
-    return false;
+bool kiss_frame_push_data(KissFrame* frame, uint8_t b) 
+{
+  if (frame->data_len < MAX_KISS_DATA_LEN) 
+  {
+    frame->data[frame->data_len++] = b;
+    return true;
+  }
+  return false;
 }
 
 /* Helper for tests: create data frame */
-bool kiss_frame_data_frame(KissFrame* frame, const uint8_t* data, size_t len) {
-    if (len > MAX_KISS_DATA_LEN) return false;
-    frame->command = KissCommandDataFrame;
-    memcpy(frame->data, data, len);
-    frame->data_len = len;
-    return true;
+bool kiss_frame_data_frame(KissFrame* frame, const uint8_t* data, size_t len) 
+{
+  if (len > MAX_KISS_DATA_LEN) return false;
+  frame->command = KissCommandDataFrame;
+  memcpy(frame->data, data, len);
+  frame->data_len = len;
+  return true;
 }
 
 /* Helper for tests: create command frame */
-bool kiss_frame_command_frame(KissFrame* frame, uint8_t command, const uint8_t* data, size_t len) {
-    if (len > MAX_KISS_DATA_LEN) return false;
-    frame->command = command;
-    memcpy(frame->data, data, len);
-    frame->data_len = len;
-    return true;
+bool kiss_frame_command_frame(KissFrame* frame, uint8_t command, const uint8_t* data, size_t len) 
+{
+  if (len > MAX_KISS_DATA_LEN) return false;
+  frame->command = command;
+  memcpy(frame->data, data, len);
+  frame->data_len = len;
+  return true;
 }
 
 /* Encode frame to KISS wire format */
-size_t kiss_frame_encode(const KissFrame* frame, uint8_t* out, size_t max_out) {
-    size_t p = 0;
-    if (p < max_out) out[p++] = FEND;
-    
-    // Command byte
-    uint8_t cmd = frame->command;
-    if (cmd == FEND) {
-        if (p < max_out) out[p++] = FESC;
-        if (p < max_out) out[p++] = TFEND;
-    } else if (cmd == FESC) {
-        if (p < max_out) out[p++] = FESC;
-        if (p < max_out) out[p++] = TFESC;
-    } else {
-        if (p < max_out) out[p++] = cmd;
-    }
-
-    // Data bytes
-    for (size_t i = 0; i < frame->data_len; i++) {
-        uint8_t b = frame->data[i];
-        if (b == FEND) {
-            if (p < max_out) out[p++] = FESC;
-            if (p < max_out) out[p++] = TFEND;
-        } else if (b == FESC) {
-            if (p < max_out) out[p++] = FESC;
-            if (p < max_out) out[p++] = TFESC;
-        } else {
-            if (p < max_out) out[p++] = b;
-        }
-    }
-
-    if (p < max_out) out[p++] = FEND;
-    return p;
+size_t kiss_frame_encode(const KissFrame* frame, uint8_t* out, size_t max_out) 
+{
+  size_t p = 0;
+  if (p < max_out) out[p++] = FEND;
+  // Command byte
+  uint8_t cmd = frame->command;
+  if (cmd == FEND) 
+  {
+    if (p < max_out) out[p++] = FESC;
+    if (p < max_out) out[p++] = TFEND;
+  } 
+  else if (cmd == FESC) 
+  {
+    if (p < max_out) out[p++] = FESC;
+    if (p < max_out) out[p++] = TFESC;
+  } 
+  else if (p < max_out) out[p++] = cmd;
+  // Data bytes
+  for (size_t i = 0; i < frame->data_len; i++) 
+  {
+    uint8_t b = frame->data[i];
+    if (b == FEND) 
+    {
+      if (p < max_out) out[p++] = FESC;
+      if (p < max_out) out[p++] = TFEND;
+    } 
+    else if (b == FESC) 
+    {
+      if (p < max_out) out[p++] = FESC;
+      if (p < max_out) out[p++] = TFESC;
+    } 
+    else if (p < max_out) out[p++] = b;
+  }
+  if (p < max_out) out[p++] = FEND;
+  return p;
 }
 
 /* --- KissParser Implementation --- */
 
-typedef struct {
-    KissFrame current_frame;
-    bool in_frame;
-    bool escaped;
+typedef struct 
+{
+  KissFrame current_frame;
+  bool in_frame;
+  bool escaped;
 } KissParser;
 
-void kiss_parser_init(KissParser* parser) {
-    parser->in_frame = false;
-    parser->escaped = false;
+void kiss_parser_init(KissParser* parser) 
+{
+  parser->in_frame = false;
+  parser->escaped = false;
 }
 
-KissFrame* kiss_parser_feed(KissParser* parser, uint8_t byte, bool* out_ready) {
-    *out_ready = false;
-    if (byte == FEND) {
-        if (parser->in_frame && parser->current_frame.data_len > 0) {
-            *out_ready = true;
-            parser->in_frame = false;
-            return &parser->current_frame;
-        } else {
-            parser->in_frame = true;
-            parser->current_frame.data_len = 0;
-            parser->current_frame.command = KissCommandUnknown;
-            return NULL;
-        }
+KissFrame* kiss_parser_feed(KissParser* parser, uint8_t byte, bool* out_ready) 
+{
+  *out_ready = false;
+  if (byte == FEND) 
+  {
+    if (parser->in_frame && parser->current_frame.data_len > 0) 
+    {
+      *out_ready = true;
+      parser->in_frame = false;
+      return &parser->current_frame;
+    } 
+    else 
+    {
+      parser->in_frame = true;
+      parser->current_frame.data_len = 0;
+      parser->current_frame.command = KissCommandUnknown;
+      return NULL;
     }
-
-    if (!parser->in_frame) return NULL;
-
-    if (byte == FESC) {
-        parser->escaped = true;
-        return NULL;
+  }
+  if (!parser->in_frame) return NULL;
+    if (byte == FESC) 
+    {
+      parser->escaped = true;
+      return NULL;
     }
-
-    if (parser->escaped) {
-        if (byte == TFEND) byte = FEND;
-        else if (byte == TFESC) byte = FESC;
-        parser->escaped = false;
+    if (parser->escaped) 
+    {
+      if (byte == TFEND) byte = FEND;
+      else if (byte == TFESC) byte = FESC;
+      parser->escaped = false;
     }
-
-    if (parser->current_frame.command == KissCommandUnknown) {
-        parser->current_frame.command = byte;
-    } else {
-        kiss_frame_push_data(&parser->current_frame, byte);
-    }
-
+    if (parser->current_frame.command == KissCommandUnknown) parser->current_frame.command = byte;
+    else kiss_frame_push_data(&parser->current_frame, byte);
     return NULL;
 }
 
 /* --- RNodeConfig Implementation --- */
 
-uint64_t rnode_config_packet_airtime_ms(const RNodeConfig* config, size_t packet_len) {
-    // Simplified LoRa airtime calculation for logic preservation
-    // In actual hardware this depends on SF, BW, CR, Preamble.
-    // Based on the test expectation: 50 bytes -> between 50 and 500 ms.
-    uint32_t sf = config->spreading_factor;
-    if (sf < 7) sf = 7;
-    uint32_t bw = config->bandwidth;
-    if (bw == 0) bw = 125000;
-    
-    // Logic: higher SF = higher airtime, higher BW = lower airtime
-    double symbol_duration = (double)(1 << sf) / (double)bw;
-    double airtime_sec = (packet_len + 8) * symbol_duration * 10.0; // rough approximation
-    return (uint64_t)(airtime_sec * 1000.0);
+uint64_t rnode_config_packet_airtime_ms(const RNodeConfig* config, size_t packet_len) 
+{
+  // Simplified LoRa airtime calculation for logic preservation
+  // In actual hardware this depends on SF, BW, CR, Preamble.
+  // Based on the test expectation: 50 bytes -> between 50 and 500 ms.
+  uint32_t sf = config->spreading_factor;
+  if (sf < 7) sf = 7;
+  uint32_t bw = config->bandwidth;
+  if (bw == 0) bw = 125000;
+  // Logic: higher SF = higher airtime, higher BW = lower airtime
+  double symbol_duration = (double)(1 << sf) / (double)bw;
+  double airtime_sec = (packet_len + 8) * symbol_duration * 10.0; // rough approximation
+  return (uint64_t)(airtime_sec * 1000.0);
 }
 
-bool rnode_config_should_enable_ldro(const RNodeConfig* config) {
-    // LDRO is usually required when symbol duration > 16ms
-    uint32_t sf = config->spreading_factor;
-    uint32_t bw = config->bandwidth;
-    double symbol_duration_ms = ((double)(1 << sf) / (double)bw) * 1000.0;
-    return symbol_duration_ms > 16.0;
+bool rnode_config_should_enable_ldro(const RNodeConfig* config) 
+{
+  // LDRO is usually required when symbol duration > 16ms
+  uint32_t sf = config->spreading_factor;
+  uint32_t bw = config->bandwidth;
+  double symbol_duration_ms = ((double)(1 << sf) / (double)bw) * 1000.0;
+  return symbol_duration_ms > 16.0;
 }
 
-void rnode_config_default(RNodeConfig* config) {
-    config->frequency = 868000000;
-    config->bandwidth = 125000;
-    config->spreading_factor = 7;
-    config->coding_rate = 5;
-    config->tx_power = 20;
+void rnode_config_default(RNodeConfig* config) 
+{
+  config->frequency = 868000000;
+  config->bandwidth = 125000;
+  config->spreading_factor = 7;
+  config->coding_rate = 5;
+  config->tx_power = 20;
 }
 
 /* --- RNodeStats Implementation --- */
 
-void rnode_stats_default(RNodeStats* stats) {
-    memset(stats, 0, sizeof(RNodeStats));
+void rnode_stats_default(RNodeStats* stats) 
+{
+  memset(stats, 0, sizeof(RNodeStats));
 }
 
 /* --- RNodeIdentity Implementation --- */
 
-uint32_t rnode_identity_identity_hash(const RNodeIdentity* identity) {
-    uint32_t hash = 5381;
-    for (int i = 0; i < 16; i++) {
-        hash = ((hash << 5) + hash) + identity->serial[i];
-    }
-    return hash;
+uint32_t rnode_identity_identity_hash(const RNodeIdentity* identity) 
+{
+  uint32_t hash = 5381;
+  for (int i = 0; i < 16; i++) hash = ((hash << 5) + hash) + identity->serial[i];
+  return hash;
 }
 
 /* --- RNodeHandler Implementation --- */
 
-void rnode_handler_init(RNodeHandler* self) {
-    rnode_stats_default(&self->stats);
-    rnode_config_default(&self->config);
-    self->state = RNodeStateOffline;
-    memset(&self->identity, 0, sizeof(RNodeIdentity));
-    self->locked = false;
-    self->promiscuous = false;
-    self->airtime_limit = 0;
+void rnode_handler_init(RNodeHandler* self) 
+{
+  rnode_stats_default(&self->stats);
+  rnode_config_default(&self->config);
+  self->state = RNodeStateOffline;
+  memset(&self->identity, 0, sizeof(RNodeIdentity));
+  self->locked = false;
+  self->promiscuous = false;
+  self->airtime_limit = 0;
 }
 
-KissFrame rnode_handler_process_lora_packet_raw(RNodeHandler* self, const uint8_t* data, size_t len) {
-    self->stats.rx_count += 1;
-    self->stats.rx_bytes += (uint64_t)len;
-
-    KissFrame frame = kiss_frame_new((uint8_t)KissCommandDataFrame);
-    for (size_t i = 0; i < len; i++) {
-        kiss_frame_push_data(&frame, data[i]);
-    }
-    return frame;
+KissFrame rnode_handler_process_lora_packet_raw(RNodeHandler* self, const uint8_t* data, size_t len) 
+{
+  self->stats.rx_count += 1;
+  self->stats.rx_bytes += (uint64_t)len;
+  KissFrame frame = kiss_frame_new((uint8_t)KissCommandDataFrame);
+  for (size_t i = 0; i < len; i++) kiss_frame_push_data(&frame, data[i]);
+  return frame;
 }
 
 // Added helper based on test usage
-KissFrame rnode_handler_process_lora_packet(RNodeHandler* self, const uint8_t* data, size_t len, int16_t rssi, int16_t snr) {
-    self->stats.last_rssi = rssi;
-    self->stats.last_snr = snr;
-    return rnode_handler_process_lora_packet_raw(self, data, len);
+KissFrame rnode_handler_process_lora_packet(RNodeHandler* self, const uint8_t* data, size_t len, int16_t rssi, int16_t snr) 
+{
+  self->stats.last_rssi = rssi;
+  self->stats.last_snr = snr;
+  return rnode_handler_process_lora_packet_raw(self, data, len);
 }
 
-const uint8_t* rnode_handler_get_tx_data(RNodeHandler* self, const KissFrame* frame, size_t* out_len) {
-    if (frame->command == (uint8_t)KissCommandDataFrame) {
-        self->stats.tx_count += 1;
-        self->stats.tx_bytes += (uint64_t)frame->data_len;
-
-        uint64_t airtime = rnode_config_packet_airtime_ms(&self->config, frame->data_len);
-        self->stats.airtime_used += airtime;
-        
-        *out_len = frame->data_len;
-        return frame->data;
-    } else {
-        *out_len = 0;
-        return NULL;
-    }
+const uint8_t* rnode_handler_get_tx_data(RNodeHandler* self, const KissFrame* frame, size_t* out_len) 
+{
+  if (frame->command == (uint8_t)KissCommandDataFrame) 
+  {
+    self->stats.tx_count += 1;
+    self->stats.tx_bytes += (uint64_t)frame->data_len;
+    uint64_t airtime = rnode_config_packet_airtime_ms(&self->config, frame->data_len);
+    self->stats.airtime_used += airtime;
+    *out_len = frame->data_len;
+    return frame->data;
+  } 
+  else 
+  {
+    *out_len = 0;
+    return NULL;
+  }
 }
 
-void rnode_handler_record_channel_busy(RNodeHandler* self, uint64_t ms) {
-    self->stats.channel_busy += ms;
+void rnode_handler_record_channel_busy(RNodeHandler* self, uint64_t ms) 
+{
+  self->stats.channel_busy += ms;
 }
 
-const RNodeConfig* rnode_handler_config(const RNodeHandler* self) {
-    return &self->config;
+const RNodeConfig* rnode_handler_config(const RNodeHandler* self) 
+{
+  return &self->config;
 }
 
-RNodeConfig* rnode_handler_config_mut(RNodeHandler* self) {
-    return &self->config;
+RNodeConfig* rnode_handler_config_mut(RNodeHandler* self) 
+{
+  return &self->config;
 }
 
-RNodeState rnode_handler_state(const RNodeHandler* self) {
-    return self->state;
+RNodeState rnode_handler_state(const RNodeHandler* self) 
+{
+  return self->state;
 }
 
-void rnode_handler_set_state(RNodeHandler* self, RNodeState state) {
-    self->state = state;
+void rnode_handler_set_state(RNodeHandler* self, RNodeState state) 
+{
+  self->state = state;
 }
 
-const RNodeStats* rnode_handler_stats(const RNodeHandler* self) {
-    return &self->stats;
+const RNodeStats* rnode_handler_stats(const RNodeHandler* self) 
+{
+  return &self->stats;
 }
 
 void rnode_handler_reset_stats(RNodeHandler* self) {
     rnode_stats_default(&self->stats);
 }
 
-const RNodeIdentity* rnode_handler_identity(const RNodeHandler* self) {
-    return &self->identity;
+const RNodeIdentity* rnode_handler_identity(const RNodeHandler* self) 
+{
+  return &self->identity;
 }
 
-bool rnode_handler_is_online(const RNodeHandler* self) {
-    return self->state != RNodeStateOffline;
+bool rnode_handler_is_online(const RNodeHandler* self) 
+{
+  return self->state != RNodeStateOffline;
 }
 
-bool rnode_handler_is_locked(const RNodeHandler* self) {
-    return self->locked;
+bool rnode_handler_is_locked(const RNodeHandler* self) 
+{
+  return self->locked;
 }
 
-bool rnode_handler_is_promiscuous(const RNodeHandler* self) {
-    return self->promiscuous;
+bool rnode_handler_is_promiscuous(const RNodeHandler* self) 
+{
+  return self->promiscuous;
 }
 
-bool rnode_handler_check_airtime_limit(const RNodeHandler* self, size_t packet_len) {
-    if (self->airtime_limit == 0) {
-        return true;
-    }
-    uint64_t airtime = rnode_config_packet_airtime_ms(&self->config, packet_len);
-
-    return (self->stats.airtime_used + airtime) <= self->airtime_limit;
+bool rnode_handler_check_airtime_limit(const RNodeHandler* self, size_t packet_len) 
+{
+  if (self->airtime_limit == 0) return true;
+  uint64_t airtime = rnode_config_packet_airtime_ms(&self->config, packet_len);
+  return (self->stats.airtime_used + airtime) <= self->airtime_limit;
 }
 
 /* Handler for process_frame used in tests */
-void* rnode_handler_process_frame(RNodeHandler* self, const KissFrame* frame) {
-    if (frame->command == (uint8_t)RNodeCommandFrequency) {
-        uint32_t freq = 0;
-        if (frame->data_len >= 4) {
-            freq = ((uint32_t)frame->data[0] << 24) | ((uint32_t)frame->data[1] << 16) | 
-                   ((uint32_t)frame->data[2] << 8) | (uint32_t)frame->data[3];
-        }
-        self->config.frequency = freq;
-        return self; 
-    } else if (frame->command == (uint8_t)RNodeCommandSpreadingFactor) {
-        if (frame->data_len >= 1) {
-            self->config.spreading_factor = frame->data[0];
-        }
-        return self;
-    } else if (frame->command == (uint8_t)RNodeCommandDetect || 
-               frame->command == (uint8_t)RNodeCommandReady ||
-               frame->command == (uint8_t)RNodeCommandFwVersion ||
-               frame->command == (uint8_t)RNodeCommandPlatform) {
-        return self;
-    }
-    return NULL;
-}
-
-//////////////////////////////////////////////////////////////////////////
-/* --- Tests --- */
-
-void test_escape_encode() 
+void* rnode_handler_process_frame(RNodeHandler* self, const KissFrame* frame) 
 {
-  KissFrame frame;
-  uint8_t data[] = {0x00, 0xC0, 0xDB, 0xFF};
-  kiss_frame_data_frame(&frame, data, 4);
-    
-  uint8_t encoded[64];
-  size_t len = kiss_frame_encode(&frame, encoded, 64);
-
-  assert(encoded[0] == FEND);
-  assert(encoded[1] == 0x00);
-  assert(encoded[2] == 0x00);
-  assert(encoded[3] == FESC);
-  assert(encoded[4] == TFEND);
-  assert(encoded[5] == FESC);
-  assert(encoded[6] == TFESC);
-  assert(encoded[7] == 0xFF);
-  assert(encoded[8] == FEND);
-  printf("test_escape_encode passed\n");
-}
-
-void test_parser() 
-{
-  KissParser parser;
-  kiss_parser_init(&parser);
-
-  uint8_t bytes[] = {FEND, 0x00, 0x01, 0x02, 0x03, FEND};
-  size_t bytes_len = 6;
-
-  for (size_t i = 0; i < bytes_len; i++) 
+  if (frame->command == (uint8_t)RNodeCommandFrequency) 
   {
-    bool ready = false;
-    KissFrame* frame = kiss_parser_feed(&parser, bytes[i], &ready);
-    if (i == bytes_len - 1) 
+    uint32_t freq = 0;
+    if (frame->data_len >= 4) 
     {
-      assert(ready == true);
-      assert(frame->command == 0x00);
-      assert(frame->data_len == 3);
-    } 
-    else assert(ready == false);
-  }
-  printf("test_parser passed\n");
-}
-
-void test_parser_escape() 
-{
-  KissParser parser;
-  kiss_parser_init(&parser);
-
-  uint8_t bytes[] = {FEND, 0x00, FESC, TFEND, FEND};
-    
-  for (size_t i = 0; i < 5; i++) 
-  {
-    bool ready = false;
-    KissFrame* frame = kiss_parser_feed(&parser, bytes[i], &ready);
-    if (ready) 
-    {
-      assert(frame->data_len == 1);
-      assert(frame->data[0] == FEND);
+        freq = ((uint32_t)frame->data[0] << 24) | ((uint32_t)frame->data[1] << 16) | 
+               ((uint32_t)frame->data[2] << 8) | (uint32_t)frame->data[3];
     }
-  }
-  printf("test_parser_escape passed\n");
+    self->config.frequency = freq;
+    return self; 
+  } 
+  else if (frame->command == (uint8_t)RNodeCommandSpreadingFactor) 
+  {
+    if (frame->data_len >= 1) 
+    {
+        self->config.spreading_factor = frame->data[0];
+    }
+    return self;
+  } 
+  else if (frame->command == (uint8_t)RNodeCommandDetect ||  frame->command == (uint8_t)RNodeCommandReady ||
+             frame->command == (uint8_t)RNodeCommandFwVersion || frame->command == (uint8_t)RNodeCommandPlatform) return self;
+  return NULL;
 }
-
-void test_rnode_config() 
-{
-  RNodeHandler handler;
-  rnode_handler_init(&handler);
-
-  KissFrame frame;
-  uint32_t freq = 915000000;
-  uint8_t freq_bytes[4] = { (freq >> 24) & 0xFF, (freq >> 16) & 0xFF, (freq >> 8) & 0xFF, freq & 0xFF };
-    
-  kiss_frame_command_frame(&frame, RNodeCommandFrequency, freq_bytes, 4);
-  rnode_handler_process_frame(&handler, &frame);
-  assert(rnode_handler_config(&handler)->frequency == 915000000);
-
-  uint8_t sf = 10;
-  kiss_frame_command_frame(&frame, RNodeCommandSpreadingFactor, &sf, 1);
-  rnode_handler_process_frame(&handler, &frame);
-  assert(rnode_handler_config(&handler)->spreading_factor == 10);
-  printf("test_rnode_config passed\n");
-}
-
-void test_rnode_statistics() 
-{
-  RNodeHandler handler;
-  rnode_handler_init(&handler);
-
-  uint8_t data1[] = {0x01, 0x02, 0x03};
-  rnode_handler_process_lora_packet(&handler, data1, 3, -80, 5);
-  assert(rnode_handler_stats(&handler)->rx_count == 1);
-  assert(rnode_handler_stats(&handler)->rx_bytes == 3);
-  assert(rnode_handler_stats(&handler)->last_rssi == -80);
-  assert(rnode_handler_stats(&handler)->last_snr == 5);
-
-  uint8_t data2[] = {0x04, 0x05};
-  rnode_handler_process_lora_packet(&handler, data2, 2, -90, 3);
-  assert(rnode_handler_stats(&handler)->rx_count == 2);
-  assert(rnode_handler_stats(&handler)->rx_bytes == 5);
-  printf("test_rnode_statistics passed\n");
-}
-
-void test_rnode_airtime() 
-{
-  RNodeConfig config;
-  rnode_config_default(&config);
-
-  uint64_t airtime = rnode_config_packet_airtime_ms(&config, 50);
-  assert(airtime > 50);
-  assert(airtime < 500);
-  printf("test_rnode_airtime passed\n");
-}
-
-void test_rnode_ldro_calculation() 
-{
-  RNodeConfig config;
-  rnode_config_default(&config);
-
-  config.spreading_factor = 9;
-  config.bandwidth = 125000;
-  assert(!rnode_config_should_enable_ldro(&config));
-
-  config.spreading_factor = 11;
-  assert(rnode_config_should_enable_ldro(&config));
-
-  config.spreading_factor = 12;
-  assert(rnode_config_should_enable_ldro(&config));
-
-  config.bandwidth = 500000;
-  assert(!rnode_config_should_enable_ldro(&config));
-  printf("test_rnode_ldro_calculation passed\n");
-}
-
-void test_rnode_identity_hash() 
-{
-  RNodeIdentity identity;
-  uint8_t serial[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                        0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10};
-  memcpy(identity.serial, serial, 16);
-
-  uint32_t hash1 = rnode_identity_identity_hash(&identity);
-  uint32_t hash2 = rnode_identity_identity_hash(&identity);
-
-  assert(hash1 == hash2);
-
-  identity.serial[0] = 0xFF;
-  uint32_t hash3 = rnode_identity_identity_hash(&identity);
-  assert(hash1 != hash3);
-  printf("test_rnode_identity_hash passed\n");
-}
-
-void test_rnode_airtime_limit() 
-{
-  RNodeHandler handler;
-  rnode_handler_init(&handler);
-  handler.airtime_limit = 1000;
-
-  assert(rnode_handler_check_airtime_limit(&handler, 10));
-  printf("test_rnode_airtime_limit passed\n");
-}
-
-void test_rnode_all_commands() 
-{
-  RNodeHandler handler;
-  rnode_handler_init(&handler);
-
-  KissFrame detect_frame;
-  kiss_frame_command_frame(&detect_frame, RNodeCommandDetect, NULL, 0);
-  assert(rnode_handler_process_frame(&handler, &detect_frame) != NULL);
-
-  KissFrame ready_frame;
-  kiss_frame_command_frame(&ready_frame, RNodeCommandReady, NULL, 0);
-  assert(rnode_handler_process_frame(&handler, &ready_frame) != NULL);
-
-  KissFrame fw_frame;
-  kiss_frame_command_frame(&fw_frame, RNodeCommandFwVersion, NULL, 0);
-  assert(rnode_handler_process_frame(&handler, &fw_frame) != NULL);
-
-  KissFrame platform_frame;
-  kiss_frame_command_frame(&platform_frame, RNodeCommandPlatform, NULL, 0);
-  assert(rnode_handler_process_frame(&handler, &platform_frame) != NULL);
-  printf("test_rnode_all_commands passed\n");
-}
-
-/* int main() {
-    test_escape_encode();
-    test_parser();
-    test_parser_escape();
-    test_rnode_config();
-    test_rnode_statistics();
-    test_rnode_airtime();
-    test_rnode_ldro_calculation();
-    test_rnode_identity_hash();
-    test_rnode_airtime_limit();
-    test_rnode_all_commands();
-    printf("All tests passed!\n");
-    return 0;
-} */
-

@@ -217,7 +217,7 @@ void wk_usbfs_irq_handler(void)
   usbd_irq_handler(&usb_core_dev);
 
   /* add user code begin otgfs1_irq_handler 1 */
-	wk_usb_app_task();
+	//wk_usb_app_task();
   /* add user code end otgfs1_irq_handler 1 */
 }
 

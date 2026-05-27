@@ -1,48 +1,48 @@
 
 
 // Global atomic state variables
-static atomic_bool dio1_triggered = ATOMIC_VAR_INIT(false);
-static atomic_bool packet_pending = ATOMIC_VAR_INIT(false);
-static atomic_bool tx_complete = ATOMIC_VAR_INIT(false);
-static atomic_uint_least32_t system_ticks = ATOMIC_VAR_INIT(0);
-static atomic_uint_least32_t last_activity = ATOMIC_VAR_INIT(0);
-static atomic_uint_least32_t error_count = ATOMIC_VAR_INIT(0);
+static bool dio1_triggered = ATOMIC_VAR_INIT(false);
+static bool packet_pending = ATOMIC_VAR_INIT(false);
+static bool tx_complete = ATOMIC_VAR_INIT(false);
+static uint_least32_t system_ticks = ATOMIC_VAR_INIT(0);
+static uint_least32_t last_activity = ATOMIC_VAR_INIT(0);
+static uint_least32_t error_count = ATOMIC_VAR_INIT(0);
 
 
 
 // Function declarations for NodeIdentity
-static void node_identity_read_mac_address(uint8_t mac[6]);
-static void node_identity_read_hardware_serial(uint8_t serial[8]);
-static void node_identity_load_or_create_identity(const uint8_t hardware_serial[8], 
+void node_identity_read_mac_address(uint8_t mac[6]);
+void node_identity_read_hardware_serial(uint8_t serial[8]);
+void node_identity_load_or_create_identity(const uint8_t hardware_serial[8], 
                                                    uint32_t *node_id, uint8_t private_key[32]);
-static uint32_t node_identity_generate_random_node_id(void);
-static void node_identity_generate_random_private_key(const uint8_t hardware_serial[8], 
+uint32_t node_identity_generate_random_node_id(void);
+void node_identity_generate_random_private_key(const uint8_t hardware_serial[8], 
                                                        uint8_t private_key[32]);
-static NodeIdentity node_identity_from_hardware(void);
-static NodeIdentity* node_identity_factory_reset(void);
-static void node_identity_x25519_pubkey(const NodeIdentity *self, uint8_t pubkey[32]);
+NodeIdentity node_identity_from_hardware(void);
+NodeIdentity* node_identity_factory_reset(void);
+void node_identity_x25519_pubkey(const NodeIdentity *self, uint8_t pubkey[32]);
 
 
 // Function declarations for BatteryState
-static void battery_state_new(BatteryState *battery);
-static void battery_state_update(BatteryState *battery, uint32_t adc_value);
-static uint8_t battery_state_voltage_to_percentage(uint32_t mv);
+void battery_state_new(BatteryState *battery);
+void battery_state_update(BatteryState *battery, uint32_t adc_value);
+uint8_t battery_state_voltage_to_percentage(uint32_t mv);
 
 
 
 // Function declarations for Stats
-static void stats_new(Stats *stats);
-static void stats_record_rx(Stats *stats, size_t len, int16_t rssi, int8_t snr);
-static void stats_record_tx(Stats *stats, size_t len, uint32_t airtime_ms);
+void stats_new(Stats *stats);
+void stats_record_rx(Stats *stats, size_t len, int16_t rssi, int8_t snr);
+void stats_record_tx(Stats *stats, size_t len, uint32_t airtime_ms);
 
 
 // Function declarations for LedController
-static void led_controller_new(LedController *led);
-static void led_controller_set_idle(LedController *led);
-static void led_controller_set_active(LedController *led);
-static void led_controller_set_error(LedController *led);
-static void led_controller_flash(LedController *led, uint8_t count);
-static bool led_controller_update(LedController *led, uint32_t current_time);
+void led_controller_new(LedController *led);
+void led_controller_set_idle(LedController *led);
+void led_controller_set_active(LedController *led);
+void led_controller_set_error(LedController *led);
+void led_controller_flash(LedController *led, uint8_t count);
+bool led_controller_update(LedController *led, uint32_t current_time);
 
 
 
@@ -60,17 +60,17 @@ void lunar_core_handle_meshtastic_frame(LunarCore *core, const MeshtasticFrame *
 void lunar_core_handle_rnode_frame(LunarCore *core, const KissFrame *frame, uart_port_t uart);
 
 // Helper function declarations
-static void write_hex8(uart_port_t uart, uint8_t value);
-static void write_hex32(uart_port_t uart, uint32_t value);
-static void write_u32(uart_port_t uart, uint32_t value);
-static void write_i16(uart_port_t uart, int16_t value);
-static const char* format_battery(const BatteryState *battery, char *buf);
-static bool parse_u32_from_cmd(const uint8_t *cmd, size_t len, uint32_t *result);
-static bool parse_i8_from_cmd(const uint8_t *cmd, size_t len, int8_t *result);
+void write_hex8(uart_port_t uart, uint8_t value);
+void write_hex32(uart_port_t uart, uint32_t value);
+void write_u32(uart_port_t uart, uint32_t value);
+void write_i16(uart_port_t uart, int16_t value);
+const char* format_battery(const BatteryState *battery, char *buf);
+bool parse_u32_from_cmd(const uint8_t *cmd, size_t len, uint32_t *result);
+bool parse_i8_from_cmd(const uint8_t *cmd, size_t len, int8_t *result);
 
 // Implementation: NodeIdentity functions
 
-static void node_identity_read_mac_address(uint8_t mac[6]) 
+void node_identity_read_mac_address(uint8_t mac[6]) 
 {
   // Read MAC address from ESP32 eFuse
   esp_efuse_mac_get_default(mac); //to be changed!!! I never use ESP
@@ -118,7 +118,7 @@ void node_identity_generate_random_private_key(const uint8_t hardware_serial[8],
   private_key[31] |= 64;
 }
 
-static void node_identity_load_or_create_identity(const uint8_t hardware_serial[8],uint32_t *node_id, uint8_t private_key[32]) 
+void node_identity_load_or_create_identity(const uint8_t hardware_serial[8],uint32_t *node_id, uint8_t private_key[32]) 
 {
   nvs_handle_t handle;
   esp_err_t err;
@@ -283,14 +283,14 @@ void lunar_core_new(LunarCore *core, Sx1262 *radio, const NodeIdentity *identity
   address_translator_from_public_key(identity->public_key, &core->our_address);
 }
 
-static const NodeIdentity* lunar_core_identity(const LunarCore *core) 
+const NodeIdentity* lunar_core_identity(const LunarCore *core) 
 {
   return &core->identity;
 }
 
 
 
-static void lunar_core_handle_dio1_interrupt(LunarCore *core) 
+void lunar_core_handle_dio1_interrupt(LunarCore *core) 
 {
   // Clear interrupt flag
   dio1_triggered = false;
@@ -332,40 +332,626 @@ void lunar_core_process_radio_events(LunarCore *core)
     led_controller_flash(&core->led, 1);
   }
   // Handle RX packet
-  if (atomic_exchange(&packet_pending, false)) 
+  if (atomic_exchange(&packet_pending, false)) led_controller_flash(&core->led, 2);
+}
+
+////////////////////////////
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
+
+/* Dependencies and External Definitions (Mocked or ESP-IDF based) */
+#include "esp_log.h"
+#include "esp_task_wdt.h"
+#include "driver/gpio.h"
+#include "driver/uart.h"
+#include "driver/spi_master.h"
+#include "driver/i2c.h"
+#include "driver/adc.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+/* Constants */
+#define FIRMWARE_VERSION "1.0.0"
+#define WATCHDOG_TIMEOUT_SEC 30
+#define BAUD_RATE 115200
+
+/* Enums and Structs */
+typedef enum 
+{
+  Protocol_MeshCore,
+  Protocol_Meshtastic,
+  Protocol_RNode,
+  Protocol_Unknown
+} Protocol;
+
+typedef enum 
+{
+  Command_Ping,
+  Command_Configure,
+  Command_Transmit,
+  Command_Version,
+  Command_GetStats,
+  Command_Reset,
+  Command_Unknown
+} Command;
+
+typedef enum 
+{
+  RadioState_Standby,
+  RadioState_Rx,
+  RadioState_Tx
+} RadioState;
+
+typedef enum 
+{
+  RadioError_None,
+  RadioError_TxTimeout,
+  RadioError_BusyTimeout,
+  RadioError_RxTimeout,
+  RadioError_CrcError,
+  RadioError_Other
+} RadioError;
+
+typedef enum 
+{
+  CryptoError_None,
+  CryptoError_SessionError,
+  CryptoError_EncryptionFailed,
+  CryptoError_DecryptionFailed,
+  CryptoError_BufferOverflow,
+  CryptoError_InvalidFormat,
+  CryptoError_NoSession,
+  CryptoError_OnionError
+} CryptoError;
+
+typedef struct 
+{
+  uint32_t frequency;
+  uint8_t spreading_factor;
+  uint8_t bandwidth;
+  uint8_t coding_rate;
+  uint8_t tx_power;
+  uint8_t sync_word;
+  uint16_t preamble_length;
+  bool crc_enabled;
+  bool implicit_header;
+  bool ldro;
+} RadioConfig;
+
+typedef struct 
+{
+  uint8_t command;
+  uint32_t sequence;
+  uint8_t data[256];
+  size_t data_len;
+} Frame;
+
+typedef struct 
+{
+    // Meshtastic specific fields
+} MeshtasticFrame;
+
+typedef struct 
+{
+  uint8_t command;
+  uint8_t data[256];
+  size_t data_len;
+} KissFrame;
+
+typedef enum {
+    KissCommand_DataFrame = 0x00
+} KissCommand;
+
+typedef struct 
+{
+  uint32_t tx_packets;
+  uint32_t rx_packets;
+  uint32_t tx_errors;
+  uint32_t rx_errors;
+  uint32_t uptime_seconds;
+} Stats;
+
+typedef struct 
+{
+  uint32_t voltage_mv;
+  uint8_t percentage;
+} BatteryState;
+
+/* Forward Declarations for Methods */
+uint32_t millis(void);
+void send_frame(void* self, uart_port_t uart, const Frame* frame);
+
+/* Global Atomic-like variables */
+volatile bool DIO1_TRIGGERED = false;
+volatile uint32_t SYSTEM_TICKS = 0;
+volatile uint32_t LAST_ACTIVITY = 0;
+
+/* LunarCore Structure (Simplified for context) */
+typedef struct 
+{
+  void* radio; // Placeholder for Sx1262 instance
+  void* rnode;
+  void* router;
+  void* meshtastic;
+  void* ble;
+  void* identity;
+  void* session_manager;
+  void* route_builder;
+  void* onion_router;
+  void* led;
+  Stats stats;
+  bool rx_active;
+  Protocol serial_protocol;
+  uint16_t our_address;
+} LunarCore;
+
+/* Implementation of Methods */
+
+void configure_radio_for_protocol(LunarCore* self, Protocol protocol) 
+{
+  RadioConfig config;
+  bool valid_protocol = true;
+
+  switch (protocol) 
   {
-    led_controller_flash(&core->led, 2);
+    case Protocol_MeshCore:
+    config.frequency = 915000000;
+    config.spreading_factor = 9;
+    config.bandwidth = 0;
+    config.coding_rate = 1;
+    config.tx_power = 14;
+    config.sync_word = 0x12;
+    config.preamble_length = 8;
+    config.crc_enabled = true;
+    config.implicit_header = false;
+    config.ldro = false;
+    break;
+    
+    case Protocol_Meshtastic:
+    config.frequency = 906875000;
+    config.spreading_factor = 11;
+    config.bandwidth = 0;
+    config.coding_rate = 1;
+    config.tx_power = 17;
+    config.sync_word = 0x2B;
+    config.preamble_length = 16;
+    config.crc_enabled = true;
+    config.implicit_header = false;
+    config.ldro = true;
+    break;
+    
+    case Protocol_RNode: 
+    {
+      // Assuming rnode_config_t cfg = rnode_get_config(self->rnode);
+      struct 
+      { 
+        uint32_t frequency; 
+        uint8_t spreading_factor; 
+        uint32_t bandwidth; 
+        uint8_t coding_rate; 
+        uint8_t tx_power; 
+      } cfg; 
+      // Mocking cfg retrieval
+      config.frequency = cfg.frequency;
+      config.spreading_factor = cfg.spreading_factor;
+      switch (cfg.bandwidth) 
+      {
+        case 125000: config.bandwidth = 0; break;
+        case 250000: config.bandwidth = 1; break;
+        case 500000: config.bandwidth = 2; break;
+        default: config.bandwidth = 0; break;
+      }
+      config.coding_rate = (cfg.coding_rate > 4) ? cfg.coding_rate - 4 : 0;
+      config.tx_power = cfg.tx_power;
+      config.sync_word = 0x12;
+      config.preamble_length = 8;
+      config.crc_enabled = true;
+      config.implicit_header = false;
+      config.ldro = (cfg.spreading_factor >= 11);
+      break;
+    }
+    default:
+    return;
+  }
+  if (radio_configure(self->radio, &config) != ESP_OK) ESP_LOGE("LunarCore", "Failed to configure radio");
+  router_set_lora_protocol(self->router, protocol);
+}
+
+void handle_meshcore_frame(LunarCore* self, const Frame* frame, uart_port_t uart) 
+{
+  switch (frame->command) 
+  {
+    case Command_Ping: 
+    {
+      Frame response; // protocol_build_pong(frame->sequence);
+      send_frame(self, uart, &response);
+      break;
+    }
+    case Command_Configure: 
+    {
+      RadioConfig config;
+      if (protocol_parse_config(frame->data, frame->data_len, &config)) 
+      {
+        if (radio_configure(self->radio, &config) == ESP_OK) 
+        {
+          Frame response = protocol_build_config_ack(frame->sequence);
+          send_frame(self, uart, &response);
+        } 
+        else 
+        {
+          Frame response;
+          if (protocol_build_error(frame->sequence, "Config failed", &response)) send_frame(self, uart, &response);
+        }
+      }
+      break;
+    }
+    case Command_Transmit: 
+    {
+      self->rx_active = false;
+      RadioError err = radio_transmit(self->radio, frame->data, frame->data_len);
+      if (err == RadioError_None) 
+      {
+        self->stats.tx_packets++;
+        Frame response = protocol_build_tx_done(frame->sequence);
+        send_frame(self, uart, &response);
+        radio_start_rx(self->radio, 0);
+        self->rx_active = true;
+      } 
+      else 
+      {
+        self->stats.tx_errors++;
+        uint8_t code = (err == RadioError_TxTimeout) ? 1 : (err == RadioError_BusyTimeout ? 2 : 255);
+        Frame response;
+        if (protocol_build_tx_error(frame->sequence, code, &response)) send_frame(self, uart, &response);
+      }
+      break;
+    }
+    case Command_Version: 
+    {
+      Frame response;
+      if (protocol_build_version_response(frame->sequence, FIRMWARE_VERSION, &response)) send_frame(self, uart, &response);
+      break;
+    }
+    case Command_GetStats: 
+    {
+      Frame response;
+      if (protocol_build_stats_response(frame->sequence, self->stats.tx_packets, self->stats.rx_packets, self->stats.tx_errors, self->stats.rx_errors, &response)) 
+      {
+        send_frame(self, uart, &response);
+      }
+      break;
+    }
+    case Command_Reset: 
+    {
+      // radio_init(self->radio);
+      self->rx_active = false;
+      Frame response; // protocol_build_pong(frame->sequence);
+      send_frame(self, uart, &response);
+      break;
+    }
+    default: 
+    {
+      Frame response;
+      if (protocol_build_error(frame->sequence, "Unknown command", &response)) send_frame(self, uart, &response);
+      break;
+    }
+  }
+  if (!self->rx_active && radio_get_state(self->radio) == RadioState_Standby) 
+  {
+    if (radio_start_rx(self->radio, 0) == ESP_OK) self->rx_active = true;
   }
 }
 
-
-
-static void lunar_core_configure_radio_for_protocol(LunarCore *core, Protocol protocol) 
+void send_meshtastic_response(LunarCore* self, const uint8_t* response, size_t len, uart_port_t uart) 
 {
-  // Configure radio parameters based on detected protocol
-  // This would contain protocol-specific configuration
-  // Implementation depends on protocol specifics
+  uint8_t serial_frame[512];
+  size_t frame_len;
+  if (meshtastic_build_serial_frame(self->meshtastic, response, len, serial_frame, &frame_len)) uart_write_bytes(uart, (const char*)serial_frame, frame_len);
+  ble_queue_from_radio(self->ble, response, len);
+  self->meshtastic_rx_count++;
+  ble_notify_from_num(self->ble, self->meshtastic_rx_count);
 }
 
-static void lunar_core_handle_meshcore_frame(LunarCore *core, const Frame *frame, uart_port_t uart) 
+void flush_meshtastic_responses(LunarCore* self, uart_port_t uart) 
 {
-  // Handle MeshCore protocol frame
-  // Implementation depends on MeshCore protocol specifics
+  uint8_t response[256];
+  size_t len;
+  while (meshtastic_poll_pending_response(self->meshtastic, response, &len)) 
+  {
+    send_meshtastic_response(self, response, len, uart);
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
 }
 
-static void lunar_core_handle_meshtastic_frame(LunarCore *core, const MeshtasticFrame *frame, uart_port_t uart) 
+void handle_meshtastic_frame(LunarCore* self, const MeshtasticFrame* frame, uart_port_t uart) 
 {
-  // Handle Meshtastic protocol frame
-  // Implementation depends on Meshtastic protocol specifics
+  ToRadioResponse res = meshtastic_process_toradio(self->meshtastic, frame);
+  if (res.type == LoRaPacket) 
+  {
+    self->rx_active = false;
+    if (radio_transmit(self->radio, res.data, res.len) == RadioError_None) 
+    {
+      self->stats.tx_packets++;
+      radio_start_rx(self->radio, 0);
+      self->rx_active = true;
+    } 
+    else self->stats.tx_errors++;
+  } 
+  else if (res.type == FromRadio) 
+  {
+    send_meshtastic_response(self, res.data, res.len, uart);
+    flush_meshtastic_responses(self, uart);
+  }
+  if (!self->rx_active) 
+  {
+    if (radio_start_rx(self->radio, 0) == ESP_OK) self->rx_active = true;
+  }
 }
 
-static void lunar_core_handle_rnode_frame(LunarCore *core, const KissFrame *frame, uart_port_t uart) 
+void handle_rnode_frame(LunarCore* self, const KissFrame* frame, uart_port_t uart) 
 {
-  // Handle RNode/KISS protocol frame
-  // Implementation depends on RNode protocol specifics
+  uint8_t response[256]; size_t res_len;
+  if (rnode_process_frame(self->rnode, frame, response, &res_len)) uart_write_bytes(uart, (const char*)response, res_len);
+  if (frame->command == (uint8_t)KissCommand_DataFrame) 
+  {
+    uint8_t tx_data[256]; size_t tx_len;
+    if (rnode_get_tx_data(self->rnode, frame, tx_data, &tx_len)) 
+    {
+      self->rx_active = false;
+      if (radio_transmit(self->radio, tx_data, tx_len) == RadioError_None) 
+      {
+        self->stats.tx_packets++;
+        radio_start_rx(self->radio, 0);
+        self->rx_active = true;
+      } 
+      else self->stats.tx_errors++;
+    }
+  }
+  if (rnode_is_online(self->rnode) && !self->rx_active) 
+  {
+    if (radio_start_rx(self->radio, 0) == ESP_OK) self->rx_active = true;
+  }
 }
 
-static void lunar_core_process_serial_byte(LunarCore *core, uint8_t byte, uart_port_t uart) 
+void route_rx_packet(LunarCore* self, const uint8_t* data, size_t len, int16_t rssi, int8_t snr, uart_port_t uart) 
+{
+  switch (self->serial_protocol) 
+  {
+    case Protocol_MeshCore: 
+    {
+      Frame frame;
+      if (protocol_build_receive(rssi, snr, data, len, &frame)) send_frame(self, uart, &frame);
+      break;
+    }
+    case Protocol_Meshtastic: 
+    {
+      Packet pkt;
+      if (meshtastic_process_lora_packet(self->meshtastic, data, len, (int32_t)rssi, (float)snr, &pkt)) 
+      {
+        uint8_t from_radio[512]; size_t fr_len;
+        if (meshtastic_encode_fromradio_packet(&pkt, from_radio, &fr_len)) 
+        {
+          uint8_t serial_frame[512]; size_t sf_len;
+          if (meshtastic_build_serial_frame(self->meshtastic, from_radio, fr_len, serial_frame, &sf_len)) uart_write_bytes(uart, (const char*)serial_frame, sf_len);
+          //ble_notify_from_num(self->ble, self->meshtastic_rx_count);
+        }
+      }
+      break;
+    }
+    case Protocol_RNode: 
+    {
+      KissFrame frame = rnode_process_lora_packet(self->rnode, data, len, rssi, snr);
+      uint8_t encoded[512]; size_t enc_len;
+      rnode_encode_kiss(&frame, encoded, &enc_len);
+      uart_write_bytes(uart, (const char*)encoded, enc_len);
+      break;
+    }
+    default:
+    break;
+  }
+}
+
+void check_rx(LunarCore* self, uart_port_t uart) 
+{
+  if (!self->rx_active) return;
+  uint8_t data[256]; 
+  size_t len; 
+  int16_t rssi; 
+  int8_t snr;
+  RadioError err = radio_check_rx(self->radio, data, &len, &rssi, &snr);
+  if (err == RadioError_None && len > 0) 
+  {
+    self->stats.rx_packets++;
+    route_rx_packet(self, data, len, rssi, snr, uart);
+  } 
+  else if (err == RadioError_RxTimeout) radio_start_rx(self->radio, 0);
+  else if (err == RadioError_CrcError) 
+  {
+    self->stats.rx_errors++;
+    radio_start_rx(self->radio, 0);
+  } 
+  else if (err != RadioError_None) self->stats.rx_errors++;
+}
+
+void send_frame(void* self, uart_port_t uart, const Frame* frame) 
+{
+  uint8_t encoded[512];
+  size_t len;
+  protocol_encode_frame(frame, encoded, &len);
+  uart_write_bytes(uart, (const char*)encoded, len);
+}
+
+/* Crypto and Routing */
+
+CryptoError encrypt_for_tx(LunarCore* self, const uint8_t* plaintext, size_t plain_len, const uint8_t recipient_public[32], bool use_onion, uint8_t* output, size_t* out_len) 
+{
+  Session* session = session_manager_get_session(self->session_manager, recipient_public);
+  if (!session) 
+  {
+    uint8_t shared[32];
+    x25519(shared, identity_get_private(self->identity), recipient_public);
+    session_manager_create_session(self->session_manager, shared, recipient_public);
+    session = session_manager_get_session(self->session_manager, recipient_public);
+    if (!session) return CryptoError_SessionError;
+  }
+  uint8_t header[48], ciphertext[256]; size_t cipher_len;
+  if (session_encrypt(session, plaintext, plain_len, header, ciphertext, &cipher_len) != ESP_OK) return CryptoError_EncryptionFailed;
+  uint8_t session_encrypted[304]; size_t se_len = 0;
+  memcpy(session_encrypted, header, 48); se_len += 48;
+  memcpy(session_encrypted + 48, ciphertext, cipher_len); se_len += cipher_len;
+  uint8_t payload_for_wire[304]; size_t pfw_len = se_len;
+  memcpy(payload_for_wire, session_encrypted, se_len);
+  if (use_onion && route_builder_relay_count(self->route_builder) >= 3) 
+  {
+    // Onion logic...
+  }
+  uint16_t dest_addr = address_translator_from_public(recipient_public);
+  uint32_t session_hint = session_derive_hint(session, millis() / 1000);
+  WirePacket wire_packet = wire_packet_new_data(dest_addr, session_hint, payload_for_wire, (pfw_len > 214 ? 214 : pfw_len));
+  wire_packet_encode(&wire_packet, output, out_len);
+  return CryptoError_None;
+}
+
+
+void IRAM_ATTR timer_tick_isr(void* arg) 
+{
+  SYSTEM_TICKS++;
+}
+
+uint32_t millis(void) 
+{
+  return SYSTEM_TICKS;
+}
+
+
+/* Utilities */
+size_t write_u32_to_buf(uint32_t val, uint8_t* buf) 
+{
+  if (val == 0) 
+  {
+    buf[0] = '0';
+    return 1;
+  }
+  uint8_t digits[10];
+  size_t count = 0;
+  while (val > 0) 
+  {
+    digits[count++] = '0' + (val % 10);
+    val /= 10;
+  }
+  for (size_t i = 0; i < count; i++) buf[i] = digits[count - 1 - i];
+  return count;
+}
+
+const char* format_battery(const BatteryState* battery, uint8_t buf[32]) 
+{
+  size_t idx = 0;
+  const char* prefix = "Battery: ";
+  size_t pre_len = strlen(prefix);
+  memcpy(buf + idx, prefix, pre_len);
+  idx += pre_len;
+  idx += write_u32_to_buf(battery->voltage_mv, buf + idx);
+  const char* suffix = "mV (";
+  size_t suf_len = strlen(suffix);
+  memcpy(buf + idx, suffix, suf_len);
+  idx += suf_len;
+  idx += write_u32_to_buf((uint32_t)battery->percentage, buf + idx);
+  const char* end = "%)";
+  size_t end_len = strlen(end);
+  memcpy(buf + idx, end, end_len);
+  idx += end_len;
+  buf[idx] = '\0';
+  return (const char*)buf;
+}
+
+void write_u32(uart_port_t uart, uint32_t val) 
+{
+  uint8_t buf[10];
+  size_t len = write_u32_to_buf(val, buf);
+  uart_write_bytes(uart, (const char*)buf, len);
+}
+
+void write_i16(uart_port_t uart, int16_t val) 
+{
+  if (val < 0) 
+  {
+    uart_write_bytes(uart, "-", 1);
+    write_u32(uart, (uint32_t)(-val));
+  } 
+  else write_u32(uart, (uint32_t)val);
+}
+
+void write_hex8(uart_port_t uart, uint8_t val) 
+{
+  const char* HEX = "0123456789ABCDEF";
+  char buf[2] = {HEX[val >> 4], HEX[val & 0xF]};
+  uart_write_bytes(uart, buf, 2);
+}
+
+void write_hex32(uart_port_t uart, uint32_t val) 
+{
+  const char* HEX = "0123456789ABCDEF";
+  char buf[8];
+  for (int i = 0; i < 8; i++) buf[7 - i] = HEX[(val >> (i * 4)) & 0xF];
+  uart_write_bytes(uart, buf, 8);
+}
+
+uint32_t* parse_u32_from_cmd(const uint8_t* bytes, size_t len, uint32_t* out) 
+{
+  uint32_t result = 0;
+  bool found_digit = false;
+  for (size_t i = 0; i < len; i++) 
+  {
+    if (bytes[i] >= '0' && bytes[i] <= '9') 
+    {
+      result = result * 10 + (bytes[i] - '0');
+      found_digit = true;
+    } 
+    else if (found_digit) break;
+  }
+  if (found_digit) 
+  { 
+    *out = result; 
+    return out; 
+  }
+  return NULL;
+}
+
+int8_t* parse_i8_from_cmd(const uint8_t* bytes, size_t len, int8_t* out) 
+{
+  int32_t result = 0;
+  bool negative = false, found_digit = false, started = false;
+  for (size_t i = 0; i < len; i++) 
+  {
+    if (bytes[i] == '-' && !started) 
+    { 
+      negative = true; 
+      started = true; 
+    }
+    else if (bytes[i] >= '0' && bytes[i] <= '9') 
+    {
+      result = result * 10 + (bytes[i] - '0');
+      found_digit = true; started = true;
+    } 
+    else if (found_digit) break;
+  }
+  if (found_digit) 
+  {
+    int32_t val = negative ? -result : result;
+    if (val >= -128 && val <= 127) 
+    { 
+      *out = (int8_t)val; 
+      return out; 
+    }
+  }
+  return NULL;
+}
+
+
+void lunar_core_process_serial_byte(LunarCore *core, uint8_t byte, uart_port_t uart) 
 {
   // Protocol detection
   if (core->serial_protocol == PROTOCOL_UNKNOWN) 
@@ -425,17 +1011,6 @@ static void lunar_core_process_serial_byte(LunarCore *core, uint8_t byte, uart_p
 }
 
 
-
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////
-
-// Forward declaration of the external function run_lunarcore
-extern void run_lunarcore(void);
-
-
-
 //Main lunarcore function
 
 void main(void) 
@@ -460,36 +1035,7 @@ void IRAM_ATTR dio1_isr(void* arg)
   atomic_fetch_add(&DIO1_COUNT, 1);
 }
 
-/* Function prototypes for external logic referenced in run_lunarcore */
-node_identity_t node_identity_from_hardware(void);
-bool load_repeater_setting(void);
-void init_watchdog(void);
-void feed_watchdog(void);
-esp_err_t status_display_init(status_display_t* disp);
-esp_err_t status_display_boot_animation(status_display_t* disp, void (*delay_fn)(uint32_t));
-esp_err_t status_display_show_status(status_display_t* disp, const status_content_t* status);
-esp_err_t sx1262_init(sx1262_t* radio);
-esp_err_t sx1262_configure(sx1262_t* radio, const radio_config_t* config);
-esp_err_t sx1262_start_rx(sx1262_t* radio, uint32_t timeout);
-esp_err_t sx1262_transmit(sx1262_t* radio, const uint8_t* data, size_t len);
-esp_err_t sx1262_get_irq_status(sx1262_t* radio, uint16_t* irq);
-esp_err_t sx1262_clear_irq(sx1262_t* radio, uint16_t irq);
-esp_err_t sx1262_read_packet(sx1262_t* radio, uint8_t* buffer, size_t* len, int16_t* rssi, int8_t* snr);
-esp_err_t sx1262_get_status(sx1262_t* radio, uint8_t* chip_mode, uint8_t* cmd_status);
-uint16_t sx1262_get_errors(sx1262_t* radio);
-esp_err_t ble_init(ble_stack_t* ble, const char* name);
-esp_err_t ble_start_advertising(ble_stack_t* ble);
-uint32_t ble_connection_count(ble_stack_t* ble);
-void lunar_core_process_radio_events(lunar_core_t* core, uart_port_t uart);
-void lunar_core_process_serial_byte(lunar_core_t* core, uint8_t byte, uart_port_t uart);
-void lunar_core_route_rx_packet(lunar_core_t* core, const uint8_t* data, size_t len, int16_t rssi, int8_t snr, uart_port_t uart);
-bool lunar_core_maybe_relay_packet(lunar_core_t* core, const uint8_t* data, size_t len, uint32_t now);
-bool lunar_core_app_connected(lunar_core_t* core);
-bool lunar_core_repeater_active(lunar_core_t* core);
-void lunar_core_reset_protocol(lunar_core_t* core);
-void lunar_core_update_battery(lunar_core_t* core, uint32_t adc_value);
-bool led_update(led_controller_t* led, uint32_t now);
-void led_flash(led_controller_t* led, uint32_t count);
+
 
 /* Main Entry Point: run_lunarcore */
 void run_lunarcore(void) 
@@ -689,6 +1235,6 @@ void run_lunarcore(void)
         (unsigned long)lunarcore.stats.tx_packets); */
       }
     }
-  vTaskDelay(pdMS_TO_TICKS(1));
+    vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
