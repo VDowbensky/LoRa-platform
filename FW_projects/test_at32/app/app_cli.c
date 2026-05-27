@@ -78,6 +78,14 @@ void cli_setopmode(int argc, char **argv);
 void cli_sweeptx(int argc, char **argv);
 void cli_sweeprx(int argc, char **argv);
 
+//new
+void cli_getscanparams(int argc, char **argv);
+void cli_setscanparams(int argc, char **argv);
+void cli_scan(int argc, char **argv);
+void cli_getjamparams(int argc, char **argv);
+void cli_setjamparams(int argc, char **argv);
+void cli_jam(int argc, char **argv);
+
 
 //void cli_setpaconfig(int argc, char **argv); //technological
 
@@ -138,6 +146,13 @@ CommandEntry_t commands[] =
 		
     COMMAND_ENTRY("SWEEP_TX", "wwwww", cli_sweeptx, "TX sweep"),
     COMMAND_ENTRY("SWEEP_RX", "wwwww", cli_sweeprx, "RX scan"),
+		
+		COMMAND_ENTRY("GET_SCANPARAMS", "", cli_getscanparams, "Get RX scan parameters"),
+		COMMAND_ENTRY("SET_SCANPARAMS", "wwwww", cli_setscanparams, "Get RX scan parameters"),
+		COMMAND_ENTRY("SCAN", "w", cli_scan, ""),
+		COMMAND_ENTRY("GET_JAMPARAMS", "", cli_getjamparams, "Get RX scan parameters"),
+		COMMAND_ENTRY("SET_JAMPARAMS", "wwwww", cli_setjamparams, "Get RX scan parameters"),
+		COMMAND_ENTRY("JAM", "w", cli_jam, ""),
 		
 		COMMAND_ENTRY(NULL, NULL, NULL, NULL)
   };
@@ -659,6 +674,36 @@ void cli_sweeprx(int argc, char **argv)
 		}
 	}
 	else printerror(err);
+}
+
+void cli_getscanparams(int argc, char **argv)
+{
+	
+}
+
+void cli_setscanparams(int argc, char **argv)
+{
+	
+}
+
+void cli_scan(int argc, char **argv)
+{
+	
+}
+
+void cli_getjamparams(int argc, char **argv)
+{
+	
+}
+
+void cli_setjamparams(int argc, char **argv)
+{
+	
+}
+
+void cli_jam(int argc, char **argv)
+{
+	
 }
 
 void cli_pan_readreg(int argc, char **argv)

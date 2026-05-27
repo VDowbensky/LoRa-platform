@@ -113,8 +113,16 @@ void process_rx_packet(void)
 		//copy packet to buffer
 		radio_getpacket(radio_rxbuffer);
 		//process buffer
-		decode_meshtastic_packet();
-		print_meshtastic_packet();
+		switch(radioconfig.pktformat)
+		{
+			case PKT_MESHTASTIC:
+			decode_meshtastic_packet();
+			print_meshtastic_packet();
+			break;
+			
+			default:
+			break;
+		}
 	//}
 }
 
@@ -131,18 +139,26 @@ void radio_startburst(void)
 void prepareTxPacket(void)
 {
 	uint8_t i;
-	
-	txmessage.destination_id = slave_id;
-	txmessage.sender_id = radioconfig.id;
-	txmessage.packet_id = txpacketnumber;
-	txmessage.relay_node = 0;
-	txmessage.next_hop = 1;
-	txmessage.flags = (1 << HOPSTART_POS) | (3 << HOPLIMIT_POS); //for test
-	for(i = 0; i < 16; i++) txmessage.payload[i] = i;
-	txlen = 16 + i;
-	//printf("Payload: ");
-	memcpy((void*)radio_txbuffer,(void*)&txmessage,txlen);
-	printf("TX: %d\r\n",txpacketnumber);
+	switch(radioconfig.pktformat)
+	{
+		case PKT_MESHTASTIC:
+		{
+			txmessage.destination_id = slave_id;
+			txmessage.sender_id = radioconfig.id;
+			txmessage.packet_id = txpacketnumber;
+			txmessage.relay_node = 0;
+			txmessage.next_hop = 1;
+			txmessage.channel_hash = 0x62;
+			txmessage.flags = (1 << HOPSTART_POS) | (3 << HOPLIMIT_POS); //for test
+			for(i = 0; i < 16; i++) txmessage.payload[i] = i;
+			txlen = 16 + i;
+			memcpy((void*)radio_txbuffer,(void*)&txmessage,txlen);
+			printf("TX: %d\r\n",txpacketnumber);
+			break;
+		}
+		default:
+		break;
+	}
 }
 
 void printcrcerror(void)
