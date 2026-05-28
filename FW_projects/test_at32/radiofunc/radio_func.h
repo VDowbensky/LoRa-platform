@@ -7,7 +7,7 @@
 #include "sx126x_proc.h"
 #include "sx126x_regs.h"
 #include "sx126x.h"
-
+#include "sx127x_proc.h"
 #include "sx128x_proc.h"
 #include "sx128x_regs.h"
 #include "sx128x.h"
@@ -46,14 +46,10 @@
 #define RADIO_OPMODE_TXSTREAMCW       6
 #define RADIO_OPMODE_TXSTREAMPRE      7
 
-#define WORK_MODE_SNIFFER							0
-#define WORK_MODE_SCANNER							1
-#define WORK_MODE_JAMMER							2
-
-#define TXMOD_CW											0
-#define TXMOD_PRE											1
-#define TXMOD_ALTERNATING							2 //0101
-#define TXMOD_PN9											3
+#define TXMOD_CW											1
+#define TXMOD_PRE											2
+#define TXMOD_ALTERNATING							3 //0101
+#define TXMOD_PN9											4
 
 #define PKT_MESHTASTIC								0
 #define PKT_MESHCORE									1
@@ -94,7 +90,7 @@ typedef struct radioconfig
 	float rssitr;
 	uint8_t workmode;
 	uint8_t pktformat;
-	uint8_t reserved[2];
+	uint16_t txsendinterval;
 }radioconfig_t;
 
 //incoming packet status

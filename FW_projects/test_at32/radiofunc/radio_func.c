@@ -51,10 +51,18 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 	radioconfig.rssitr = -100.0;
 	radioconfig.workmode = WORK_MODE_SNIFFER;
 	radioconfig.pktformat = PKT_MESHTASTIC; //meshtastic
+	radioconfig.txsendinterval = 5000; //5 sec.
 	
 	switch(chip)
   {
-    case 1262:
+    case 1276:
+		radioconfig.chip = 1276;
+		radioconfig.freq = 433125000;
+		radioconfig.bw = 250; //LORA_BW_250;
+		radioconfig.paylen = 0;
+		break;
+		
+		case 1262:
     radioconfig.chip = 1262;
 		radioconfig.freq = 433125000;
 		radioconfig.bw = 250; //LORA_BW_250;
@@ -122,6 +130,10 @@ int8_t radio_init(void)
 	int8_t err = RADIO_OK;
 	switch(radioconfig.chip)
 	{
+		case 1276:
+		err = (int8_t)SX127x_init();
+		break;
+		
 		case 1262:
 		err = (int8_t)SX126x_init();
 		break;
@@ -155,6 +167,10 @@ int8_t radio_set_freq(uint32_t khz)
 	radio_setopmode(RADIO_OPMODE_STBYXOSC);
 	switch(radioconfig.chip)
 	{
+		case 1276:
+		err = (int8_t)SX127x_set_rf_freq(khz * 1000,true); //temporary
+		break;
+		
 		case 1262:
 		err = (int8_t)sx126x_set_rf_freq(NULL,khz * 1000);
 		break;
@@ -190,6 +206,11 @@ int8_t radio_set_power(int8_t dbm)
 	radio_setopmode(RADIO_OPMODE_STBYXOSC);
 	switch(radioconfig.chip)
 	{
+		case 1276:
+		if((dbm < 2) || (dbm > 17)) err = RADIO_INVALID_PARAMETER;
+		else err = SX127x_set_tx_params(dbm,PARAMP_10);
+		break;
+		
 		case 1262:
 		if((dbm < -9) || (dbm > 22)) err = RADIO_INVALID_PARAMETER;
 		else err = (int8_t)sx126x_set_tx_params(NULL,dbm,SX126X_RAMP_10_US);
@@ -236,7 +257,11 @@ int8_t radio_setmodparams(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
 	radio_setopmode(RADIO_OPMODE_STBYXOSC);
 	switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		err = SX127x_set_mod_params(bw_khz,sf,cr,ldropt);
+		break;
+		
+		case 1262:
 		err = (int8_t)SX126x_set_mod_params(bw_khz,sf,cr,ldropt);
 		break;
 		
@@ -272,7 +297,11 @@ int8_t radio_setpktparams(uint16_t sync,uint16_t prelen,uint8_t paylen,uint8_t h
 	radio_setopmode(RADIO_OPMODE_STBYXOSC);
 	switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		err = SX127x_set_packet_params(sync,prelen,paylen,header,crc,invertiq);
+		break;
+		
+		case 1262:
 		err = (int8_t)SX126x_set_packet_params(sync,prelen,paylen,header,crc,invertiq);
 		break;
 		
@@ -306,7 +335,12 @@ int8_t radio_sendpacket(uint8_t *buf)
 	if(err != RADIO_OK) return err;
 	switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		err = sx127x_prepare_tx(buf,txlen);
+		if(err != RADIO_OK) return err;
+		break;
+		
+		case 1262:
 		err = (int8_t)sx126x_write_buffer(NULL,0,buf,txlen);
 		if(err != RADIO_OK) return err;
 		break;
@@ -343,7 +377,16 @@ int8_t radio_getpktstatus(rxpacketstatus_t *status)
   int8_t err;
 	switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		{
+			status->rssi_pkt = SX127x_get_rssi_pkt();
+			status->snr_pkt = SX127x_get_snr_pkt();
+			status->signal_rssi_pkt = status->rssi_pkt;
+			if(status->snr_pkt < 0) status->signal_rssi_pkt += status->snr_pkt; //???
+			return RADIO_OK;
+		}
+		
+		case 1262:
 		{
 			sx126x_pkt_status_lora_t pktstatus;
 			err = (int8_t)sx126x_get_lora_pkt_status(NULL,&pktstatus);
@@ -360,7 +403,8 @@ int8_t radio_getpktstatus(rxpacketstatus_t *status)
 			if(err != RADIO_OK) return err;
 			status->rssi_pkt = pktstatus.rssi; 
 			status->snr_pkt = pktstatus.snr;
-			status->signal_rssi_pkt = status->rssi_pkt + status->snr_pkt; //???
+			status->signal_rssi_pkt = status->rssi_pkt;
+			if(status->snr_pkt < 0) status->signal_rssi_pkt += status->snr_pkt; //???
 			return RADIO_OK;
 		}
     case 1121:
@@ -400,7 +444,12 @@ int8_t radio_getpacket(uint8_t *buf)
   int8_t err;
 	switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		rxlen = SX127x_get_rx_len();
+		SX127x_read_rx_buffer(buf,rxlen);
+		return RADIO_OK;
+		
+		case 1262:
 		{
 			sx126x_rx_buffer_status_t status;
 			err = (int8_t)sx126x_get_rx_buffer_status(NULL,&status);
@@ -450,7 +499,14 @@ int8_t radio_getstats(rxstats_t *stats)
   int8_t err;
 	switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		stats->pkt_received = sx127x_get_rxpkt_cnt();
+		stats->crc_error = 0;
+		stats->header_error = 0;
+		stats->false_sync = 0;
+		return RADIO_TODO;
+		
+		case 1262:
 		{
 			sx126x_stats_lora_t lora_stats;
 			err = (int8_t)sx126x_get_lora_stats(NULL,&lora_stats);
@@ -499,7 +555,10 @@ int8_t radio_clearstats(void)
 {
   switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+    return FEATURE_NOT_SUPPORTED;
+		
+		case 1262:
 		return(int8_t)sx126x_reset_stats(NULL);
 		
     case 1280:
@@ -524,7 +583,11 @@ void radio_irq_handler(void)
 {
   switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		SX127x_irq_handler();
+		break;
+		
+		case 1262:
 		SX126X_irq_handler();
 		break;  
 
@@ -561,7 +624,11 @@ int8_t radio_getrssi(float *dbm)
   int8_t err;
 	switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		*dbm = SX127x_get_rssi_inst();
+		return RADIO_OK;
+		
+		case 1262:
 		{
 			int16_t rssi;
 			err = (int8_t)sx126x_get_rssi_inst(NULL,&rssi);
@@ -645,7 +712,10 @@ int8_t radio_sleep(uint8_t node)
 {
   switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+    return RADIO_TODO;
+		
+		case 1262:
     return RADIO_TODO;
 		
     case 1280:
@@ -669,7 +739,10 @@ int8_t radio_wakeup(uint8_t mode)
 {
   switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+    return RADIO_TODO;
+		
+		case 1262:
     return RADIO_TODO;
 		
     case 1280:
@@ -693,7 +766,10 @@ int8_t radio_setxotrim(uint8_t trim)
 {
   switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		return FEATURE_NOT_SUPPORTED;	
+		
+		case 1262:
 		if(trim > 94) return RADIO_INVALID_PARAMETER;
 		sx126x_xtatrim = trim / 2;
 		sx126x_xtbtrim = trim - sx126x_xtatrim;
@@ -724,7 +800,10 @@ int8_t radio_getxotrim(uint8_t *trim)
 {
   switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		return FEATURE_NOT_SUPPORTED;
+		
+		case 1262:
 		{
 			uint8_t buf[2];
 			sx126x_read_register(NULL,SX126X_REG_XTATRIM,buf,2);
@@ -753,7 +832,12 @@ int8_t radio_readreg(uint32_t reg,uint32_t *val)
 {
   switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		if(reg > 0x3f) return RADIO_INVALID_PARAMETER;
+		*val = SX127x_read_reg(reg);
+		return RADIO_OK;
+		
+		case 1262:
 		{
 			uint8_t regval;
 			if(reg > 0xffff) return RADIO_INVALID_PARAMETER;
@@ -802,11 +886,18 @@ int8_t radio_writereg(uint32_t reg,uint32_t val)
 {
   switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		{
+			uint8_t regval = val & 0xff;
+			if(reg > 0x3f) return RADIO_INVALID_PARAMETER;
+			SX127x_write_reg(reg,regval);
+			return RADIO_OK;
+		}
+		
+		case 1262:
 		{
 			uint8_t regval = val & 0xff;
 			if(reg > 0xffff) return RADIO_INVALID_PARAMETER;
-			if(val > 0xff) return RADIO_INVALID_PARAMETER;
 			sx126x_write_register(NULL,reg,&regval,1);
 			return RADIO_OK;
 		}
@@ -846,7 +937,10 @@ int8_t radio_get_chip_version(uint8_t *hw,uint8_t *use_case,uint8_t *fw_major,ui
 {
   switch(radioconfig.chip)
   {
-    case 1262: //0x035C, 0x0320
+    case 1276: 
+		return RADIO_TODO;
+		
+		case 1262: //0x035C, 0x0320
 		return RADIO_TODO;
 
     case 1280:
@@ -894,6 +988,9 @@ int8_t radio_get_status(uint8_t *chip_mode,uint8_t *cmd_status)
 {
   switch(radioconfig.chip)
   {
+		case 1276:
+		return RADIO_TODO;
+		
 		case 1262:
 		{	
 			sx126x_chip_status_t status;
@@ -944,7 +1041,11 @@ int8_t radio_setopmode(uint8_t mode)
 {
   switch(radioconfig.chip)
   {
-    case 1262:
+    case 1276:
+		SX127x_setopmode(mode);
+		return RADIO_OK;
+		
+		case 1262:
 		SX126X_setopmode(mode);
 		return RADIO_OK;
 		

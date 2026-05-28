@@ -21,7 +21,7 @@
 #include <stdlib.h>
 //#include <stdint.h>
 //#include <stdbool.h>
-#include "bsp.h"
+//#include "main.h"
 #include <string.h>
 #include <errno.h>
 
@@ -93,7 +93,7 @@ WEAK bool ciPrintHelp(CommandEntry_t *commands)
 
   // Print out some information about the help
   printf("<command> <args> <help text>\r\n");
-  printf("u=uint8, v=uint16, w=uint32, s=int32, b=string, ?=Anything, *=0 or more of previous\r\n");
+  printf("u=uint8, v=uint16, w=uint32, s=int32, b=string, f=float, ?=Anything, *=0 or more of previous\r\n");
 
   // Walk back through the list and print now that we know the widths
   commands = head;
@@ -219,6 +219,11 @@ uint32_t ciGetUnsigned(char *arg)
 int32_t ciGetSigned(char *arg)
 {
   return strtol(arg, NULL, 0);
+}
+
+float ciGetFloat(char *arg)
+{
+	return strtof(arg, NULL);
 }
 
 bool ciValidateInteger(char *arg, char type)
@@ -407,6 +412,10 @@ static bool validateArguments(char *argstring, int argc, char **argv)
         // Strings are always valid...
         isValid = true;
         break;
+			case 'f':
+        // Floats probably valid...
+        isValid = true;
+        break;
       default:
         // Error in the argstring so stop processing
         isValid = false;
@@ -485,3 +494,5 @@ char* strtok_r(char *str, const char *delim, char **nextp)
   return ret;
 }
 #endif // _WIN32 == 1
+
+

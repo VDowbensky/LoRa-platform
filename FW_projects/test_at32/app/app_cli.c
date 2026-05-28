@@ -75,8 +75,8 @@ void cli_radioinit(int argc, char **argv);
 void cli_setopmode(int argc, char **argv);
 
 //special tests
-void cli_sweeptx(int argc, char **argv);
-void cli_sweeprx(int argc, char **argv);
+//void cli_sweeptx(int argc, char **argv);
+//void cli_sweeprx(int argc, char **argv);
 
 //new
 void cli_getscanparams(int argc, char **argv);
@@ -85,8 +85,8 @@ void cli_scan(int argc, char **argv);
 void cli_getjamparams(int argc, char **argv);
 void cli_setjamparams(int argc, char **argv);
 void cli_jam(int argc, char **argv);
-
-
+ 
+void cli_getworkmode(int argc, char **argv);
 //void cli_setpaconfig(int argc, char **argv); //technological
 
 
@@ -144,8 +144,8 @@ CommandEntry_t commands[] =
 		COMMAND_ENTRY("RADIO_INIT", "", cli_radioinit, ""),
 		COMMAND_ENTRY("SET_OPMODE", "w", cli_setopmode, ""),
 		
-    COMMAND_ENTRY("SWEEP_TX", "wwwww", cli_sweeptx, "TX sweep"),
-    COMMAND_ENTRY("SWEEP_RX", "wwwww", cli_sweeprx, "RX scan"),
+//    COMMAND_ENTRY("SWEEP_TX", "wwwww", cli_sweeptx, "TX sweep"),
+//    COMMAND_ENTRY("SWEEP_RX", "wwwww", cli_sweeprx, "RX scan"),
 		
 		COMMAND_ENTRY("GET_SCANPARAMS", "", cli_getscanparams, "Get RX scan parameters"),
 		COMMAND_ENTRY("SET_SCANPARAMS", "wwwww", cli_setscanparams, "Get RX scan parameters"),
@@ -153,6 +153,8 @@ CommandEntry_t commands[] =
 		COMMAND_ENTRY("GET_JAMPARAMS", "", cli_getjamparams, "Get RX scan parameters"),
 		COMMAND_ENTRY("SET_JAMPARAMS", "wwwww", cli_setjamparams, "Get RX scan parameters"),
 		COMMAND_ENTRY("JAM", "w", cli_jam, ""),
+		
+		COMMAND_ENTRY("GET_WORKMODE", "", cli_getworkmode, ""),
 		
 		COMMAND_ENTRY(NULL, NULL, NULL, NULL)
   };
@@ -460,15 +462,32 @@ void cli_txstream(int argc, char **argv)
 		{
 			case 0:
 			default:
+			radioconfig.workmode = prev_workmode;
 			printf("OFF\r\n");
 			break;
 
 			case 1:
+			prev_workmode = radioconfig.workmode;
+			radioconfig.workmode = WORK_MODE_TEST;
       printf("CW\r\n");
       break;
 
 			case 2:
+			prev_workmode = radioconfig.workmode;
+			radioconfig.workmode = WORK_MODE_TEST;
       printf("PREAMBLE\r\n");
+      break;
+			
+			case 3:
+			prev_workmode = radioconfig.workmode;
+			radioconfig.workmode = WORK_MODE_TEST;
+      printf("0101...\r\n");
+      break;
+			
+			case 4:
+			prev_workmode = radioconfig.workmode;
+			radioconfig.workmode = WORK_MODE_TEST;
+      printf("PN9\r\n");
       break;
 		}
 	}
@@ -624,86 +643,216 @@ void cli_radioinit(int argc, char **argv)
 	else printerror(err);
 }
 
-void cli_sweeptx(int argc, char **argv)
+//void cli_sweeptx(int argc, char **argv)
+//{
+//	uint32_t startfreq = ciGetUnsigned(argv[1]);
+//	uint32_t stopfreq = ciGetUnsigned(argv[2]);
+//	uint32_t step = ciGetUnsigned(argv[3]);
+//	uint32_t us = ciGetUnsigned(argv[4]);
+//	uint8_t stream = ciGetUnsigned(argv[5]);
+//	printf("SWEEP_TX: ");
+//	int8_t err = radio_txsweep(startfreq,stopfreq,step,us,stream);
+//	if(err == RADIO_OK)
+//	{
+//		//check result, on or off
+//		if(txmode == 0) 
+//		{
+//			txled_off();
+//			printf("STOP\r\n");
+//		}
+//		else 
+//		{
+//			txled_on();
+//			printf("START\r\n");
+//		}
+//	}
+//	else printerror(err);
+//}
+
+//void cli_sweeprx(int argc, char **argv)
+//{
+//	uint32_t startfreq = ciGetUnsigned(argv[1]);
+//	uint32_t stopfreq = ciGetUnsigned(argv[2]);
+//	uint32_t step = ciGetUnsigned(argv[3]);
+//	uint32_t ms = ciGetUnsigned(argv[4]);
+//	float rssitr = (float)ciGetSigned(argv[5]);
+//	printf("SWEEP_RX: ");
+//	int8_t err = radio_rxscan(startfreq,stopfreq,step,ms,rssitr);
+//	if(err == RADIO_OK)
+//	{
+//		//check result, on or off
+//		if(sweeprx == false) 
+//		{
+//			rxled_off();
+//			printf("STOP\r\n");
+//		}
+//		else 
+//		{
+//			rxled_on();
+//			printf("START\r\n");
+//		}
+//	}
+//	else printerror(err);
+//}
+
+void cli_getworkmode(int argc, char **argv)
 {
-	uint32_t startfreq = ciGetUnsigned(argv[1]);
-	uint32_t stopfreq = ciGetUnsigned(argv[2]);
+	printf("GET_WORKMODE: CURRENT: ");
+	switch(radioconfig.workmode)
+	{
+		case WORK_MODE_IDLE:
+		printf("IDLE");
+		break;
+		
+		case WORK_MODE_SNIFFER:
+		printf("SNIFFER");
+		break;
+		
+		case WORK_MODE_SCANNER:
+		printf("SCANNER");
+		break;
+		
+		case WORK_MODE_JAMMER:
+		printf("JAMMER");
+		break;
+		
+		case WORK_MODE_TEST:
+		printf("TEST");
+		break;
+		
+		default:
+		printf("UNKNOWN");
+		break;
+	}
+	printf(", PREV: ");
+	switch(prev_workmode)
+	{
+		case WORK_MODE_IDLE:
+		printf("IDLE");
+		break;
+		
+		case WORK_MODE_SNIFFER:
+		printf("SNIFFER");
+		break;
+		
+		case WORK_MODE_SCANNER:
+		printf("SCANNER");
+		break;
+		
+		case WORK_MODE_JAMMER:
+		printf("JAMMER");
+		break;
+		
+		case WORK_MODE_TEST:
+		printf("TEST");
+		break;
+		
+		default:
+		printf("UNKNOWN");
+		break;
+	}
+	printf("\r\n");
+}
+
+void cli_getscanparams(int argc, char **argv)
+{
+	printf("GET_SCANPARAMS: START=%d,STOP=%d,STEP=%d,TIME=%d,RSSI=%.1f\r\n",radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,radioconfig.rssitr);
+}
+
+void cli_setscanparams(int argc, char **argv)
+{
+	uint32_t start = ciGetUnsigned(argv[1]);
+	uint32_t stop = ciGetUnsigned(argv[2]);
 	uint32_t step = ciGetUnsigned(argv[3]);
-	uint32_t us = ciGetUnsigned(argv[4]);
-	uint8_t stream = ciGetUnsigned(argv[5]);
-	printf("SWEEP_TX: ");
-	int8_t err = radio_txsweep(startfreq,stopfreq,step,us,stream);
+	uint32_t time = ciGetUnsigned(argv[4]);
+	float rssi = ciGetFloat(argv[5]);
+	if(stop < (start+step)) stop = start+step;
+	if(rssi > -1.0) rssi = -1.0;
+	if(rssi < -127.5) rssi = -127.5;
+	check_param(time,10,100000);
+	radioconfig.rxstartfreq = start;
+	radioconfig.rxstopfreq = stop;
+	radioconfig.rxstep = step;
+	radioconfig.rxinterval = time;
+	radioconfig.rssitr = rssi;
+	printf("SET_SCANPARAMS: START=%d,STOP=%d,STEP=%d,TIME=%d,RSSI=%.1f\r\n",radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,radioconfig.rssitr);
+}
+
+void cli_scan(int argc, char **argv)
+{
+	int8_t err;
+	uint32_t enable = ciGetUnsigned(argv[1]);
+	printf("SCAN: ");
+	if(enable == 0) err = radio_rxscan(radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,radioconfig.rssitr);
+	else err = radio_rxscan(radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,0.0);
+	if(err == RADIO_OK)
+	{
+		//check result, on or off
+		if(sweep == false) 
+		{
+			rxled_off();
+			radioconfig.workmode = prev_workmode;
+			printf("STOP\r\n");
+		}
+		else 
+		{
+			rxled_on();
+			prev_workmode = radioconfig.workmode;
+			radioconfig.workmode = WORK_MODE_SCANNER;
+			printf("START\r\n");
+		}
+	}
+	else printerror(err);
+}
+
+void cli_getjamparams(int argc, char **argv)
+{
+	printf("GET_JAMPARAMS: START=%d,STOP=%d,STEP=%d,TIME=%d,MOD=%d\r\n",radioconfig.txstartfreq,radioconfig.txstopfreq,radioconfig.txstep,radioconfig.txinterval,radioconfig.txmodulation);
+}
+
+void cli_setjamparams(int argc, char **argv)
+{
+	uint32_t start = ciGetUnsigned(argv[1]);
+	uint32_t stop = ciGetUnsigned(argv[2]);
+	uint32_t step = ciGetUnsigned(argv[3]);
+	uint32_t time = ciGetUnsigned(argv[4]);
+	uint32_t mod = ciGetUnsigned(argv[5]);
+	check_param(mod,1,4);
+	check_param(time,1,100000);
+	if(stop < (start+step)) stop = start+step;
+	radioconfig.txstartfreq = start;
+	radioconfig.txstopfreq = stop;
+	radioconfig.txstep = step;
+	radioconfig.txinterval = time;
+	radioconfig.txmodulation = mod;
+	printf("SET_JAMPARAMS: START=%d,STOP=%d,STEP=%d,TIME=%d,MOD=%d\r\n",radioconfig.txstartfreq,radioconfig.txstopfreq,radioconfig.txstep,radioconfig.txinterval,radioconfig.txmodulation);
+}
+
+void cli_jam(int argc, char **argv)
+{
+	int8_t err;
+	uint32_t enable = ciGetUnsigned(argv[1]);
+	printf("JAM: ");
+	if(enable == 0) err = radio_txsweep(radioconfig.txstartfreq,radioconfig.txstopfreq,radioconfig.txstep,radioconfig.txinterval,radioconfig.txmodulation);
+	else err = radio_txsweep(radioconfig.txstartfreq,radioconfig.txstopfreq,radioconfig.txstep,radioconfig.txinterval,0);
 	if(err == RADIO_OK)
 	{
 		//check result, on or off
 		if(txmode == 0) 
 		{
 			txled_off();
+			radioconfig.workmode = prev_workmode;
 			printf("STOP\r\n");
 		}
 		else 
 		{
 			txled_on();
+			prev_workmode = radioconfig.workmode;
+			radioconfig.workmode = WORK_MODE_JAMMER;
 			printf("START\r\n");
 		}
 	}
 	else printerror(err);
-}
-
-void cli_sweeprx(int argc, char **argv)
-{
-	uint32_t startfreq = ciGetUnsigned(argv[1]);
-	uint32_t stopfreq = ciGetUnsigned(argv[2]);
-	uint32_t step = ciGetUnsigned(argv[3]);
-	uint32_t ms = ciGetUnsigned(argv[4]);
-	float rssitr = (float)ciGetSigned(argv[5]);
-	printf("SWEEP_RX: ");
-	int8_t err = radio_rxscan(startfreq,stopfreq,step,ms,rssitr);
-	if(err == RADIO_OK)
-	{
-		//check result, on or off
-		if(sweeprx == false) 
-		{
-			rxled_off();
-			printf("STOP\r\n");
-		}
-		else 
-		{
-			rxled_on();
-			printf("START\r\n");
-		}
-	}
-	else printerror(err);
-}
-
-void cli_getscanparams(int argc, char **argv)
-{
-	
-}
-
-void cli_setscanparams(int argc, char **argv)
-{
-	
-}
-
-void cli_scan(int argc, char **argv)
-{
-	
-}
-
-void cli_getjamparams(int argc, char **argv)
-{
-	
-}
-
-void cli_setjamparams(int argc, char **argv)
-{
-	
-}
-
-void cli_jam(int argc, char **argv)
-{
-	
 }
 
 void cli_pan_readreg(int argc, char **argv)

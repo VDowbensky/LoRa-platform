@@ -77,7 +77,7 @@ void bsp_timing_irq(void)
      }
    }
 	}
-	if(sweeptx || sweeprx)
+	if(sweep)
 	{
 		sweepcnt--;
 		if(sweepcnt == 0) 

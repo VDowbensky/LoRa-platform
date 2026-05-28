@@ -150,6 +150,8 @@ uint32_t ciGetUnsigned(char *arg);
  * @return The signed integer value.
  */
 int32_t ciGetSigned(char *arg);
+											
+float ciGetFloat(char *arg);
 
 /**
  * Helper function to validate whether a command argument is of the expected
@@ -193,5 +195,6 @@ void ciErrorCallback(char* command, CommandError_t error);
  * @return true if the 'help' command was handled and false otherwise.
  */
 bool ciPrintHelp(CommandEntry_t *commands);
+
 
 #endif // COMMAND_INTERPRETER_SIMPLE_H__

@@ -753,6 +753,11 @@
               <FileType>1</FileType>
               <FilePath>..\radioproc\lr202x_proc.c</FilePath>
             </File>
+            <File>
+              <FileName>sx127x_proc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\radioproc\sx127x_proc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -972,6 +977,11 @@
               <FileName>sx128x_interface.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\radiohal\sx128x_interface.c</FilePath>
+            </File>
+            <File>
+              <FileName>sx127x_interface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\radiohal\sx127x_interface.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -4,6 +4,12 @@
 #include "radio_func.h"
 #include "mesh_packet.h"
 
+#define WORK_MODE_IDLE								0
+#define WORK_MODE_SNIFFER							1
+#define WORK_MODE_SCANNER							2
+#define WORK_MODE_JAMMER							3
+#define WORK_MODE_TEST								4
+
 #define MIN_FREQ_STEP									1
 #define MIN_TX_SWEEP_TIME							1
 #define MAX_TX_SWEEP_TIME							60000
@@ -26,6 +32,8 @@ void radio_startburst(void);
 int8_t radio_txsweep(uint32_t start,uint32_t stop,uint32_t step,uint32_t interval,uint8_t stream);
 int8_t radio_rxscan(uint32_t start,uint32_t stop,uint32_t step,uint32_t interval,float tr);
 
+extern uint8_t work_mode;
+
 extern volatile uint32_t txpacketnumber;
 extern volatile uint32_t rxpacketnumber;
 extern volatile uint32_t txpacketcount;
@@ -38,8 +46,9 @@ extern bool packet_received;
 extern bool crc_error;
 extern bool packet_sent;
 
-extern volatile bool sweeptx;
-extern volatile bool sweeprx;
+extern volatile bool sweep;
+extern volatile uint8_t prev_workmode;
+
 extern volatile bool sweepflag;
 extern volatile uint32_t sweepcnt;
 extern uint32_t sweeptime;
@@ -48,7 +57,7 @@ extern uint32_t master_id;
 extern uint32_t slave_id;
 
 extern uint8_t opmode;
-extern uint8_t prevopmod;
+extern uint8_t prevopmode;
 extern uint8_t txmode;
 
 #endif
