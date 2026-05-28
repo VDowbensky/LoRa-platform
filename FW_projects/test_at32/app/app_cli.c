@@ -106,10 +106,8 @@ CommandEntry_t commands[] =
     COMMAND_ENTRY("SET_POWER", "w", cli_setpower, ""),
     COMMAND_ENTRY("GET_XOTRIM", "", cli_getxotrim, ""),
     COMMAND_ENTRY("SET_XOTRIM", "w", cli_setxotrim, ""),
-    //COMMAND_ENTRY("STORE_CTUNE", "", cli_storectune, ""),
 
     COMMAND_ENTRY("GET_RSSI", "", cli_getRSSI, ""),
-    
     COMMAND_ENTRY("GET_STATUS", "", cli_getstatus, ""),
 
     //LoRa
@@ -199,7 +197,6 @@ void cli_reset(int argc, char **argv)
 void cli_info(int argc, char **argv)
 {
 	printf("GET_UID: 0x%llX\r\n", bsp_get_uid());
-	//printf("GET_UID: 0x%llX\r\n", *(uint64_t*)0x4002002c);
 }
 
 void cli_getver(int argc, char **argv)
@@ -556,19 +553,6 @@ void cli_storeconfig(int argc, char **argv)
 	else printerror((int8_t)err); 
 }
 
-//void cli_setpaconfig(int argc, char **argv)
-//{
-//	uint8_t dutycycle;
-//	uint8_t hpmax;
-//	
-//	dutycycle = ciGetUnsigned(argv[1]);
-//	if(dutycycle > 7) dutycycle = 7;
-//	if(hpmax > 7) hpmax = 7;
-//	hpmax = ciGetUnsigned(argv[2]);
-//	SX126X_SetPaConfig(dutycycle,hpmax,false);
-//	printf("SET_PACONFIG: %d,%d\r\n",dutycycle,hpmax);
-//}
-
 void cli_getstats(int argc, char **argv)
 {
 	rxstats_t rxstats;
@@ -642,58 +626,6 @@ void cli_radioinit(int argc, char **argv)
 	if(err == RADIO_OK) printf("OK\r\n");
 	else printerror(err);
 }
-
-//void cli_sweeptx(int argc, char **argv)
-//{
-//	uint32_t startfreq = ciGetUnsigned(argv[1]);
-//	uint32_t stopfreq = ciGetUnsigned(argv[2]);
-//	uint32_t step = ciGetUnsigned(argv[3]);
-//	uint32_t us = ciGetUnsigned(argv[4]);
-//	uint8_t stream = ciGetUnsigned(argv[5]);
-//	printf("SWEEP_TX: ");
-//	int8_t err = radio_txsweep(startfreq,stopfreq,step,us,stream);
-//	if(err == RADIO_OK)
-//	{
-//		//check result, on or off
-//		if(txmode == 0) 
-//		{
-//			txled_off();
-//			printf("STOP\r\n");
-//		}
-//		else 
-//		{
-//			txled_on();
-//			printf("START\r\n");
-//		}
-//	}
-//	else printerror(err);
-//}
-
-//void cli_sweeprx(int argc, char **argv)
-//{
-//	uint32_t startfreq = ciGetUnsigned(argv[1]);
-//	uint32_t stopfreq = ciGetUnsigned(argv[2]);
-//	uint32_t step = ciGetUnsigned(argv[3]);
-//	uint32_t ms = ciGetUnsigned(argv[4]);
-//	float rssitr = (float)ciGetSigned(argv[5]);
-//	printf("SWEEP_RX: ");
-//	int8_t err = radio_rxscan(startfreq,stopfreq,step,ms,rssitr);
-//	if(err == RADIO_OK)
-//	{
-//		//check result, on or off
-//		if(sweeprx == false) 
-//		{
-//			rxled_off();
-//			printf("STOP\r\n");
-//		}
-//		else 
-//		{
-//			rxled_on();
-//			printf("START\r\n");
-//		}
-//	}
-//	else printerror(err);
-//}
 
 void cli_getworkmode(int argc, char **argv)
 {
@@ -783,8 +715,8 @@ void cli_scan(int argc, char **argv)
 	int8_t err;
 	uint32_t enable = ciGetUnsigned(argv[1]);
 	printf("SCAN: ");
-	if(enable == 0) err = radio_rxscan(radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,radioconfig.rssitr);
-	else err = radio_rxscan(radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,0.0);
+	if(enable == 0) err = radio_rxscan(radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,0.0);
+	else err = radio_rxscan(radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,radioconfig.rssitr);
 	if(err == RADIO_OK)
 	{
 		//check result, on or off
@@ -833,8 +765,8 @@ void cli_jam(int argc, char **argv)
 	int8_t err;
 	uint32_t enable = ciGetUnsigned(argv[1]);
 	printf("JAM: ");
-	if(enable == 0) err = radio_txsweep(radioconfig.txstartfreq,radioconfig.txstopfreq,radioconfig.txstep,radioconfig.txinterval,radioconfig.txmodulation);
-	else err = radio_txsweep(radioconfig.txstartfreq,radioconfig.txstopfreq,radioconfig.txstep,radioconfig.txinterval,0);
+	if(enable == 0) err = radio_txsweep(radioconfig.txstartfreq,radioconfig.txstopfreq,radioconfig.txstep,radioconfig.txinterval,0);
+	else err = radio_txsweep(radioconfig.txstartfreq,radioconfig.txstopfreq,radioconfig.txstep,radioconfig.txinterval,radioconfig.txmodulation);
 	if(err == RADIO_OK)
 	{
 		//check result, on or off

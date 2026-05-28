@@ -122,6 +122,7 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
   }
 	writeconfig();
 	radio_init();
+	prev_workmode = radioconfig.workmode;
 	return RADIO_OK;
 }
 
