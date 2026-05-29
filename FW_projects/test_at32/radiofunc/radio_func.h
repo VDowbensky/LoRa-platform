@@ -45,6 +45,8 @@
 #define RADIO_OPMODE_TX               5
 #define RADIO_OPMODE_TXSTREAMCW       6
 #define RADIO_OPMODE_TXSTREAMPRE      7
+#define RADIO_OPMODE_TXSTREAM01	      8
+#define RADIO_OPMODE_TXSTREAMPN9      9
 
 #define TXMOD_CW											1
 #define TXMOD_PRE											2
@@ -88,8 +90,9 @@ typedef struct radioconfig
 	uint32_t rxstep;
 	uint32_t rxinterval;
 	float rssitr;
-	uint8_t workmode;
+	//uint8_t workmode;
 	uint8_t pktformat;
+	uint8_t reserved;
 	uint16_t txsendinterval;
 }radioconfig_t;
 

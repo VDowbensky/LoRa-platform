@@ -1,5 +1,6 @@
 #include "radio_proc.h"
 #include "flash.h"
+#include "menu.h"
 
 
 volatile uint32_t txpacketnumber = 0;
@@ -28,7 +29,7 @@ uint8_t opmode = 0;
 uint8_t prevopmode = 0;
 uint8_t txmode;
 
-volatile uint8_t prev_workmode;
+volatile uint8_t workmode;
 
 uint32_t master_id;
 uint32_t slave_id;
@@ -41,12 +42,12 @@ void printcrcerror(void);
 //radio events handler
 void radio_proc(void)
 {
-	switch(radioconfig.workmode)
+	switch(workmode)
 	{
-		case WORK_MODE_IDLE:
-		{
-			break;
-		}
+//		case WORK_MODE_IDLE:
+//		{
+//			break;
+//		}
 //sniffer-sender mode
 		case WORK_MODE_SNIFFER:
 		{
@@ -83,14 +84,12 @@ void radio_proc(void)
 				radio_getrssi(&rssi);
 				if(rssi > rssitr)
 				{
-					//rssi_peak = rssi;
 					printf("Freq=%d,RSSI=%.1f dBm\r\n",currfreq,rssi); //temporary; send to buffer instead
-					//display_rssi(currfreq/1000,rssi_peak);
-					//beep(2000,100);
+					display_scan_rssi(currfreq,rssi);
 				}
 				radio_setopmode(RADIO_OPMODE_FS);
 				currfreq += sweepstep;
-				if(currfreq >= stopfreq) currfreq = radioconfig.rxstartfreq;
+				if(currfreq > stopfreq) currfreq = radioconfig.rxstartfreq;
 				radio_set_freq(currfreq);
 				radio_rx();
 			}
@@ -103,7 +102,7 @@ void radio_proc(void)
 			{
 				sweepflag = false;
 				currfreq+= sweepstep;
-				if(currfreq >= stopfreq) currfreq = radioconfig.txstartfreq;
+				if(currfreq > stopfreq) currfreq = radioconfig.txstartfreq;
 				//printf("freq:%d,stream:%d\r\n",currfreq,txmode);
 				radio_setopmode(RADIO_OPMODE_FS);
 				radio_set_freq(currfreq);
@@ -198,16 +197,19 @@ int8_t radio_txsweep(uint32_t start,uint32_t stop,uint32_t step,uint32_t interva
 	if(stream > 2) return RADIO_INVALID_PARAMETER;
 	if(stream == 0)
 	{
+		display_main_screen();
 		txmode = 0;
 		sweep = false;
 		currfreq = prevfreq;
 		radio_set_freq(currfreq);
 		txled_off();
-		radio_rx();
+		radio_init();
 		return RADIO_OK;
 	}
 	else
 	{
+		GUI_ShowString(0,16,"                ",16,1);
+		GUI_ShowString(0,16,"JAMMING MODE",16,1);
 		prevfreq = currfreq;
 		startfreq = start;
 		stopfreq = stop;
@@ -233,14 +235,16 @@ int8_t radio_rxscan(uint32_t start,uint32_t stop,uint32_t step,uint32_t interval
 	//SSD1306_Clear(0);
 	if(tr >= 0)
 	{
-//		//GUI_ShowString(0,0,"IDLE       ",16,1);
+		display_main_screen();
 		sweep = false;
 		radio_set_freq(prevfreq);
 		currfreq = prevfreq;
+		radio_init();
 	}
 	else
 	{
-		//GUI_ShowString(0,0,"SCAN       ",16,1);
+		GUI_ShowString(0,16,"                ",16,1);
+		GUI_ShowString(0,16,"SCANNING MODE",16,1);
 		prevfreq = currfreq;
 		startfreq = start;
 		stopfreq = stop;
@@ -255,5 +259,6 @@ int8_t radio_rxscan(uint32_t start,uint32_t stop,uint32_t step,uint32_t interval
 	radio_rx();
 	return RADIO_OK;
 }
+
 
 

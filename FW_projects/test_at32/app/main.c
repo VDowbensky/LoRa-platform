@@ -164,7 +164,7 @@ int main(void)
 	else printerror(err);
 	printf("Radio chip: %d\r\n",radioconfig.chip);
 	rxled_off();
-	radio_rx();
+	//radio_rx();
   /* add user code end 2 */
 #if OLED_ENABLED
 	display_main_screen();
@@ -174,6 +174,12 @@ int main(void)
     /* add user code begin 3 */
 		radio_proc();
 		cli_proc();
+		if(SecFlag)
+		{
+			SecFlag = false;
+			display_status();
+			if(workmode == WORK_MODE_JAMMER) display_jam_freq(currfreq);
+		}
 		char key = Keypad_GetKey();
 //		if(key != KEY_NONE) printf("%c\r\n",key);
 		if(key == '#') menu_proc();

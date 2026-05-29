@@ -47,7 +47,7 @@ extern bool crc_error;
 extern bool packet_sent;
 
 extern volatile bool sweep;
-extern volatile uint8_t prev_workmode;
+extern volatile uint8_t workmode;
 
 extern volatile bool sweepflag;
 extern volatile uint32_t sweepcnt;

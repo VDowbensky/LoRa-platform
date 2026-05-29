@@ -70,50 +70,52 @@ sx128x_status_t SX128x_set_packet_params(uint8_t sync,uint16_t prelen,uint8_t pa
 	return (int8_t)sx128x_set_lora_sync_word(NULL,sync);
 }
 
-void SX128X_setopmode(uint8_t mode)
+int8_t SX128X_setopmode(uint8_t mode)
 {
   switch(mode)
   {
     case RADIO_OPMODE_SLEEP:
     opmode = RADIO_OPMODE_SLEEP;
 		sx128x_set_sleep(NULL,NULL,false);
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_STBYRC:
     opmode = RADIO_OPMODE_STBYRC;
     sx128x_set_standby(NULL,SX128X_STANDBY_CFG_RC);
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_STBYXOSC:
     opmode = RADIO_OPMODE_STBYXOSC;
     sx128x_set_standby(NULL,SX128X_STANDBY_CFG_XOSC);
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_FS:
     opmode = RADIO_OPMODE_FS;
     sx128x_set_fs(NULL);
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_TX:
     opmode = RADIO_OPMODE_TX;
     sx128x_set_tx(NULL,0,0); //temp.
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_RX:
-    default:
     opmode = RADIO_OPMODE_RX;
     sx128x_set_rx(NULL,0xff,0xffff); //temp.
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_TXSTREAMCW:
     opmode = RADIO_OPMODE_TXSTREAMCW;
     sx128x_set_tx_cw(NULL);
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_TXSTREAMPRE:
     opmode = RADIO_OPMODE_TXSTREAMPRE;
     sx128x_set_tx_infinite_preamble(NULL);
-    break;
+    return RADIO_OK;
+		
+		default:
+		return FEATURE_NOT_SUPPORTED;
   }
 }
 

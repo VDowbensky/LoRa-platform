@@ -13,7 +13,7 @@ char key;
 void display_main_screen(void)
 {
 	SSD1306_Clear(0);
-	GUI_ShowString(0,0,"MODE: 0",16,1);
+	display_status();
 	sprintf(strbuffer,"Chip:%d",radioconfig.chip);
 	GUI_ShowString(0,16,strbuffer,16,1);
 	sprintf(strbuffer,"Freq:%d",radioconfig.freq/1000);
@@ -132,4 +132,30 @@ void add_settings(void)
 			return;
 		}
 	}
+}
+
+
+void display_status(void)
+{
+	sprintf(strbuffer,"BATT: %.2fV",Vbatt);
+	GUI_ShowString(0,0,strbuffer,16,1);
+}
+
+void display_scan_rssi(uint32_t freq,float rssi)
+{
+	char strbuffer[64];
+
+	GUI_ShowString(0,32,"                ",16,1);
+	GUI_ShowString(0,48,"                ",16,1);
+	sprintf(strbuffer,"FREQ: %d kHz",freq);
+	GUI_ShowString(0,32,strbuffer,16,1);
+	sprintf(strbuffer,"RSSI: %.1f dBm",rssi);
+	GUI_ShowString(0,48,strbuffer,16,1);
+}
+
+void display_jam_freq(uint32_t freq)
+{
+	GUI_ShowString(0,32,"                ",16,1);
+	sprintf(strbuffer,"FREQ: %d kHz",freq);
+	GUI_ShowString(0,32,strbuffer,16,1);
 }

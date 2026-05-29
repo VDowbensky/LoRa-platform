@@ -459,31 +459,27 @@ void cli_txstream(int argc, char **argv)
 		{
 			case 0:
 			default:
-			radioconfig.workmode = prev_workmode;
+			workmode = WORK_MODE_SNIFFER;
 			printf("OFF\r\n");
 			break;
 
 			case 1:
-			prev_workmode = radioconfig.workmode;
-			radioconfig.workmode = WORK_MODE_TEST;
+			workmode = WORK_MODE_TEST;
       printf("CW\r\n");
       break;
 
 			case 2:
-			prev_workmode = radioconfig.workmode;
-			radioconfig.workmode = WORK_MODE_TEST;
+			workmode = WORK_MODE_TEST;
       printf("PREAMBLE\r\n");
       break;
 			
 			case 3:
-			prev_workmode = radioconfig.workmode;
-			radioconfig.workmode = WORK_MODE_TEST;
+			workmode = WORK_MODE_TEST;
       printf("0101...\r\n");
       break;
 			
 			case 4:
-			prev_workmode = radioconfig.workmode;
-			radioconfig.workmode = WORK_MODE_TEST;
+			workmode = WORK_MODE_TEST;
       printf("PN9\r\n");
       break;
 		}
@@ -629,35 +625,8 @@ void cli_radioinit(int argc, char **argv)
 
 void cli_getworkmode(int argc, char **argv)
 {
-	printf("GET_WORKMODE: CURRENT: ");
-	switch(radioconfig.workmode)
-	{
-		case WORK_MODE_IDLE:
-		printf("IDLE");
-		break;
-		
-		case WORK_MODE_SNIFFER:
-		printf("SNIFFER");
-		break;
-		
-		case WORK_MODE_SCANNER:
-		printf("SCANNER");
-		break;
-		
-		case WORK_MODE_JAMMER:
-		printf("JAMMER");
-		break;
-		
-		case WORK_MODE_TEST:
-		printf("TEST");
-		break;
-		
-		default:
-		printf("UNKNOWN");
-		break;
-	}
-	printf(", PREV: ");
-	switch(prev_workmode)
+	printf("GET_WORKMODE: ");
+	switch(workmode)
 	{
 		case WORK_MODE_IDLE:
 		printf("IDLE");
@@ -720,17 +689,16 @@ void cli_scan(int argc, char **argv)
 	if(err == RADIO_OK)
 	{
 		//check result, on or off
-		if(sweep == false) 
+		if(enable == 0) 
 		{
 			rxled_off();
-			radioconfig.workmode = prev_workmode;
+			workmode = WORK_MODE_SNIFFER;
 			printf("STOP\r\n");
 		}
 		else 
 		{
 			rxled_on();
-			prev_workmode = radioconfig.workmode;
-			radioconfig.workmode = WORK_MODE_SCANNER;
+			workmode = WORK_MODE_SCANNER;
 			printf("START\r\n");
 		}
 	}
@@ -770,17 +738,16 @@ void cli_jam(int argc, char **argv)
 	if(err == RADIO_OK)
 	{
 		//check result, on or off
-		if(txmode == 0) 
+		if(enable == 0) 
 		{
 			txled_off();
-			radioconfig.workmode = prev_workmode;
+			workmode = WORK_MODE_SNIFFER;
 			printf("STOP\r\n");
 		}
 		else 
 		{
 			txled_on();
-			prev_workmode = radioconfig.workmode;
-			radioconfig.workmode = WORK_MODE_JAMMER;
+			workmode = WORK_MODE_JAMMER;
 			printf("START\r\n");
 		}
 	}

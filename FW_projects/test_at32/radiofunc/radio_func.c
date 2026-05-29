@@ -49,7 +49,6 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 	radioconfig.rxstep = 100;
 	radioconfig.rxinterval = 100;
 	radioconfig.rssitr = -100.0;
-	radioconfig.workmode = WORK_MODE_SNIFFER;
 	radioconfig.pktformat = PKT_MESHTASTIC; //meshtastic
 	radioconfig.txsendinterval = 5000; //5 sec.
 	
@@ -122,7 +121,6 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
   }
 	writeconfig();
 	radio_init();
-	prev_workmode = radioconfig.workmode;
 	return RADIO_OK;
 }
 
@@ -154,8 +152,10 @@ int8_t radio_init(void)
 		err = INVALID_CHIP;
 		break;
 	}
+	if(err != RADIO_OK) return err;
+	workmode = WORK_MODE_SNIFFER;
 	radio_rx();
-	return err;
+	return RADIO_OK;
 }
 
 //Common functions
@@ -704,6 +704,8 @@ int8_t radio_stream(uint8_t stream)
 			txled_on();
 			txmode = 2;
 		}
+		
+		
 		break;
 	}
 	return err;
@@ -1040,35 +1042,42 @@ int8_t radio_get_status(uint8_t *chip_mode,uint8_t *cmd_status)
 
 int8_t radio_setopmode(uint8_t mode)
 {
-  switch(radioconfig.chip)
+  int8_t err;
+	switch(radioconfig.chip)
   {
     case 1276:
-		SX127x_setopmode(mode);
-		return RADIO_OK;
+		err = SX127x_setopmode(mode);
+		if(err != RADIO_OK) return err;
+		break;
 		
 		case 1262:
-		SX126X_setopmode(mode);
-		return RADIO_OK;
+		err = SX126X_setopmode(mode);
+		if(err != RADIO_OK) return err;
+		break;
 		
     case 1280:
-		SX128X_setopmode(mode);
-		return RADIO_OK;
+		err = SX128X_setopmode(mode);
+		if(err != RADIO_OK) return err;
+		break;
 		
     case 1121:
-		LR112X_setopmode(mode);
-		opmode = mode;
-		return RADIO_OK;
+		err = LR112X_setopmode(mode);
+		if(err != RADIO_OK) return err;
+		break;
 		
 		case 2021:
-		LR202x_setopmode(mode);
-		opmode = mode;
-		return RADIO_OK;	
+		err = LR202x_setopmode(mode);
+		if(err != RADIO_OK) return err;
+		break;	
 		
 		case 3029:
-		PAN_setopmode(mode);
-		return RADIO_OK;
+		err = PAN_setopmode(mode);
+		if(err != RADIO_OK) return err;
+		break;
 		
     default:
     return INVALID_CHIP;
   }
+	opmode = mode;
+	return RADIO_OK;
 }

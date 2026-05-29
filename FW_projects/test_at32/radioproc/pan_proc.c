@@ -61,7 +61,7 @@ int8_t PAN_set_packet_params(uint8_t sync,uint16_t prelen,uint8_t paylen,uint8_t
 	return RADIO_OK;
 }
 
-void PAN_setopmode(uint8_t mode) 
+int8_t PAN_setopmode(uint8_t mode) 
 {
 //* - PAN_STATE_DEEPSLEEP
 //* - PAN_STATE_SLEEP
@@ -73,37 +73,31 @@ void PAN_setopmode(uint8_t mode)
     case RADIO_OPMODE_SLEEP:
 		opmode = RADIO_OPMODE_SLEEP;
     PAN_SetRfState(PAN_STATE_SLEEP);
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_STBYRC:
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_STBYXOSC:
 		opmode = RADIO_OPMODE_STBYXOSC;
 		PAN_EnterStandbyState();
-    break;
-
-    case RADIO_OPMODE_FS:
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_TX:
-		break;
+		return RADIO_TODO;
 
     case RADIO_OPMODE_RX:
 		opmode = RADIO_OPMODE_RX;
 		PAN_EnterContinousRxState();
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_TXSTREAMCW:
 		opmode = RADIO_OPMODE_TXSTREAMCW;
     PAN_StartTxContinuousWave();
-    break;
+    return RADIO_OK;
 
-    case RADIO_OPMODE_TXSTREAMPRE:
-    break;
-		
 		default:
-		break;
+		return FEATURE_NOT_SUPPORTED;
   }
 }
 

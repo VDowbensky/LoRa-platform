@@ -1295,7 +1295,6 @@ sx126x_status_t sx126x_get_lora_pkt_status( const void* context, sx126x_pkt_stat
  * @see sx126x_set_rx
  */
 sx126x_status_t sx126x_get_rssi_inst( const void* context, int16_t* rssi_in_dbm );
-
 /**
  * @brief Get the statistics about GFSK communication
  *

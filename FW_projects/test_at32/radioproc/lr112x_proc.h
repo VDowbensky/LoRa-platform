@@ -11,7 +11,7 @@ lr11xx_status_t LR112X_set_freq(uint32_t Hz);
 lr11xx_status_t LR112x_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt);
 lr11xx_status_t LR112x_set_packet_params(uint8_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq);
 
-void LR112X_setopmode(uint8_t mode);
+int8_t LR112X_setopmode(uint8_t mode);
 void LR112X_RssiCal(uint32_t freq);
 void LR112X_printstatus(void);
 void LR112X_printerrors(void);

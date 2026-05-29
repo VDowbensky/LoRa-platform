@@ -178,7 +178,7 @@ int8_t SX127x_set_packet_params(uint8_t sync,uint16_t prelen,uint8_t paylen,uint
 	return RADIO_OK;
 }
 
-void SX127x_setopmode(uint8_t mode)
+int8_t SX127x_setopmode(uint8_t mode)
 {
 	uint8_t regval;
 	uint8_t mode127x;
@@ -207,25 +207,22 @@ void SX127x_setopmode(uint8_t mode)
     break;
 
     case RADIO_OPMODE_RX:
-    default:
     opmode = RADIO_OPMODE_RX;
     mode127x = LR_OPMODE_RXCONT;
     break;
 
     case RADIO_OPMODE_TXSTREAMCW:
-    opmode = RADIO_OPMODE_TXSTREAMCW;
-    //
-    break;
-
     case RADIO_OPMODE_TXSTREAMPRE:
-    opmode = RADIO_OPMODE_TXSTREAMPRE;
-    //
-    break;
+		return RADIO_TODO;
+		
+		default:
+		return FEATURE_NOT_SUPPORTED;
   }
 	regval = SX127x_read_reg(REG_OPMODE);
 	regval &= ~OPMODE_MSK;
 	regval |= mode127x;
 	SX127x_write_reg(REG_OPMODE,regval);
+	return RADIO_OK;
 }
 
 uint8_t SX127x_calc_bw_value(uint32_t bw_khz)

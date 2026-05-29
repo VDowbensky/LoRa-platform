@@ -214,7 +214,7 @@ lr20xx_status_t LR202x_set_packet_params(uint16_t sync,uint16_t prelen,uint8_t p
 	return (int8_t)lr20xx_radio_lora_set_syncword(NULL,sync);
 }
 
-void LR202x_setopmode(uint8_t mode)
+int8_t LR202x_setopmode(uint8_t mode)
 {
   switch(mode)
   {
@@ -225,47 +225,51 @@ void LR202x_setopmode(uint8_t mode)
 			sleepcfg.is_clk_32k_enabled = false;
 			sleepcfg.is_ram_retention_enabled = false;
 			lr20xx_system_set_sleep_mode(NULL,&sleepcfg,0);
-			break;
+			return RADIO_OK;
 		}
 
     case RADIO_OPMODE_STBYRC:
 		opmode = RADIO_OPMODE_STBYRC;
     lr20xx_system_set_standby_mode(NULL,LR20XX_SYSTEM_STANDBY_MODE_RC);
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_STBYXOSC:
 		opmode = RADIO_OPMODE_STBYXOSC;
     lr20xx_system_set_standby_mode(NULL,LR20XX_SYSTEM_STANDBY_MODE_XOSC);
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_FS:
 		opmode = RADIO_OPMODE_FS;
     lr20xx_system_set_fs_mode(NULL);
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_TX:
 		opmode = RADIO_OPMODE_TX;
     lr20xx_radio_common_set_tx(NULL,0); //temp.
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_RX:
-    default:
 		opmode = RADIO_OPMODE_RX;
     lr20xx_radio_common_set_rx(NULL,0); //temp.
 		lr20xx_radio_fifo_clear_rx(NULL);
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_TXSTREAMCW:
 		opmode = RADIO_OPMODE_TXSTREAMCW;
     lr20xx_radio_common_set_tx_test_mode(NULL,LR20XX_RADIO_COMMON_TX_TEST_MODE_CONTINUOUS_WAVE);
-    break;
+    return RADIO_OK;
 
     case RADIO_OPMODE_TXSTREAMPRE:
 		opmode = RADIO_OPMODE_TXSTREAMPRE;
     lr20xx_radio_common_set_tx_test_mode(NULL,LR20XX_RADIO_COMMON_TX_TEST_MODE_INFINITE_PREAMBLE);
-    break;
+    return RADIO_OK;
 		
-		//add PN9
+		case RADIO_OPMODE_TXSTREAMPN9:
+		lr20xx_radio_common_set_tx_test_mode(NULL,LR20XX_RADIO_COMMON_TX_TEST_MODE_PRBS9);
+		return RADIO_OK;
+		
+		default:
+		return FEATURE_NOT_SUPPORTED;
   }
 	//LR112X_printerrors(0);
 }
