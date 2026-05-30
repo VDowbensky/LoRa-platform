@@ -59,12 +59,8 @@ void print_meshtastic_packet(void)
 	if(crc_error) sprintf(strbuffer,"FERR:%.1f",pktstatus.snr_pkt);
 	else sprintf(strbuffer,"RPCK:%.1f",pktstatus.snr_pkt);
 	GUI_ShowString(0,0,strbuffer,8,1);
-	sprintf(strbuffer," %.3fV",Vbatt);
-	GUI_ShowString(80,0,strbuffer,8,1);
-	
 	sprintf(strbuffer,"RSSI:%.1f,%.1f",pktstatus.rssi_pkt,pktstatus.signal_rssi_pkt);
 	GUI_ShowString(0,8,strbuffer,8,1);
-	
 	sprintf(strbuffer,"SEND:0x%08X",rxmessage.sender_id);
 	GUI_ShowString(0,16,strbuffer,8,1);
 	sprintf(strbuffer,"DEST:0x%08X",rxmessage.destination_id);
@@ -78,8 +74,6 @@ void print_meshtastic_packet(void)
 	GUI_ShowString(0,48,strbuffer,8,1);
 	sprintf(strbuffer,"Payload: %d",rxlen - 16);
 	GUI_ShowString(0,56,strbuffer,8,1);
-	
-	
 #endif
 	crc_error = false;
 }

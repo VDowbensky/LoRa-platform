@@ -137,8 +137,8 @@ void add_settings(void)
 
 void display_status(void)
 {
-	sprintf(strbuffer,"BATT: %.2fV",Vbatt);
-	GUI_ShowString(0,0,strbuffer,16,1);
+	sprintf(strbuffer,"BATT:%.2fV",Vbatt);
+	GUI_ShowString(64,0,strbuffer,8,1);
 }
 
 void display_scan_rssi(uint32_t freq,float rssi)
@@ -159,3 +159,5 @@ void display_jam_freq(uint32_t freq)
 	sprintf(strbuffer,"FREQ: %d kHz",freq);
 	GUI_ShowString(0,32,strbuffer,16,1);
 }
+
+
