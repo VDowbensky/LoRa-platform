@@ -14,7 +14,6 @@ CommandState_t state;
 char ciBuffer[256];
 //uint8_t printmode = 0;
 //uint8_t txmode = 0;
-int32_t check_param(int32_t param,const int32_t param_min,const int32_t param_max);
 //General
 void cli_reset(int argc, char **argv);
 void cli_info(int argc, char **argv);

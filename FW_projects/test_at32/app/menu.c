@@ -1,12 +1,37 @@
 #include "menu.h"
+#include "app_cli.h"
 
-volatile uint8_t menu_level = 0;
+//volatile uint8_t menu_level = 0;
 
 void display_main_menu(void);
-void mode_settings(void);
+
+void sniffer_settings(void);
+void display_sniffer_menu(void);
 void freq_settings(void);
-void mod_settings(void);
+void bw_settings(void);
+void sf_settings(void);
+void cr_settings(void);
+void ldro_settings(void);
+void pkt_fmt_settings(void);
+
+void scanner_settings(void);
+void display_scanner_menu(void);
+void scan_start_settings(void);
+void scan_stop__settings(void);
+void scan_step_settings(void);
+void scan_time_settings(void);
+void scan_rssi_settings(void);
+
+void jammer_settings(void);
+void display_jammer_menu(void);
+void jam_start_settings(void);
+void jam_stop__settings(void);
+void jam_step_settings(void);
+void jam_time_settings(void);
+void jam_mod_settings(void);
+
 void add_settings(void);
+void display_add_menu(void);
 
 char key;
 
@@ -18,6 +43,7 @@ void display_main_screen(void)
 	GUI_ShowString(0,16,strbuffer,16,1);
 	sprintf(strbuffer,"Freq:%d",radioconfig.freq/1000);
 	GUI_ShowString(0,32,strbuffer,16,1);
+	GUI_ShowString(0,48,"# - Settings",16,1);
 }
 
 void menu_proc(void)
@@ -33,16 +59,17 @@ void menu_proc(void)
 		}
 		switch(key)
 		{
+			//sniffer parameters settinga
 			case '1':
-			mode_settings();
+			sniffer_settings();
 			break;
 		
 			case '2':
-			freq_settings();
+			scanner_settings();
 			break;
 		
 			case '3':
-			mod_settings();
+			jammer_settings();
 			break;
 		
 			case '4':
@@ -58,25 +85,63 @@ void menu_proc(void)
 void display_main_menu(void)
 {
 	SSD1306_Clear(0);
-	GUI_ShowString(0,0,"1 - Mode",16,1);
-	//sprintf(strbuffer,"Chip:%d",radioconfig.chip);
-	GUI_ShowString(0,16,"2 - Frequency",16,1);
+	GUI_ShowString(0,0,"1 Sniff settings",16,1);
+	GUI_ShowString(0,16,"2 Scan settings",16,1);
 	//sprintf(strbuffer,"Freq:%d",radioconfig.freq/1000);
-	GUI_ShowString(0,32,"3 - Modulation",16,1);
-	GUI_ShowString(0,48,"4 - Additional",16,1);
+	GUI_ShowString(0,32,"3 Jam settings",16,1);
+	GUI_ShowString(0,48,"4 Additional",16,1);
 }
 
-void mode_settings(void)
+void display_sniffer_menu(void)
 {
 	SSD1306_Clear(0);
-	GUI_ShowString(0,16,"Mode: sniffer",16,1);
-	//
+	GUI_ShowString(0,0,"1 Frequency",8,1);
+	GUI_ShowString(0,8,"2 BW",8,1);
+	GUI_ShowString(0,16,"3 CR",8,1);
+	GUI_ShowString(0,24,"4 SF",8,1);
+	GUI_ShowString(0,32,"5 LDRO",8,1);
+	GUI_ShowString(0,40,"6 Packet format",8,1);
+}
+
+void sniffer_settings(void)
+{
+	display_sniffer_menu();
 	while(1)
 	{
-		if (Keypad_GetKey() == '*') 
+		key = Keypad_GetKey();
+		if(key == '#') 
 		{
 			display_main_menu();
-			return;
+			break;
+		}
+		switch(key)
+		{
+			case '1':
+			freq_settings();
+			break;
+			
+			case '2':
+			bw_settings();
+			break;
+			
+			case '3':
+			sf_settings();
+			break;
+			
+			case '4':
+			cr_settings();
+			break;
+			
+			case '5':
+			ldro_settings();
+			break;
+			
+			case '6':
+			pkt_fmt_settings();
+			break;
+			
+			default:
+			break;
 		}
 	}
 }
@@ -85,12 +150,7 @@ void freq_settings(void)
 {
 	int32_t value;
 	SSD1306_Clear(0);
-	GUI_ShowString(0,16,"Frequency:",16,1);
-//		if (Keypad_GetKey() == '*') 
-//		{
-//			display_main_menu();
-//			return;
-//		}
+	GUI_ShowString(0,16,"Frequency",16,1);
 	NumberInput_Start(radioconfig.freq / 1000);
 	while(1)
 	{
@@ -98,41 +158,407 @@ void freq_settings(void)
 		if(r == 1) break;
 		if(r == -1) break; /* canceled */ 
 	}
-	//set frequency
+	value = check_param(value,30000,3000000);
 	radioconfig.freq = value * 1000;
 	writeconfig();
-	display_main_menu();
+	display_sniffer_menu();
 }
 
-void mod_settings(void)
+void bw_settings(void)
 {
+	int32_t value;
 	SSD1306_Clear(0);
-	GUI_ShowString(0,16,"Settings:",16,1);
-	//
+	GUI_ShowString(0,16,"BW",16,1);
+	NumberInput_Start(radioconfig.bw);
 	while(1)
 	{
-		if (Keypad_GetKey() == '*') 
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,7,1600);
+	radioconfig.bw = value;
+	writeconfig();
+	display_sniffer_menu();
+}
+
+void sf_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"SF",16,1);
+	NumberInput_Start(radioconfig.sf);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,5,12);
+	radioconfig.sf = value;
+	writeconfig();
+	display_sniffer_menu();
+}
+
+void cr_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"CR",16,1);
+	NumberInput_Start(radioconfig.cr);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,0,4);
+	radioconfig.cr = value;
+	writeconfig();
+	display_sniffer_menu();
+}
+
+void ldro_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"LDRO",16,1);
+	NumberInput_Start(radioconfig.ldropt);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,0,1);
+	radioconfig.ldropt = value;
+	writeconfig();
+	display_sniffer_menu();
+}
+
+void pkt_fmt_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"PACKET FORMAT",16,1);
+	NumberInput_Start(radioconfig.pktformat);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,0,3); //to be changed
+	radioconfig.pktformat = value;
+	writeconfig();
+	display_sniffer_menu();
+}
+
+void display_scanner_menu(void)
+{
+	SSD1306_Clear(0);
+	GUI_ShowString(0,0,"1 Start frequency",8,1);
+	GUI_ShowString(0,8,"2 Stop frequency",8,1);
+	GUI_ShowString(0,16,"3 Frequency step",8,1);
+	GUI_ShowString(0,24,"4 Scan time",8,1);
+	GUI_ShowString(0,32,"5 RSSI threshold",8,1);
+}
+
+
+void scanner_settings(void)
+{
+	display_scanner_menu();
+	while(1)
+	{
+		key = Keypad_GetKey();
+		if (key == '#') 
 		{
 			display_main_menu();
-			return;
+			break;
+		}
+		switch(key)
+		{
+			case '1':
+			scan_start_settings();
+			break;
+			
+			case '2':
+			scan_stop__settings();
+			break;
+			
+			case '3':
+			scan_step_settings();
+			break;
+			
+			case '4':
+			scan_time_settings();
+			break;
+			
+			case '5':
+			scan_rssi_settings();
+			break;
+			
+			default:
+			break;
 		}
 	}
+}
+
+void scan_start_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Start, kHz",16,1);
+	NumberInput_Start(radioconfig.rxstartfreq);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,30000,3000000);
+	radioconfig.rxstartfreq = value;
+	writeconfig();
+	display_scanner_menu();
+}
+
+void scan_stop__settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Stop, kHz",16,1);
+	NumberInput_Start(radioconfig.rxstopfreq);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,30000,3000000);
+	radioconfig.rxstopfreq = value;
+	writeconfig();
+	display_scanner_menu();
+}
+
+void scan_step_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Step, kHz",16,1);
+	NumberInput_Start(radioconfig.rxstep);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,1,1000000);
+	radioconfig.rxstep = value;
+	writeconfig();
+	display_scanner_menu();
+}
+
+void scan_time_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Scan time, ms",16,1);
+	NumberInput_Start(radioconfig.rxinterval);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,1,60000);
+	radioconfig.rxinterval = value;
+	writeconfig();
+	display_scanner_menu();
+}
+
+void scan_rssi_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"RSSI, dBm",16,1);
+	NumberInput_Start(radioconfig.rssitr);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,-127,-10);
+	radioconfig.rssitr = value;
+	writeconfig();
+	display_scanner_menu();
+}
+
+
+void display_jammer_menu(void)
+{
+	SSD1306_Clear(0);
+	GUI_ShowString(0,0,"1 Start frequency",8,1);
+	GUI_ShowString(0,8,"2 Stop frequency",8,1);
+	GUI_ShowString(0,16,"3 Frequency step",8,1);
+	GUI_ShowString(0,24,"4 Jam time",8,1);
+	GUI_ShowString(0,32,"5 Modulation",8,1);
+}
+
+void jammer_settings(void)
+{
+	display_jammer_menu();
+	while(1)
+	{
+		key = Keypad_GetKey();
+		if (key == '#') 
+		{
+			display_main_menu();
+			break;
+		}
+		switch(key)
+		{
+			case '1':
+			jam_start_settings();
+			break;
+			
+			case '2':
+			jam_stop__settings();
+			break;
+			
+			case '3':
+			jam_step_settings();
+			break;
+			
+			case '4':
+			jam_time_settings();
+			break;
+			
+			case '5':
+			jam_mod_settings ();
+			break;
+			
+			default:
+			break;
+		}
+	}
+}
+
+void jam_start_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Start, kHz",16,1);
+	NumberInput_Start(radioconfig.txstartfreq);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,30000,3000000);
+	radioconfig.txstartfreq = value;
+	writeconfig();
+	display_jammer_menu();
+}
+
+void jam_stop__settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Stop, kHz",16,1);
+	NumberInput_Start(radioconfig.txstopfreq);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,30000,3000000);
+	radioconfig.txstopfreq = value;
+	writeconfig();
+	display_jammer_menu();
+}
+
+void jam_step_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Step, kHz",16,1);
+	NumberInput_Start(radioconfig.txstep);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,1,1000000);
+	radioconfig.txstep = value;
+	writeconfig();
+	display_jammer_menu();
+}
+
+void jam_time_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Time, ms",16,1);
+	NumberInput_Start(radioconfig.txinterval);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,1,60000);
+	radioconfig.txinterval = value;
+	writeconfig();
+	display_jammer_menu();
+}
+
+void jam_mod_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Modulation",16,1);
+	NumberInput_Start(radioconfig.txmodulation);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,0,2);
+	radioconfig.txmodulation = value;
+	writeconfig();
+	display_jammer_menu();
+}
+
+
+void display_add_menu(void)
+{
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Additional",16,1);
 }
 
 void add_settings(void)
 {
-	SSD1306_Clear(0);
-	GUI_ShowString(0,16,"Additional:",16,1);
-	//
+	display_add_menu();
 	while(1)
 	{
-		if (Keypad_GetKey() == '*') 
+		if (Keypad_GetKey() == '#') 
 		{
 			display_main_menu();
-			return;
+			break;
 		}
+//		switch(key)
+//		{
+//			
+//		}
 	}
 }
+
+
 
 
 void display_status(void)

@@ -156,7 +156,7 @@ int8_t NumberInput_Run(int32_t* value)
 		*value = Convert_To_Int32();
 		return 1;
 		
-		case KEY_D:
+		case 'C':
 		return -1;
 
 		default:

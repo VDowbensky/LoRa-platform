@@ -14,5 +14,6 @@ extern uint8_t printmode;
 
 //void updatescreen(void);
 void printerror(int8_t error);
+int32_t check_param(int32_t param,const int32_t param_min,const int32_t param_max);
 
 #endif
