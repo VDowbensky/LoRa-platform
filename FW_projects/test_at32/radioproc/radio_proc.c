@@ -11,6 +11,7 @@ bool master = false;
 uint32_t inter_packet_delay = 100;
 volatile uint32_t pkt_timecnt;
 volatile bool tx_request = false;
+volatile bool ack_request = false;
 
 //Frequency sweep
 uint32_t startfreq;
@@ -31,11 +32,10 @@ uint8_t txmode;
 
 volatile uint8_t workmode;
 
-uint32_t master_id;
-uint32_t slave_id;
 meshtastic_pkt_t txmessage;
 meshtastic_pkt_t rxmessage;
 void prepareTxPacket(void);
+void prepareAckPacket(void);
 void printcrcerror(void);
 
 
@@ -55,6 +55,13 @@ void radio_proc(void)
 			{
 				tx_request = false;
 				prepareTxPacket();
+				txled_on();
+				radio_sendpacket(radio_txbuffer);
+			}
+			if(ack_request)
+			{
+				ack_request = false;
+				prepareAckPacket();
 				txled_on();
 				radio_sendpacket(radio_txbuffer);
 			}
@@ -107,7 +114,6 @@ void radio_proc(void)
 				radio_setopmode(RADIO_OPMODE_FS);
 				radio_set_freq(currfreq);
 				radio_stream(txmode);
-				//printf("freq:%d,stream:%d\r\n",currfreq,txmode);
 			}
 			break;
 		}
@@ -141,6 +147,7 @@ void process_rx_packet(void)
 			case PKT_MESHTASTIC:
 			decode_meshtastic_packet();
 			print_meshtastic_packet();
+			if(!master && rxmessage.destination_id == radioconfig.id) ack_request = true;
 			break;
 			
 			default:
@@ -166,7 +173,7 @@ void prepareTxPacket(void)
 	{
 		case PKT_MESHTASTIC:
 		{
-			txmessage.destination_id = slave_id;
+			txmessage.destination_id = radioconfig.pair_id;
 			txmessage.sender_id = radioconfig.id;
 			txmessage.packet_id = txpacketnumber;
 			txmessage.relay_node = 0;
@@ -177,6 +184,31 @@ void prepareTxPacket(void)
 			txlen = 16 + i;
 			memcpy((void*)radio_txbuffer,(void*)&txmessage,txlen);
 			printf("TX: %d\r\n",txpacketnumber);
+			break;
+		}
+		default:
+		break;
+	}
+}
+
+void prepareAckPacket(void)
+{
+	uint8_t i;
+	switch(radioconfig.pktformat)
+	{
+		case PKT_MESHTASTIC:
+		{
+			txmessage.destination_id = radioconfig.pair_id;
+			txmessage.sender_id = radioconfig.id;
+			txmessage.packet_id = rxpacketnumber;
+			txmessage.relay_node = 0xff;
+			txmessage.next_hop = 1;
+			txmessage.channel_hash = 0x62;
+			txmessage.flags = (1 << HOPSTART_POS) | (4 << HOPLIMIT_POS); //for test
+			for(i = 0; i < 16; i++) txmessage.payload[i] = i+16;
+			txlen = 16 + i;
+			memcpy((void*)radio_txbuffer,(void*)&txmessage,txlen);
+			printf("ACK: %d\r\n",rxpacketnumber);
 			break;
 		}
 		default:

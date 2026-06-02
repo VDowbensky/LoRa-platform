@@ -182,12 +182,110 @@ int main(void)
 		}
 		char key = Keypad_GetKey();
 //		if(key != KEY_NONE) printf("%c\r\n",key);
-		if(key == '#') menu_proc();
-		//check work mode changing (sniffer/scanner/jammer/test)
+		//if(key == '#') menu_proc();
+		switch(key)
+		{
+			case '#':
+			{
+				if(workmode == WORK_MODE_SNIFFER)
+				{
+					menu_proc();
+				}
+			}
+			break;
+			
+			case 'A': //send one packet
+			{
+				if(workmode == WORK_MODE_SNIFFER)
+				{
+					tx_request = true;
+				}
+				break;
+			}
+			
+			case 'B': //send burst
+			{
+				if(workmode == WORK_MODE_SNIFFER)
+				{
+					txpacketcount = radioconfig.pkt_count;
+					inter_packet_delay = radioconfig.txsendinterval;
+					//slave_id = 0xffffffff; //temp.
+					radio_startburst();
+				}
+				break;
+			}
+
+			case 'C': //scanner
+			{
+				int8_t err;
+				if(workmode == WORK_MODE_SNIFFER)
+				{
+					err = radio_rxscan(radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,radioconfig.rssitr);
+					if(err == RADIO_OK)
+					{
+						rxled_on();
+						workmode = WORK_MODE_SCANNER;
+						//printf("START\r\n");
+					}
+				}
+				break;
+			}
+			
+			case 'D': //jammer
+			{
+				int8_t err;
+				if(workmode == WORK_MODE_SNIFFER)
+				{
+					err = radio_txsweep(radioconfig.txstartfreq,radioconfig.txstopfreq,radioconfig.txstep,radioconfig.txinterval,radioconfig.txmodulation);
+					if(err == RADIO_OK)
+					{
+						txled_on();
+						workmode = WORK_MODE_JAMMER;
+						//printf("START\r\n");
+					}
+				}
+				break;
+			}
+			
+			case '*':
+			{
+				if(workmode == WORK_MODE_SCANNER)
+				{
+					err = radio_rxscan(radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,0.0);
+					if(err == RADIO_OK)
+					{
+						rxled_off();
+						workmode = WORK_MODE_SNIFFER;
+						//printf("STOP\r\n");
+					}
+				}
+				if(workmode == WORK_MODE_JAMMER)
+				{
+					err = radio_txsweep(radioconfig.txstartfreq,radioconfig.txstopfreq,radioconfig.txstep,radioconfig.txinterval,0);
+					if(err == RADIO_OK)
+					{
+						rxled_off();
+						workmode = WORK_MODE_SNIFFER;
+						//printf("STOP\r\n");
+					}
+				}
+				if(workmode == WORK_MODE_SNIFFER)	
+				{
+					if(master)
+					{
+						master = false;
+						tx_request = false;
+					}
+				}					
+			}
+			
+			default:
+			break;
+		}
     /* add user code end 3 */
   }
 }
 
   /* add user code begin 4 */
 
-  /* add user code end 4 */
+/* add user code end 4 */

@@ -94,6 +94,8 @@ typedef struct radioconfig
 	uint8_t pktformat;
 	uint8_t reserved;
 	uint16_t txsendinterval;
+	uint32_t pair_id;
+	uint32_t pkt_count;
 }radioconfig_t;
 
 //incoming packet status

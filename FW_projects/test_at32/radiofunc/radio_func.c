@@ -51,6 +51,8 @@ int8_t radio_initconfig(uint16_t chip,uint8_t tcxo)
 	radioconfig.rssitr = -100.0;
 	radioconfig.pktformat = PKT_MESHTASTIC; //meshtastic
 	radioconfig.txsendinterval = 5000; //5 sec.
+	radioconfig.pair_id = 0;
+	radioconfig.pkt_count = 10;
 	
 	switch(chip)
   {

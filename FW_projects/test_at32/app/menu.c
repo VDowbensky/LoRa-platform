@@ -32,6 +32,10 @@ void jam_mod_settings(void);
 
 void add_settings(void);
 void display_add_menu(void);
+void add_own_id_settings(void);
+void add_pair_id_settings(void);
+void add_pkt_cnt_settings(void);
+void add_interval_settings(void);
 
 char key;
 
@@ -52,6 +56,12 @@ void menu_proc(void)
 	while(1)
 	{
 		key = Keypad_GetKey();
+		if(key == '*') 
+		{
+			display_main_screen();
+			writeconfig();
+			break;
+		}
 		if(key == '#') 
 		{
 			display_main_screen();
@@ -85,11 +95,12 @@ void menu_proc(void)
 void display_main_menu(void)
 {
 	SSD1306_Clear(0);
-	GUI_ShowString(0,0,"1 Sniff settings",16,1);
-	GUI_ShowString(0,16,"2 Scan settings",16,1);
-	//sprintf(strbuffer,"Freq:%d",radioconfig.freq/1000);
-	GUI_ShowString(0,32,"3 Jam settings",16,1);
-	GUI_ShowString(0,48,"4 Additional",16,1);
+	GUI_ShowString(0,0,"1 Sniff settings",8,1);
+	GUI_ShowString(0,8,"2 Scan settings",8,1);
+	GUI_ShowString(0,16,"3 Jam settings",8,1);
+	GUI_ShowString(0,24,"4 Test settings",8,1);
+	GUI_ShowString(0,32,"* Save and exit",8,1);
+	GUI_ShowString(0,40,"# Exit without saving",8,1);
 }
 
 void display_sniffer_menu(void)
@@ -160,7 +171,7 @@ void freq_settings(void)
 	}
 	value = check_param(value,30000,3000000);
 	radioconfig.freq = value * 1000;
-	writeconfig();
+	//writeconfig();
 	display_sniffer_menu();
 }
 
@@ -178,7 +189,7 @@ void bw_settings(void)
 	}
 	value = check_param(value,7,1600);
 	radioconfig.bw = value;
-	writeconfig();
+	//writeconfig();
 	display_sniffer_menu();
 }
 
@@ -196,7 +207,7 @@ void sf_settings(void)
 	}
 	value = check_param(value,5,12);
 	radioconfig.sf = value;
-	writeconfig();
+	//writeconfig();
 	display_sniffer_menu();
 }
 
@@ -214,7 +225,7 @@ void cr_settings(void)
 	}
 	value = check_param(value,0,4);
 	radioconfig.cr = value;
-	writeconfig();
+	//writeconfig();
 	display_sniffer_menu();
 }
 
@@ -232,7 +243,7 @@ void ldro_settings(void)
 	}
 	value = check_param(value,0,1);
 	radioconfig.ldropt = value;
-	writeconfig();
+	//writeconfig();
 	display_sniffer_menu();
 }
 
@@ -250,7 +261,7 @@ void pkt_fmt_settings(void)
 	}
 	value = check_param(value,0,3); //to be changed
 	radioconfig.pktformat = value;
-	writeconfig();
+	//writeconfig();
 	display_sniffer_menu();
 }
 
@@ -318,7 +329,7 @@ void scan_start_settings(void)
 	}
 	value = check_param(value,30000,3000000);
 	radioconfig.rxstartfreq = value;
-	writeconfig();
+  //writeconfig();
 	display_scanner_menu();
 }
 
@@ -336,7 +347,7 @@ void scan_stop__settings(void)
 	}
 	value = check_param(value,30000,3000000);
 	radioconfig.rxstopfreq = value;
-	writeconfig();
+	//writeconfig();
 	display_scanner_menu();
 }
 
@@ -354,7 +365,7 @@ void scan_step_settings(void)
 	}
 	value = check_param(value,1,1000000);
 	radioconfig.rxstep = value;
-	writeconfig();
+	//writeconfig();
 	display_scanner_menu();
 }
 
@@ -372,7 +383,7 @@ void scan_time_settings(void)
 	}
 	value = check_param(value,1,60000);
 	radioconfig.rxinterval = value;
-	writeconfig();
+	//writeconfig();
 	display_scanner_menu();
 }
 
@@ -390,7 +401,7 @@ void scan_rssi_settings(void)
 	}
 	value = check_param(value,-127,-10);
 	radioconfig.rssitr = value;
-	writeconfig();
+	//writeconfig();
 	display_scanner_menu();
 }
 
@@ -458,7 +469,7 @@ void jam_start_settings(void)
 	}
 	value = check_param(value,30000,3000000);
 	radioconfig.txstartfreq = value;
-	writeconfig();
+	//writeconfig();
 	display_jammer_menu();
 }
 
@@ -476,7 +487,7 @@ void jam_stop__settings(void)
 	}
 	value = check_param(value,30000,3000000);
 	radioconfig.txstopfreq = value;
-	writeconfig();
+	//writeconfig();
 	display_jammer_menu();
 }
 
@@ -494,7 +505,7 @@ void jam_step_settings(void)
 	}
 	value = check_param(value,1,1000000);
 	radioconfig.txstep = value;
-	writeconfig();
+	//writeconfig();
 	display_jammer_menu();
 }
 
@@ -512,7 +523,7 @@ void jam_time_settings(void)
 	}
 	value = check_param(value,1,60000);
 	radioconfig.txinterval = value;
-	writeconfig();
+	//writeconfig();
 	display_jammer_menu();
 }
 
@@ -530,7 +541,7 @@ void jam_mod_settings(void)
 	}
 	value = check_param(value,0,2);
 	radioconfig.txmodulation = value;
-	writeconfig();
+	//writeconfig();
 	display_jammer_menu();
 }
 
@@ -538,7 +549,10 @@ void jam_mod_settings(void)
 void display_add_menu(void)
 {
 	SSD1306_Clear(0);
-	GUI_ShowString(0,16,"Additional",16,1);
+	GUI_ShowString(0,0,"1 Own ID",8,1);
+	GUI_ShowString(0,8,"2 Pair ID",8,1);
+	GUI_ShowString(0,16,"3 Packet count",8,1);
+	GUI_ShowString(0,24,"4 Sending interval",8,1);
 }
 
 void add_settings(void)
@@ -546,17 +560,109 @@ void add_settings(void)
 	display_add_menu();
 	while(1)
 	{
-		if (Keypad_GetKey() == '#') 
+		key = Keypad_GetKey();
+		if (key == '#') 
 		{
 			display_main_menu();
 			break;
 		}
-//		switch(key)
-//		{
-//			
-//		}
+		switch(key)
+		{
+			case '1':
+			add_own_id_settings();
+			break;
+			
+			case '2':
+			add_pair_id_settings();
+			break;
+			
+			case '3':
+			add_pkt_cnt_settings();
+			break;
+			
+			case '4':
+			add_interval_settings();
+			break;
+			
+			default:
+			break;
+		}
 	}
 }
+
+void add_own_id_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Own ID",16,1);
+	NumberInput_Start(radioconfig.id);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	if(value < 0) value = 0;
+	radioconfig.id = value;
+	//writeconfig();
+	display_add_menu();
+}
+
+void add_pair_id_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Pair ID",16,1);
+	NumberInput_Start(radioconfig.pair_id);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	if(value < 0) value = 0;
+	if(value == radioconfig.id) value = radioconfig.id + 1;
+	radioconfig.pair_id = value;
+	//writeconfig();
+	display_add_menu();
+}
+
+void add_pkt_cnt_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Packet count",16,1);
+	NumberInput_Start(radioconfig.pkt_count);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	if(value < 1) value = 1;
+	radioconfig.pkt_count = value;
+	//writeconfig();
+	display_add_menu();
+}
+
+void add_interval_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"Sending interval",16,1);
+	NumberInput_Start(radioconfig.txsendinterval);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	if(value < 100) value = 100;
+	radioconfig.txsendinterval = value;
+	//writeconfig();
+	display_add_menu();
+}
+
 
 
 
