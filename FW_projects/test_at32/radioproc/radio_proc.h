@@ -42,6 +42,7 @@ extern bool master;
 extern uint32_t inter_packet_delay;
 extern volatile uint32_t pkt_timecnt;
 extern volatile bool tx_request;
+extern volatile bool ack_request;
 extern bool packet_received;
 extern bool crc_error;
 extern bool packet_sent;
@@ -52,9 +53,6 @@ extern volatile uint8_t workmode;
 extern volatile bool sweepflag;
 extern volatile uint32_t sweepcnt;
 extern uint32_t sweeptime;
-
-extern uint32_t master_id;
-extern uint32_t slave_id;
 
 extern uint8_t opmode;
 extern uint8_t prevopmode;

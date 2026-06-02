@@ -431,7 +431,7 @@ void cli_sendburst(int argc, char **argv)
   txpacketcount = ciGetUnsigned(argv[1]);
   if(txpacketcount == 0) txpacketcount = 1;
   inter_packet_delay = ciGetUnsigned(argv[2]);
-  slave_id = ciGetUnsigned(argv[3]);
+  radioconfig.pair_id = ciGetUnsigned(argv[3]);
   if(inter_packet_delay < 100) inter_packet_delay = 100;
   radio_startburst();
   printf("START_TX: %d,%d\r\n",txpacketcount,inter_packet_delay);

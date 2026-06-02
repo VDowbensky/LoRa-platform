@@ -51,7 +51,7 @@ void run_lunarcore(void)
     if(app_connected) app_proc();
     else check_serial_connect();
     feed_watchdog();
-    ui_proc(); //keyboard, display, LES's
+    ui_proc(); //keyboard, display, LED's
     
     // Second-based periodic tasks
   
