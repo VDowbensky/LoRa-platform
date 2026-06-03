@@ -153,14 +153,14 @@ lr11xx_status_t LR112x_set_mod_params(uint16_t bw_khz,uint8_t sf,uint8_t cr,uint
 lr11xx_status_t LR112x_set_packet_params(uint8_t sync,uint16_t prelen,uint8_t paylen,uint8_t header,uint8_t crc,uint8_t invertiq)
 {
 	lr11xx_radio_pkt_params_lora_t pktparams;
-	pktparams.preamble_len_in_symb = radioconfig.prelen;
-	pktparams.pld_len_in_bytes = radioconfig.paylen;
-	pktparams.header_type = (lr11xx_radio_lora_pkt_len_modes_t)radioconfig.header;
-	pktparams.crc = (lr11xx_radio_lora_crc_t)radioconfig.crc;
-	pktparams.iq = (lr11xx_radio_lora_iq_t)radioconfig.invertiq;
+	pktparams.preamble_len_in_symb = prelen;
+	pktparams.pld_len_in_bytes = paylen;
+	pktparams.header_type = (lr11xx_radio_lora_pkt_len_modes_t)header;
+	pktparams.crc = (lr11xx_radio_lora_crc_t)crc;
+	pktparams.iq = (lr11xx_radio_lora_iq_t)invertiq;
 	lr11xx_status_t err = lr11xx_radio_set_lora_pkt_params(NULL,&pktparams);
 	if(err != LR11XX_STATUS_OK) return (int8_t)err;
-	return lr11xx_radio_set_lora_sync_word(NULL,radioconfig.sync & 0xff);
+	return lr11xx_radio_set_lora_sync_word(NULL,sync);
 }
 
 

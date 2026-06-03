@@ -12,7 +12,8 @@ int8_t PAN3029_init(void)
 	//PAN_SetChipMode(CHIPMODE_MODE0);
 	//PAN_SetChipMode(CHIPMODE_MODE1);       /* Set the chip mode to MODE1 */
 	//enable interrupts
-	PAN_SetPageRegBits(0,0x58,PAN_IRQ_TX_DONE | PAN_IRQ_RX_DONE | PAN_IRQ_CRC_ERR);
+	//PAN_SetPageRegBits(0,0x58,PAN_IRQ_TX_DONE | PAN_IRQ_RX_DONE | PAN_IRQ_CRC_ERR);
+	PAN_SetPageRegBits(0,0x58,PAN_IRQ_TX_DONE | PAN_IRQ_RX_DONE);
 	PAN_setopmode(RADIO_OPMODE_RX);
 	return RADIO_OK;
 }

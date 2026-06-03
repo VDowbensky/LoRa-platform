@@ -11,9 +11,10 @@ int8_t SX127x_init(void)
 	SX127x_setopmode(OPMODE_SLEEP);
 	SX127x_write_reg(REG_OPMODE,OPMODE_LORA);
 	//maybe small delay
-	delay_ms(1000);
+	delay_ms(10);
 	SX127x_setopmode(RADIO_OPMODE_STBYRC);
-	delay_ms(1000);
+	printf("");
+	delay_ms(10);
 	SX127x_set_rf_freq(radioconfig.freq,true);
 	//set parameters
 	SX127x_set_tx_params(radioconfig.txpower,PARAMP_10);

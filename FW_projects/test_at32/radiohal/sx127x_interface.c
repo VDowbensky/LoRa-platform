@@ -7,9 +7,9 @@ uint8_t SX127x_spi_transfer(uint8_t b);
 void SX127x_reset(void)
 {
 	gpio_bits_reset(RF_RST_GPIO_PORT,RF_RST_PIN);
-	delay_us(10);
+	delay_ms(1);
 	gpio_bits_set(RF_RST_GPIO_PORT,RF_RST_PIN);
-	delay_us(20);
+	delay_ms(10);
 }
 
 
@@ -33,7 +33,7 @@ void SX127x_write_regs(uint8_t reg,uint8_t *buf,uint8_t len)
 {
 	uint8_t i;
 	
-	SX127x_deselect();
+	SX127x_select();
 	SX127x_spi_transfer(reg & ~0x80);
 	for(i = 0; i < len; i++) buf[i] = SX127x_spi_transfer(0);
 	SX127x_deselect();

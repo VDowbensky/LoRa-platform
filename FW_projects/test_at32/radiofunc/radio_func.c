@@ -600,6 +600,7 @@ void radio_irq_handler(void)
 		
     case 1121:
 		LR112X_irq_handler();
+		break;
 		
 		case 2021:
 		LR20xx_irq_handler();

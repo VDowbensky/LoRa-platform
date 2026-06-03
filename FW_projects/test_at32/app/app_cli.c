@@ -399,6 +399,8 @@ void cli_setpacketparams(int argc, char **argv)
 	pre = ciGetUnsigned(argv[2]) & 0xffff;
 	pay = ciGetUnsigned(argv[3]);
 	head = ciGetUnsigned(argv[4]);
+	crc = ciGetUnsigned(argv[5]);
+	inviq = ciGetUnsigned(argv[6]);
 	check_param(head,0,1);
 	check_param(crc,0,1);
 	check_param(inviq,0,1);

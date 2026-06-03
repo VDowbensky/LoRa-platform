@@ -353,9 +353,9 @@ void cli_setpacketparams(int argc, char **argv)
 	head = ciGetUnsigned(argv[4]);
 	if(head > 1) head = 1;
 	crc = ciGetUnsigned(argv[5]);
-	if(crc > 1) head = 1;
+	if(crc > 1) crc = 1;
 	inviq = ciGetUnsigned(argv[6]);
-	if(inviq > 1) head = 1;
+	if(inviq > 1) inviq = 1;
 	int8_t err = radio_setpktparams(sync,pre,pay,head,crc,inviq);
 	printf("SET_PACKETPARAMS: ");
 	if(err == RADIO_OK) 
