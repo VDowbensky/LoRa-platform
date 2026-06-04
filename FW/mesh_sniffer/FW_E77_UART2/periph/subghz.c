@@ -117,6 +117,10 @@ void subghz_rfsw_rx(void)
 
 void subghz_rfsw_tx(void)
 {
-  LL_GPIO_SetOutputPin(RFSW_TX_PORT, RFSW_TX_PIN);
+	LL_GPIO_SetOutputPin(RFSW_TX_PORT, RFSW_TX_PIN);
+#if E77M915M30
+	LL_GPIO_SetOutputPin(RFSW_RX_PORT, RFSW_RX_PIN); 
+#else	
   LL_GPIO_ResetOutputPin(RFSW_RX_PORT, RFSW_RX_PIN); 
+#endif
 }

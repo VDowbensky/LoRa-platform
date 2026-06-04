@@ -79,6 +79,8 @@
 #define RFSW_TX_PORT				GPIOA //TX
 #define RFSW_TX_PIN					LL_GPIO_PIN_6
 
+#define E77M915M30					1
+
 //AUX RF power
 //#define EXTRF_POWER_PORT		GPIOA
 //#define EXTRF_POWER_PIN			LL_GPIO_PIN_0
