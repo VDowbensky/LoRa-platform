@@ -189,6 +189,7 @@ void kiss_frame_new(KissFrame* frame, uint8_t command)
 {
   frame->command = command;
   vec_u8_max_data_new(&frame->data);
+  //vec->len = 0;
 }
 
 /* KissFrame::data_frame */
