@@ -217,6 +217,15 @@ void SysTick_Handler(void)
      }
    }
 	}
+	if(sweeptx || sweeprx)
+	{
+		sweepcnt--;
+		if(sweepcnt == 0) 
+		{
+			sweepcnt = sweeptime;
+			sweepflag = true;
+		}
+	}
 }
 
 /******************************************************************************/
