@@ -198,7 +198,7 @@ void prepareAckPacket(void)
 	{
 		case PKT_MESHTASTIC:
 		{
-			txmessage.destination_id = radioconfig.pair_id;
+			txmessage.destination_id = 0xffffffff;
 			txmessage.sender_id = radioconfig.id;
 			txmessage.packet_id = rxpacketnumber;
 			txmessage.relay_node = 0xff;

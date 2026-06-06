@@ -36,6 +36,7 @@ void add_own_id_settings(void);
 void add_pair_id_settings(void);
 void add_pkt_cnt_settings(void);
 void add_interval_settings(void);
+void add_power_settings(void);
 
 char key;
 
@@ -553,6 +554,7 @@ void display_add_menu(void)
 	GUI_ShowString(0,8,"2 Pair ID",8,1);
 	GUI_ShowString(0,16,"3 Packet count",8,1);
 	GUI_ShowString(0,24,"4 Sending interval",8,1);
+	GUI_ShowString(0,32,"5 TX power",8,1);
 }
 
 void add_settings(void)
@@ -582,6 +584,10 @@ void add_settings(void)
 			
 			case '4':
 			add_interval_settings();
+			break;
+			
+			case '5':
+			add_power_settings();
 			break;
 			
 			default:
@@ -659,6 +665,52 @@ void add_interval_settings(void)
 	}
 	if(value < 100) value = 100;
 	radioconfig.txsendinterval = value;
+	//writeconfig();
+	display_add_menu();
+}
+
+void add_power_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"TX power, dBm",16,1);
+	NumberInput_Start(radioconfig.txpower);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	switch(radioconfig.chip)
+	{
+		case 1276:
+		value = check_param(value,2,17);
+		break;
+		
+		case 1262:
+		value = check_param(value,-9,22);
+		break;
+		
+		case 1280:
+		value = check_param(value,-18,13);
+		break;
+		
+		case 1121:
+		value = check_param(value,-18,22);
+		break;
+		
+		case 2021:
+		value = check_param(value,-19,22);
+		break;
+		
+		case 3029:
+		value = check_param(value,0,20);
+		break;
+		
+		default:
+		break;
+	}
+	radioconfig.txpower = value;
 	//writeconfig();
 	display_add_menu();
 }
