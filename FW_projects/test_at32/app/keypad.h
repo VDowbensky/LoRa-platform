@@ -43,5 +43,6 @@ void Keypad_Init(void);
 void Keypad_Scan_ISR(void);
 char Keypad_GetKey(void);
 
+extern bool PttFlag;
 
 #endif

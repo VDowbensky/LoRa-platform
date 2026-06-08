@@ -22,6 +22,8 @@ static uint8_t current_row = 0;
 static uint8_t debounce_cnt[4][4];
 static uint8_t stable_state[4][4];
 
+bool PttFlag = false;
+
 /* ========================================================= */
 
 static void Rows_AllHigh(void)
@@ -107,6 +109,11 @@ void Keypad_Scan_ISR(void)
 	}
 	current_row++;
 	if(current_row >= 4) current_row = 0;
+	
+	if(!gpio_input_data_bit_read(PTT_GPIO_PORT, PTT_PIN))
+	{
+		PttFlag = 1;
+	}
 }
 
 /* ========================================================= */

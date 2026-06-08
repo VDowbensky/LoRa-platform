@@ -200,7 +200,7 @@ void prepareAckPacket(void)
 		{
 			txmessage.destination_id = 0xffffffff;
 			txmessage.sender_id = radioconfig.id;
-			txmessage.packet_id = rxpacketnumber;
+			txmessage.packet_id = rxmessage.packet_id;
 			txmessage.relay_node = 0xff;
 			txmessage.next_hop = 1;
 			txmessage.channel_hash = 0x62;
