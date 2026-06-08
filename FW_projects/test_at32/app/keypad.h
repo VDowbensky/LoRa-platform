@@ -34,7 +34,9 @@ typedef enum
     KEY_STAR,
     KEY_0,
     KEY_HASH,
-    KEY_D
+    KEY_D,
+		
+		KEY_PTT
 
 } keypad_key_t;
 

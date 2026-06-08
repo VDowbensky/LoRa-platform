@@ -460,7 +460,7 @@ void cli_txstream(int argc, char **argv)
 		{
 			case 0:
 			default:
-			workmode = WORK_MODE_SNIFFER;
+			workmode = WORK_MODE_PACKET;
 			printf("OFF\r\n");
 			break;
 
@@ -633,7 +633,7 @@ void cli_getworkmode(int argc, char **argv)
 		printf("IDLE");
 		break;
 		
-		case WORK_MODE_SNIFFER:
+		case WORK_MODE_PACKET:
 		printf("SNIFFER");
 		break;
 		
@@ -693,7 +693,7 @@ void cli_scan(int argc, char **argv)
 		if(enable == 0) 
 		{
 			rxled_off();
-			workmode = WORK_MODE_SNIFFER;
+			workmode = WORK_MODE_PACKET;
 			printf("STOP\r\n");
 		}
 		else 
@@ -742,7 +742,7 @@ void cli_jam(int argc, char **argv)
 		if(enable == 0) 
 		{
 			txled_off();
-			workmode = WORK_MODE_SNIFFER;
+			workmode = WORK_MODE_PACKET;
 			printf("STOP\r\n");
 		}
 		else 

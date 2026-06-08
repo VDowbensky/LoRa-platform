@@ -155,7 +155,7 @@ int8_t radio_init(void)
 		break;
 	}
 	if(err != RADIO_OK) return err;
-	workmode = WORK_MODE_SNIFFER;
+	workmode = WORK_MODE_PACKET;
 	radio_rx();
 	return RADIO_OK;
 }

@@ -5,22 +5,23 @@
 
 #define DEBOUNCE_TICKS 20
 
-static const char KeyCodes[] = {0,'1','2','3','A','4','5','6','B','7','8','9','C','*','0','#','D'};
+static const char KeyCodes[] = {0,'1','2','3','A','4','5','6','B','7','8','9','C','*','0','#','D','@'}; //@ - PTT
 
-static const keypad_key_t keymap[4][4] =
+static const keypad_key_t keymap[5][4] =
 {
 	{KEY_1, KEY_2, KEY_3, KEY_A},
 	{KEY_4, KEY_5, KEY_6, KEY_B},
 	{KEY_7, KEY_8, KEY_9, KEY_C},
-	{KEY_STAR, KEY_0, KEY_HASH, KEY_D}
+	{KEY_STAR, KEY_0, KEY_HASH, KEY_D},
+	{KEY_PTT, KEY_PTT, KEY_PTT, KEY_PTT},
 };
 
 static volatile keypad_key_t key_ready = KEY_NONE;
 
 static uint8_t current_row = 0;
 
-static uint8_t debounce_cnt[4][4];
-static uint8_t stable_state[4][4];
+static uint8_t debounce_cnt[5][4];
+static uint8_t stable_state[5][4];
 
 /* ========================================================= */
 
@@ -74,6 +75,7 @@ static uint8_t Read_Column(uint8_t col)
 		case 1: return !gpio_input_data_bit_read(C1_GPIO_PORT, C1_PIN);
 		case 2: return !gpio_input_data_bit_read(C2_GPIO_PORT, C2_PIN);
 		case 3: return !gpio_input_data_bit_read(C3_GPIO_PORT, C3_PIN);
+		case 4: return !gpio_input_data_bit_read(PTT_GPIO_PORT, PTT_PIN);
 	}
 	return 0;
 }
@@ -90,7 +92,7 @@ void Keypad_Scan_ISR(void)
 		case 2:	gpio_bits_reset(R2_GPIO_PORT, R2_PIN); break;
 		case 3:	gpio_bits_reset(R3_GPIO_PORT, R3_PIN); break;
 	}
-	for(uint8_t col = 0; col < 4; col++)
+	for(uint8_t col = 0; col < 5; col++)
 	{
 		uint8_t pressed = Read_Column(col);
 		if(pressed != stable_state[current_row][col])

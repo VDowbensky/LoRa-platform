@@ -49,7 +49,7 @@ void radio_proc(void)
 //			break;
 //		}
 //sniffer-sender mode
-		case WORK_MODE_SNIFFER:
+		case WORK_MODE_PACKET:
 		{
 			if(tx_request)
 			{
@@ -150,6 +150,11 @@ void process_rx_packet(void)
 			if(!master && rxmessage.destination_id == radioconfig.id) ack_request = true;
 			break;
 			
+			case PKT_TESTING:
+			process_test_packet();
+			if(!master && rxmessage.destination_id == radioconfig.id) ack_request = true;
+			break;
+			
 			default:
 			break;
 		}
@@ -186,6 +191,10 @@ void prepareTxPacket(void)
 			printf("TX: %d\r\n",txpacketnumber);
 			break;
 		}
+		
+		case PKT_TESTING:
+		break;
+		
 		default:
 		break;
 	}
@@ -211,6 +220,10 @@ void prepareAckPacket(void)
 			printf("ACK: %d\r\n",rxpacketnumber);
 			break;
 		}
+		
+		case PKT_TESTING:
+		break;
+		
 		default:
 		break;
 	}

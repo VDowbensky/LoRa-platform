@@ -181,13 +181,13 @@ int main(void)
 			if(workmode == WORK_MODE_JAMMER) display_jam_freq(currfreq);
 		}
 		char key = Keypad_GetKey();
-//		if(key != KEY_NONE) printf("%c\r\n",key);
+		//if(key != KEY_NONE) printf("%c\r\n",key);
 		//if(key == '#') menu_proc();
 		switch(key)
 		{
 			case '#':
 			{
-				if(workmode == WORK_MODE_SNIFFER)
+				if(workmode == WORK_MODE_PACKET)
 				{
 					menu_proc();
 				}
@@ -195,8 +195,9 @@ int main(void)
 			break;
 			
 			case 'A': //send one packet
+			case '@':
 			{
-				if(workmode == WORK_MODE_SNIFFER)
+				if(workmode == WORK_MODE_PACKET)
 				{
 					tx_request = true;
 				}
@@ -204,8 +205,9 @@ int main(void)
 			}
 			
 			case 'B': //send burst
+			//case '@':
 			{
-				if(workmode == WORK_MODE_SNIFFER)
+				if(workmode == WORK_MODE_PACKET)
 				{
 					txpacketcount = radioconfig.pkt_count;
 					inter_packet_delay = radioconfig.txsendinterval;
@@ -218,7 +220,7 @@ int main(void)
 			case 'C': //scanner
 			{
 				int8_t err;
-				if(workmode == WORK_MODE_SNIFFER)
+				if(workmode == WORK_MODE_PACKET)
 				{
 					err = radio_rxscan(radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,radioconfig.rssitr);
 					if(err == RADIO_OK)
@@ -234,7 +236,7 @@ int main(void)
 			case 'D': //jammer
 			{
 				int8_t err;
-				if(workmode == WORK_MODE_SNIFFER)
+				if(workmode == WORK_MODE_PACKET)
 				{
 					err = radio_txsweep(radioconfig.txstartfreq,radioconfig.txstopfreq,radioconfig.txstep,radioconfig.txinterval,radioconfig.txmodulation);
 					if(err == RADIO_OK)
@@ -255,7 +257,7 @@ int main(void)
 					if(err == RADIO_OK)
 					{
 						rxled_off();
-						workmode = WORK_MODE_SNIFFER;
+						workmode = WORK_MODE_PACKET;
 						//printf("STOP\r\n");
 					}
 				}
@@ -265,11 +267,11 @@ int main(void)
 					if(err == RADIO_OK)
 					{
 						rxled_off();
-						workmode = WORK_MODE_SNIFFER;
+						workmode = WORK_MODE_PACKET;
 						//printf("STOP\r\n");
 					}
 				}
-				if(workmode == WORK_MODE_SNIFFER)	
+				if(workmode == WORK_MODE_PACKET)	
 				{
 					if(master)
 					{
