@@ -10,7 +10,7 @@
       <TargetName>M665FW_AT32</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6230000::V6.23::ARMCLANG</pCCUsed>
+      <pCCUsed>6240000::V6.24::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -677,6 +677,11 @@
               <FileName>num_input.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\num_input.c</FilePath>
+            </File>
+            <File>
+              <FileName>test_packet.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\test_packet.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -3,9 +3,10 @@
 
 #include "radio_func.h"
 #include "mesh_packet.h"
+#include "test_packet.h"
 
 #define WORK_MODE_IDLE								0
-#define WORK_MODE_SNIFFER							1
+#define WORK_MODE_PACKET							1
 #define WORK_MODE_SCANNER							2
 #define WORK_MODE_JAMMER							3
 #define WORK_MODE_TEST								4
