@@ -284,12 +284,6 @@ int main(void)
 			default:
 			break;
 		}
-		
-		if(PttFlag)
-		{
-			PttFlag = false;
-			if(workmode == WORK_MODE_SNIFFER) tx_request = true;
-		}
     /* add user code end 3 */
   }
 }

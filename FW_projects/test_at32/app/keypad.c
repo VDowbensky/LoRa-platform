@@ -111,11 +111,6 @@ void Keypad_Scan_ISR(void)
 	}
 	current_row++;
 	if(current_row >= 4) current_row = 0;
-	
-	if(!gpio_input_data_bit_read(PTT_GPIO_PORT, PTT_PIN))
-	{
-		PttFlag = 1;
-	}
 }
 
 /* ========================================================= */
