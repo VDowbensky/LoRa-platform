@@ -359,8 +359,8 @@ int8_t radio_sendpacket(uint8_t *buf)
 		break;
 		
 		case 2021:
-		//err = (int8_t)lr20xx_radio_fifo_clear_tx(NULL);
-		//if(err != RADIO_OK) return err;
+		err = (int8_t)lr20xx_radio_fifo_clear_tx(NULL);
+		if(err != RADIO_OK) return err;
 		err = (int8_t)lr20xx_radio_fifo_write_tx(NULL,buf,txlen);
 		if(err != RADIO_OK) return err;
 		break;
