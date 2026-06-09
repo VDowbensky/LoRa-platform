@@ -152,7 +152,7 @@ void process_rx_packet(void)
 			
 			case PKT_TESTING:
 			process_test_packet();
-			if(!master && rxmessage.destination_id == radioconfig.id) ack_request = true;
+			if(!master && test_rxpacket.destination_id == radioconfig.id) ack_request = true;
 			break;
 			
 			default:
@@ -193,6 +193,9 @@ void prepareTxPacket(void)
 		}
 		
 		case PKT_TESTING:
+		prepare_test_request();
+		memcpy((void*)radio_txbuffer,(void*)&test_txpacket,txlen);
+		printf("TX: %d\r\n",txpacketnumber);
 		break;
 		
 		default:
@@ -222,6 +225,9 @@ void prepareAckPacket(void)
 		}
 		
 		case PKT_TESTING:
+		prepare_test_ack();
+		memcpy((void*)radio_txbuffer,(void*)&test_txpacket,txlen);
+		printf("ACK: %d\r\n",rxpacketnumber);
 		break;
 		
 		default:

@@ -20,6 +20,8 @@ void cli_info(int argc, char **argv);
 void cli_getver(int argc, char **argv);
 void cli_getdevid(int argc, char **argv);
 void cli_setdevid(int argc, char **argv);
+void cli_getpairid(int argc, char **argv);
+void cli_setpairid(int argc, char **argv);
 //RF settings
 
 void cli_getfreq(int argc, char **argv);
@@ -87,7 +89,8 @@ void cli_jam(int argc, char **argv);
  
 void cli_getworkmode(int argc, char **argv);
 //void cli_setpaconfig(int argc, char **argv); //technological
-
+void cli_getpacketformat(int argc, char **argv);
+void cli_setpacketformat(int argc, char **argv);
 
 CommandEntry_t commands[] =
   {
@@ -97,6 +100,8 @@ CommandEntry_t commands[] =
     COMMAND_ENTRY("GET_VERSION", "", cli_getver, "Get HW/FW version"),
     COMMAND_ENTRY("GET_DEVID", "", cli_getdevid, "Get device ID"),
     COMMAND_ENTRY("SET_DEVID", "w", cli_setdevid, "Get device ID"),
+		COMMAND_ENTRY("GET_PAIRID", "", cli_getpairid, "Get pair ID"),
+    COMMAND_ENTRY("SET_PAIRID", "w", cli_setpairid, "Get pair ID"),
     //RF settings
     COMMAND_ENTRY("GET_FREQ", "", cli_getfreq, "Get frequency settings"),
     COMMAND_ENTRY("SET_FREQ", "w", cli_setfreq, "Set frequency settings"),
@@ -152,6 +157,8 @@ CommandEntry_t commands[] =
 		COMMAND_ENTRY("JAM", "w", cli_jam, ""),
 		
 		COMMAND_ENTRY("GET_WORKMODE", "", cli_getworkmode, ""),
+		COMMAND_ENTRY("GET_PKTFORMAT", "", cli_getpacketformat, ""),
+		COMMAND_ENTRY("SET_PKTFORMAT", "w", cli_setpacketformat, ""),
 		
 		COMMAND_ENTRY(NULL, NULL, NULL, NULL)
   };
@@ -205,14 +212,26 @@ void cli_getver(int argc, char **argv)
 
 void cli_getdevid(int argc, char **argv)
 {
-  printf("GET_DEVID: 0x%08X\r\n", radioconfig.id);
+  printf("GET_DEVID: %d\r\n", radioconfig.id);
 }
 
 void cli_setdevid(int argc, char **argv)
 {
   radioconfig.id = ciGetUnsigned(argv[1]);
   writeconfig();
-  printf("SET_DEVID: 0x%08X\r\n", radioconfig.id);
+  printf("SET_DEVID: %d\r\n", radioconfig.id);
+}
+
+void cli_getpairid(int argc, char **argv)
+{
+  printf("GET_PAIRID: %d\r\n", radioconfig.pair_id);
+}
+
+void cli_setpairid(int argc, char **argv)
+{
+  radioconfig.pair_id = ciGetUnsigned(argv[1]);
+  writeconfig();
+  printf("SET_PAIRID: %d\r\n", radioconfig.pair_id);
 }
 
 void cli_getfreq(int argc, char **argv)
@@ -656,6 +675,19 @@ void cli_getworkmode(int argc, char **argv)
 	printf("\r\n");
 }
 
+void cli_getpacketformat(int argc, char **argv)
+{
+	printf("GET_PKTFORMAT: %d\r\n",radioconfig.pktformat);
+}
+
+void cli_setpacketformat(int argc, char **argv)
+{
+	uint32_t fmt = ciGetUnsigned(argv[1]);
+	fmt = check_param(fmt,0,3);
+	radioconfig.pktformat = fmt;
+	printf("SET_PKTFORMAT: %d\r\n",radioconfig.pktformat);
+}
+
 void cli_getscanparams(int argc, char **argv)
 {
 	printf("GET_SCANPARAMS: START=%d,STOP=%d,STEP=%d,TIME=%d,RSSI=%.1f\r\n",radioconfig.rxstartfreq,radioconfig.rxstopfreq,radioconfig.rxstep,radioconfig.rxinterval,radioconfig.rssitr);
@@ -671,7 +703,7 @@ void cli_setscanparams(int argc, char **argv)
 	if(stop < (start+step)) stop = start+step;
 	if(rssi > -1.0) rssi = -1.0;
 	if(rssi < -127.5) rssi = -127.5;
-	check_param(time,10,100000);
+	time = check_param(time,10,100000);
 	radioconfig.rxstartfreq = start;
 	radioconfig.rxstopfreq = stop;
 	radioconfig.rxstep = step;
