@@ -195,7 +195,6 @@ void prepareTxPacket(void)
 		case PKT_TESTING:
 		prepare_test_request();
 		memcpy((void*)radio_txbuffer,(void*)&test_txpacket,txlen);
-		printf("TX: %d\r\n",txpacketnumber);
 		break;
 		
 		default:
