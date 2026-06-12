@@ -181,7 +181,7 @@ int main(void)
 			if(workmode == WORK_MODE_JAMMER) display_jam_freq(currfreq);
 		}
 		char key = Keypad_GetKey();
-		if(key != KEY_NONE) printf("%c\r\n",key);
+		//if(key != KEY_NONE) printf("%c\r\n",key);
 		//if(key == '#') menu_proc();
 		switch(key)
 		{
