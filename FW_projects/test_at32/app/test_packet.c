@@ -42,8 +42,12 @@ void process_test_packet(void)
 	}
 	else printf("RPCK: ");
   printf("%d,%.1f,%.1f,%.1f\r\n",test_rxpacket.packet_id,pktstatus.rssi_pkt,pktstatus.signal_rssi_pkt,pktstatus.snr_pkt);
-	printf("BACK: %.1f,%.1f,%.1f\r\n",test_rxpacket.rssi_received,test_rxpacket.signal_rssi_received,test_rxpacket.snr_received);
-  printf("Vbatt:%.2f\r\n",test_rxpacket.vbatt);
+	if(!crc_error)
+	{
+		printf("BACK: %.1f,%.1f,%.1f\r\n",test_rxpacket.rssi_received,test_rxpacket.signal_rssi_received,test_rxpacket.snr_received);
+		printf("Vbatt:%.2f\r\n",test_rxpacket.vbatt);
+	} 
+	else printf("Bad data\r\n");
 
 	#if OLED_ENABLED
 	SSD1306_Clear(0);
@@ -54,10 +58,21 @@ void process_test_packet(void)
 	GUI_ShowString(0,0,strbuffer,8,1);
 	sprintf(strbuffer,"REC:%.1f,%.1f,%.1f",pktstatus.rssi_pkt,pktstatus.signal_rssi_pkt,pktstatus.snr_pkt);
 	GUI_ShowString(0,8,strbuffer,8,1);
-	sprintf(strbuffer,"BCK:%.1f,%.1f,%.1f",test_rxpacket.rssi_received,test_rxpacket.signal_rssi_received,test_rxpacket.snr_received);
-	GUI_ShowString(0,16,strbuffer,8,1);
-	sprintf(strbuffer,"Voltage: %.2f",test_rxpacket.vbatt);
-	GUI_ShowString(0,24,strbuffer,8,1);
+	if(!crc_error)
+	{
+		sprintf(strbuffer,"BCK:%.1f,%.1f,%.1f",test_rxpacket.rssi_received,test_rxpacket.signal_rssi_received,test_rxpacket.snr_received);
+		GUI_ShowString(0,16,strbuffer,8,1);
+		sprintf(strbuffer,"Sender: %d",test_rxpacket.sender_id);
+		GUI_ShowString(0,24,strbuffer,8,1);
+		sprintf(strbuffer,"Packet: %d",test_rxpacket.packet_id);
+		GUI_ShowString(0,32,strbuffer,8,1);
+		sprintf(strbuffer,"Voltage: %.2f",test_rxpacket.vbatt);
+		GUI_ShowString(0,40,strbuffer,8,1);
+	}
+	else
+	{
+		GUI_ShowString(0,16,"Bad data",8,1);
+	}
 	
 //	sprintf(strbuffer,"DEST:0x%08X",rxmessage.destination_id);
 //	GUI_ShowString(0,24,strbuffer,8,1);

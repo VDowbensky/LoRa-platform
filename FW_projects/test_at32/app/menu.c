@@ -45,10 +45,14 @@ void display_main_screen(void)
 	SSD1306_Clear(0);
 	display_status();
 	sprintf(strbuffer,"Chip:%d",radioconfig.chip);
-	GUI_ShowString(0,16,strbuffer,16,1);
+	GUI_ShowString(0,8,strbuffer,8,1);
 	sprintf(strbuffer,"Freq:%d",radioconfig.freq/1000);
-	GUI_ShowString(0,32,strbuffer,16,1);
-	GUI_ShowString(0,48,"# - Settings",16,1);
+	GUI_ShowString(0,16,strbuffer,8,1);
+	GUI_ShowString(0,24,"A - Send one packet",8,1);
+	GUI_ShowString(0,32,"B - Send burst",8,1);
+	GUI_ShowString(0,40,"C - RX scan",8,1);
+	GUI_ShowString(0,48,"D - TX sweep",8,1);
+	GUI_ShowString(0,56,"# - Settings",8,1);
 }
 
 void menu_proc(void)

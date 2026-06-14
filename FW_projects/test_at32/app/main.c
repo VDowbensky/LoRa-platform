@@ -148,7 +148,7 @@ int main(void)
 	if(radioconfig.chip == 0xff) 
 	{
 		printf("Config missing. Init...\r\n");
-		if(radio_initconfig(1262,0) == RADIO_OK) 
+		if(radio_initconfig(1262,1) == RADIO_OK) 
 		{
 			writeconfig();
 			printf("Init config OK.\r\n");
@@ -160,8 +160,16 @@ int main(void)
 	delay_ms(100);
 	int8_t err = radio_init();
 	printf("Radio init: ");
-	if(err == RADIO_OK) printf("OK\r\n");
-	else printerror(err);
+	if(err == RADIO_OK) 
+	{
+		printf("OK\r\n");
+		GUI_ShowString(0,16,"Radio init OK.",16,1);
+	}
+	else 
+	{
+		printerror(err);
+		GUI_ShowString(0,16,"Radio init error.",16,1);
+	}
 	printf("Radio chip: %d\r\n",radioconfig.chip);
 	rxled_off();
 	//radio_rx();
