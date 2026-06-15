@@ -46,7 +46,7 @@ int __getchar(void);
 #endif
 
 #define RXBUFSIZE    		512 /**< Buffer size for RX */
-#define TXBUFSIZE				2048
+#define TXBUFSIZE				512
 
 int  RETARGET_ReadChar(void);
 int  RETARGET_WriteChar(char c);

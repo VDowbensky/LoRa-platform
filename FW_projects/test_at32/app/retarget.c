@@ -68,11 +68,6 @@ int RETARGET_ReadChar(void)
  * @return Transmitted character
  *****************************************************************************/
 
-//int _write(int file, char *ptr, int len) { 
-//    CDC_Send_DATA((uint8_t*) ptr, len); return len; 
-//}
-
-
 int RETARGET_WriteChar(char c)
 {
   if (initialized == false) RETARGET_Init();

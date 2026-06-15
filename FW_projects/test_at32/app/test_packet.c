@@ -20,7 +20,7 @@ void prepare_test_ack(void)
 {
 	test_txpacket.sender_id = radioconfig.id;
 	test_txpacket.destination_id = radioconfig.pair_id;
-	test_txpacket.packet_id = txpacketnumber;
+	test_txpacket.packet_id = rxpacketnumber;
 	test_txpacket.rssi_received = pktstatus.rssi_pkt;
 	test_txpacket.signal_rssi_received = pktstatus.signal_rssi_pkt;
 	test_txpacket.snr_received = pktstatus.snr_pkt;
@@ -46,6 +46,7 @@ void process_test_packet(void)
 	{
 		printf("BACK: %.1f,%.1f,%.1f\r\n",test_rxpacket.rssi_received,test_rxpacket.signal_rssi_received,test_rxpacket.snr_received);
 		printf("Vbatt:%.2f\r\n",test_rxpacket.vbatt);
+		rxpacketnumber = test_rxpacket.packet_id;
 	} 
 	else printf("Bad data\r\n");
 
@@ -73,19 +74,8 @@ void process_test_packet(void)
 	{
 		GUI_ShowString(0,16,"Bad data",8,1);
 	}
-	
-//	sprintf(strbuffer,"DEST:0x%08X",rxmessage.destination_id);
-//	GUI_ShowString(0,24,strbuffer,8,1);
-//	sprintf(strbuffer,"PKT:0x%08X",rxmessage.packet_id);
-//	GUI_ShowString(0,32,strbuffer,8,1);
-//	sprintf(strbuffer,"S:%d,L:%d,H:0x%02X,R:0x%02X",hop_start,hop_limit,rxmessage.channel_hash,rxmessage.relay_node);
-//	GUI_ShowString(0,40,strbuffer,8,1);
-//	//sprintf(strbuffer,"Hash:0x%02X,Relay:0x%02X",rxmessage.channel_hash,rxmessage.relay_node);
-//	sprintf(strbuffer,"WantAck:%d,MQTT:%d",want_ack,mqtt);
-//	GUI_ShowString(0,48,strbuffer,8,1);
-//	sprintf(strbuffer,"Payload: %d",rxlen - 16);
-//	GUI_ShowString(0,56,strbuffer,8,1);
 #endif
+	if(!master && (test_rxpacket.destination_id == radioconfig.id) && !crc_error) ack_request = true;
 	crc_error = false;
 }
 

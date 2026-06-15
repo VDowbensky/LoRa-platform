@@ -559,7 +559,6 @@ void display_add_menu(void)
 	GUI_ShowString(0,16,"3 Packet count",8,1);
 	GUI_ShowString(0,24,"4 Sending interval",8,1);
 	GUI_ShowString(0,32,"5 TX power",8,1);
-	GUI_ShowString(0,40,"6 Packet format",8,1);
 }
 
 void add_settings(void)
@@ -594,9 +593,6 @@ void add_settings(void)
 			case '5':
 			add_power_settings();
 			break;
-			
-			case '6':
-			break;	
 			
 			default:
 			break;

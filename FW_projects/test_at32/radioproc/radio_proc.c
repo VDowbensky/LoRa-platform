@@ -152,7 +152,7 @@ void process_rx_packet(void)
 			
 			case PKT_TESTING:
 			process_test_packet();
-			if(!master && test_rxpacket.destination_id == radioconfig.id) ack_request = true;
+			//if(!master && test_rxpacket.destination_id == radioconfig.id) ack_request = true;
 			break;
 			
 			default:

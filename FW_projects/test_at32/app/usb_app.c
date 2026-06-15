@@ -69,7 +69,7 @@ uint16_t ov_cnt = 0;
 /* add user code end function prototypes */
 
 usbd_core_type usb_core_dev;
-uint32_t usbd_app_buffer_fs1[1024];
+uint32_t usbd_app_buffer_fs1[256]; //[1024];
 
 
 
