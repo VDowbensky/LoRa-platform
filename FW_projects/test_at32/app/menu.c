@@ -194,6 +194,7 @@ void bw_settings(void)
 	}
 	value = check_param(value,7,1600);
 	radioconfig.bw = value;
+	radio_setmodparams(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
 	//writeconfig();
 	display_sniffer_menu();
 }
@@ -212,6 +213,7 @@ void sf_settings(void)
 	}
 	value = check_param(value,5,12);
 	radioconfig.sf = value;
+	radio_setmodparams(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
 	//writeconfig();
 	display_sniffer_menu();
 }
@@ -230,6 +232,7 @@ void cr_settings(void)
 	}
 	value = check_param(value,0,4);
 	radioconfig.cr = value;
+	radio_setmodparams(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
 	//writeconfig();
 	display_sniffer_menu();
 }
@@ -248,6 +251,8 @@ void ldro_settings(void)
 	}
 	value = check_param(value,0,1);
 	radioconfig.ldropt = value;
+	//uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
+	radio_setmodparams(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
 	//writeconfig();
 	display_sniffer_menu();
 }
@@ -715,6 +720,7 @@ void add_power_settings(void)
 		break;
 	}
 	radioconfig.txpower = value;
+	radio_set_power(radioconfig.txpower);
 	//writeconfig();
 	display_add_menu();
 }

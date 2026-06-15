@@ -13,7 +13,7 @@ void prepare_test_request(void)
 	test_txpacket.vbatt = Vbatt;
 	txlen = 36;
 	memcpy((void*)radio_txbuffer,(void*)&test_txpacket,txlen);
-	printf("TX: %d\r\n",txpacketnumber);
+	//printf("TX: %d\r\n",txpacketnumber);
 }
 
 void prepare_test_ack(void)
@@ -27,7 +27,7 @@ void prepare_test_ack(void)
 	test_txpacket.vbatt = Vbatt;
 	txlen = 36;
 	memcpy((void*)radio_txbuffer,(void*)&test_txpacket,txlen);
-	printf("TX: %d\r\n",txpacketnumber);
+	//printf("TX: %d\r\n",rxpacketnumber);
 }
 
 void process_test_packet(void)
