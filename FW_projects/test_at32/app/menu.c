@@ -595,6 +595,9 @@ void add_settings(void)
 			add_power_settings();
 			break;
 			
+			case '6':
+			break;	
+			
 			default:
 			break;
 		}
