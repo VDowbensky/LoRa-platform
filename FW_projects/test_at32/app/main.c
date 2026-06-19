@@ -188,6 +188,19 @@ int main(void)
 			display_status();
 			if(workmode == WORK_MODE_JAMMER) display_jam_freq(currfreq);
 		}
+		if(MinFlag)
+		{
+			MinFlag = false;
+			if(workmode == WORK_MODE_PACKET) 
+			{
+				txled_on();
+				rxled_on();
+				radio_init(); //restart RX
+				txled_off();
+				rxled_off();
+				printf("Restart radio.\r\n");
+			}
+		}
 		char key = Keypad_GetKey();
 		//if(key != KEY_NONE) printf("%c\r\n",key);
 		//if(key == '#') menu_proc();

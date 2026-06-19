@@ -39,6 +39,7 @@ void bsp_timing_irq(void);
 
 extern volatile uint32_t adc_ticks;
 extern volatile bool SecFlag;
+extern volatile bool MinFlag;
 extern volatile bool usb_flag;
 
 #endif

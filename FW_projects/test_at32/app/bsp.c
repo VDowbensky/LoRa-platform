@@ -1,8 +1,10 @@
 #include "bsp.h"
 
 volatile uint32_t 	ms_cnt = 0;
+volatile uint32_t 	s_cnt = 0;
 volatile uint32_t adc_ticks = VBAT_MEAS_TIME;
 volatile bool SecFlag = false;
+volatile bool MinFlag = false;
 volatile bool usb_flag = false;
 
 void radio_power_on(void)
@@ -99,6 +101,12 @@ void bsp_timing_irq(void)
 	{
 		ms_cnt = 0;
 		SecFlag = true;
+		s_cnt++;
+		if(s_cnt >= 60)
+		{
+			s_cnt = 0;
+			MinFlag = true; 
+		}
 	}
 }
 
