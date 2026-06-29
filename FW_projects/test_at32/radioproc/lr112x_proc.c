@@ -101,7 +101,7 @@ lr11xx_status_t LR112x_init(void)
 	err = lr11xx_system_calibrate_image(NULL,radioconfig.freq / 4000000, radioconfig.freq / 4000000 + 2); //must be rewritted
 	if(err != LR11XX_STATUS_OK) return err;
 	//calibrate RSSI
-	LR112X_RssiCal(radioconfig.freq);
+	//LR112X_RssiCal(radioconfig.freq);
 	
 	err = lr11xx_system_set_dio_irq_params(NULL,LR11XX_SYSTEM_IRQ_TX_DONE | LR11XX_SYSTEM_IRQ_RX_DONE | LR11XX_SYSTEM_IRQ_CRC_ERROR,LR11XX_SYSTEM_IRQ_NONE);
 	if(err != LR11XX_STATUS_OK) return err;
