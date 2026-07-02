@@ -3,9 +3,11 @@
 volatile uint32_t 	ms_cnt = 0;
 volatile uint32_t 	s_cnt = 0;
 volatile uint32_t adc_ticks = VBAT_MEAS_TIME;
+volatile uint32_t display_cnt = DISPLAY_OFF_DELAY;
 volatile bool SecFlag = false;
 volatile bool MinFlag = false;
 volatile bool usb_flag = false;
+volatile bool display_active = true;
 
 void radio_power_on(void)
 {
@@ -108,6 +110,24 @@ void bsp_timing_irq(void)
 			MinFlag = true; 
 		}
 	}
+	if(display_active && (workmode == WORK_MODE_PACKET))
+	{
+		display_cnt--;
+		if(display_cnt == 0) display_deactivate();
+	}
+}
+
+void display_deactivate(void)
+{
+	SSD1306_Display_Off();
+	display_active = false;
+}
+
+void display_activate(void)
+{
+	SSD1306_Display_On();
+	display_cnt = DISPLAY_OFF_DELAY;
+	display_active = true;
 }
 
 

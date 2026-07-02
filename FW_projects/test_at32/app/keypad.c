@@ -134,6 +134,7 @@ char Keypad_GetKey(void)
 	keypad_key_t key = KEY_NONE;
 	__disable_irq();
 	key = key_ready;
+	if(key != KEY_NONE) display_activate();
 	key_ready = KEY_NONE;
 	__enable_irq();
 	return KeyCodes[key];

@@ -25,6 +25,7 @@
 
 #define SSD1306_INTERFACE_HARD_SPI		1
 #define OLED_ENABLED									1
+#define DISPLAY_OFF_DELAY							120000 //2 min.
 
 void radio_power_on(void);
 void radio_power_off(void);
@@ -36,10 +37,14 @@ void bsp_reset_proc(void);
 uint64_t bsp_get_uid(void);
 
 void bsp_timing_irq(void);
+void display_deactivate(void);
+void display_activate(void);
 
 extern volatile uint32_t adc_ticks;
 extern volatile bool SecFlag;
 extern volatile bool MinFlag;
 extern volatile bool usb_flag;
+extern volatile bool display_active;
+extern volatile uint32_t display_cnt;
 
 #endif

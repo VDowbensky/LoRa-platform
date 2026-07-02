@@ -56,6 +56,7 @@ void radio_proc(void)
 				tx_request = false;
 				prepareTxPacket();
 				txled_on();
+				display_activate();
 				radio_sendpacket(radio_txbuffer);
 			}
 			if(ack_request)
@@ -130,6 +131,7 @@ void radio_proc(void)
 
 void process_rx_packet(void)
 {
+	display_activate();
 	//if(crc_error)
 	//{
 		//crc_error = false;

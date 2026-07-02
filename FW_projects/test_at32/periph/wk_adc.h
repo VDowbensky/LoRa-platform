@@ -48,9 +48,9 @@ extern "C" {
 /* exported constants --------------------------------------------------------*/
 /* add user code begin exported constants */
 #define V_REF							3300.0f
-#define K_VBAT						12.5f 
-#define VBAT_MEAS_TIME		100
-#define VBAT_SAMPLE_TIME	1
+#define K_VBAT						11.8f 
+#define VBAT_MEAS_TIME		1000
+#define VBAT_SAMPLE_TIME	10
 /* add user code end exported constants */
 
 /* exported macro ------------------------------------------------------------*/

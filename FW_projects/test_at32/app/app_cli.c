@@ -152,8 +152,8 @@ CommandEntry_t commands[] =
 		COMMAND_ENTRY("GET_SCANPARAMS", "", cli_getscanparams, "Get RX scan parameters"),
 		COMMAND_ENTRY("SET_SCANPARAMS", "wwwww", cli_setscanparams, "Get RX scan parameters"),
 		COMMAND_ENTRY("SCAN", "w", cli_scan, ""),
-		COMMAND_ENTRY("GET_JAMPARAMS", "", cli_getjamparams, "Get RX scan parameters"),
-		COMMAND_ENTRY("SET_JAMPARAMS", "wwwww", cli_setjamparams, "Get RX scan parameters"),
+		COMMAND_ENTRY("GET_JAMPARAMS", "", cli_getjamparams, "Get TX jamming parameters"),
+		COMMAND_ENTRY("SET_JAMPARAMS", "wwwww", cli_setjamparams, "Get TX jamming parameters"),
 		COMMAND_ENTRY("JAM", "w", cli_jam, ""),
 		
 		COMMAND_ENTRY("GET_WORKMODE", "", cli_getworkmode, ""),
