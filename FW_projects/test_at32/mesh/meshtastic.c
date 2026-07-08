@@ -1,4 +1,4 @@
-#include "mesh_packet.h"
+#include "meshtastic.h"
 
 extern meshtastic_pkt_t rxmessage;
 extern rxpacketstatus_t pktstatus;

@@ -649,11 +649,6 @@
               <FilePath>..\app\flash.c</FilePath>
             </File>
             <File>
-              <FileName>mesh_packet.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\mesh\mesh_packet.c</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\main.c</FilePath>
@@ -682,6 +677,16 @@
               <FileName>test_packet.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\test_packet.c</FilePath>
+            </File>
+            <File>
+              <FileName>meshtastic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mesh\meshtastic.c</FilePath>
+            </File>
+            <File>
+              <FileName>meshcore.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mesh\meshcore.c</FilePath>
             </File>
           </Files>
         </Group>

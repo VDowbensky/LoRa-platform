@@ -2,7 +2,7 @@
 #define _RADIO_PROC_H_
 
 #include "radio_func.h"
-#include "mesh_packet.h"
+#include "meshtastic.h"
 #include "test_packet.h"
 
 #define WORK_MODE_IDLE								0
