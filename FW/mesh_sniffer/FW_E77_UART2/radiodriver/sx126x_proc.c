@@ -1,6 +1,6 @@
 #include "sx126x_proc.h"
 
-void SX126X_setopmode(uint8_t mode)
+void SX126X_setopmode(uint8_t mode) 
 {
   switch(mode)
   {

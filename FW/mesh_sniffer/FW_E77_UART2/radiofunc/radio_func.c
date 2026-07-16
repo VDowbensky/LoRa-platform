@@ -115,8 +115,8 @@ int8_t radio_set_power(int8_t dbm)
 {
 	if((dbm < -9) || (dbm > 22)) return RADIO_INVALID_PARAMETER;
 	prevopmode = opmode;
-	//SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
-	SX126X_setopmode(RADIO_OPMODE_STBYRC);
+	SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
+	//SX126X_setopmode(RADIO_OPMODE_STBYRC);
 	radioconfig.txpower = dbm;
 	SX126X_SetTxParams();
 	SX126X_setopmode(prevopmode);
@@ -279,12 +279,12 @@ int8_t radio_stream(uint8_t stream)
 	//prevopmode = opmode;
 	if(stream == 1) 
 	{
-		SX126X_SetCW();
+		SX126X_setopmode(RADIO_OPMODE_TXSTREAMCW);
 		txmode = 1;
 	}
 	else 
 	{
-		SX126X_SetTxInfinitePreamble();
+		SX126X_setopmode(RADIO_OPMODE_TXSTREAMPRE);
 		txmode = 2;
 	}
 	led_on();

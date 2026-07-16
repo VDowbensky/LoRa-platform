@@ -9,7 +9,6 @@
 CommandState_t state;
 char ciBuffer[256];
 //uint8_t printmode = 0;
-//uint8_t txmode = 0;
 
 //General
 void cli_reset(int argc, char **argv);
@@ -402,18 +401,18 @@ void cli_txstream(int argc, char **argv)
 	int8_t err = radio_stream(ciGetUnsigned(argv[1]));
 	if(err == RADIO_OK)
 	{
-		switch(txmode)
+		switch(opmode)
 		{
-			case 0:
+			case RADIO_OPMODE_RX:
 			default:
 			printf("OFF\r\n");
 			break;
 
-			case 1:
+			case RADIO_OPMODE_TXSTREAMCW:
       printf("CW\r\n");
       break;
 
-			case 2:
+			case RADIO_OPMODE_TXSTREAMPRE:
       printf("PREAMBLE\r\n");
       break;
 		}
@@ -584,7 +583,7 @@ void cli_sweeptx(int argc, char **argv)
 	if(err == RADIO_OK)
 	{
 		//check result, on or off
-		if(txmode == 0) 
+		if(opmode  == RADIO_OPMODE_RX) 
 		{
 			led_off();
 			printf("STOP\r\n");
