@@ -1,13 +1,14 @@
 
 /* Main Entry Point: run_lunarcore */
-void run_lunarcore(void) 
+//void run_lunarcore(void) 
+void main(void)
 {
   // identity logic
   node_identity_t identity = node_identity_from_hardware();
   
   read_identity();
   read_config();
-  init_clocks(0;
+  init_power_clk();
   init_peripherals(); //gpio, i2c, spi, uart's, display, adc, wdt, ...
   show_boot_animation();
   //status_display_boot_animation(&status_display, (void (*)(uint32_t))vTaskDelay);
@@ -50,20 +51,22 @@ void run_lunarcore(void)
     health_proc(); //on flags
     if(app_connected) app_proc();
     else check_serial_connect();
-    feed_watchdog();
+    feed_watchdog(); //maybe in timing_proc (1 ms)
     ui_proc(); //keyboard, display, LED's
     
     // Second-based periodic tasks
   
     uint32_t current_second = now / 1000;
-    if (current_second > last_second) 
+    //if (current_second > last_second) 
+    if(SecFlag)
     {
       update_status();
-      
-      last_second = current_second;
-      lunarcore.stats.uptime_seconds = current_second;
-/*       if (current_second % 2 == 0) 
-      {
+      display_show_status();
+      //last_second = current_second;
+      //lunarcore.stats.uptime_seconds = current_second;
+
+ 
+ /*     {
         const char* protocol_name;
         switch (lunarcore.serial_protocol) 
         {
