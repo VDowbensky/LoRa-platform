@@ -79,6 +79,9 @@ int8_t radio_init(void)
 	SX126X_SetLoRaPacketParams(radioconfig.prelen,radioconfig.header,radioconfig.paylen,radioconfig.crc,radioconfig.invertiq);
 	SX126X_writeReg(SX126X_REG_LRSYNC_H,(radioconfig.sync & 0xff00) >> 8);
 	SX126X_writeReg(SX126X_REG_LRSYNC_L,radioconfig.sync & 0xff);
+	SX126X_setopmode(RADIO_OPMODE_RX);
+	SX126X_CalibrateIR();
+
 	SX126X_setopmode(RADIO_OPMODE_STBYXOSC);
 	if(sx126x_tcxo == 0) //TCXO off
 	{
@@ -87,13 +90,15 @@ int8_t radio_init(void)
 		SX126X_writeReg(SX126X_REG_XTBTRIM,sx126x_xtbtrim);
 	}
 	delay_ms(100); //??? without this delay tx amp not activated
-	SX126X_CalibrateIR();
+	//SX126X_restart_agc();
+	//SX126X_CalibrateIR();
 	SX126X_ClearDeviceErrors();
 	SX126X_SetTxParams();
 	SX126X_LNAboost(true);
 	//SX126X_SetDIO2AsRfSwitchCtrl(true); //for E77 not needed!
 	SX126X_SetDioIrqParams(SX126X_TXDONE_IRQMSK | SX126X_RPEDET_IRQMSK | SX126X_SYNCDET_IRQMSK | SX126X_RXDONE_IRQMSK | SX126X_CRCERR_IRQMSK, SX126X_TXDONE_IRQMSK | SX126X_RPEDET_IRQMSK | SX126X_SYNCDET_IRQMSK | SX126X_RXDONE_IRQMSK, 0, 0);
 	SX126X_setopmode(RADIO_OPMODE_RX);
+	//SX126X_restart_agc();
 	return RADIO_OK;
 }
 

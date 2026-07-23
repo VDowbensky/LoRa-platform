@@ -21,7 +21,7 @@
 //#include "main.h"
 #include <stdint.h>
 #include "stm32wlxx_it.h"
-//#include "adc.h"
+#include "bsp.h"
 //#include "beeper.h"
 
 //volatile uint32_t delay_ticks;
@@ -199,33 +199,7 @@ void SysTick_Handler(void)
 //		adc_ticks = 0;
 //		adc_start(true);
 //	}
-	
-	if(master)
-	{
-	 pkt_timecnt++;
-   if((pkt_timecnt >= inter_packet_delay) && (master == true))
-   {
-     pkt_timecnt = 0;
-     txpacketnumber++;
-     //if((txpacketnumber <= txpacketcount) || (contTX)) tx_needed = true;
-		 if(txpacketnumber <= txpacketcount) tx_request = true;
-     else
-     {
-       tx_request = false;
-       master = false;
-       printf("TX: DONE\r\n");
-     }
-   }
-	}
-	if(sweeptx || sweeprx)
-	{
-		sweepcnt--;
-		if(sweepcnt == 0) 
-		{
-			sweepcnt = sweeptime;
-			sweepflag = true;
-		}
-	}
+	timing_irq_process();
 }
 
 /******************************************************************************/

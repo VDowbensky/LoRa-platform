@@ -81,6 +81,9 @@
 
 #define E77M915M30					0
 
+//#define RX_RESTART_INTERVAL	120000 //2 min
+#define RX_RESTART_INTERVAL	60000 //1 min
+
 //AUX RF power
 //#define EXTRF_POWER_PORT		GPIOA
 //#define EXTRF_POWER_PIN			LL_GPIO_PIN_0
@@ -129,5 +132,8 @@ void bsp_reset_proc(void);
 
 void led_on(void);
 void led_off(void);
+void timing_irq_process(void);
+
+extern volatile bool RxRestartFlag;
 
 #endif

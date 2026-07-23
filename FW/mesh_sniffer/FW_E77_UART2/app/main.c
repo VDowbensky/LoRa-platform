@@ -27,6 +27,15 @@ int main(void)
 	{
 		radio_proc();
 		cli_proc();
+		if(RxRestartFlag)
+		{
+			RxRestartFlag = false;
+			led_on();
+			//SX126X_restart_agc();
+			radio_init();
+			printf("Restart radio.\r\n");
+			led_off();
+		}
 	}
 }
 

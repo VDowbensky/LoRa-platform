@@ -90,16 +90,20 @@ void SX126X_irq_proc(void)
 void SX126X_restart_agc(void)
 {
 	//get status
-	uint16_t irqstatus = SX126X_GetIrqStatus();
-	if(!(irqstatus & SX126X_ALL_IRQMSK))
-	{
+//	uint16_t irqstatus = SX126X_GetIrqStatus();
+//	if(!(irqstatus & SX126X_ALL_IRQMSK))
+//	{
 		// warm sleep to power down the analog frontend
+	SX126X_SetSleep(false,true);
 		// wake to RC standby
+	SX126X_SetStandby(0);
 		// recalibrate all blocks
+	SX126X_Calibrate(true,true,true,true,true,true,true);
 		// re-calibrate image rejection for the operating frequency
-		// SX126X_CalibrateIR();
+	SX126X_CalibrateIR();
 		// re-apply DIO2 RF switch if it was configured
-	}
+	SX126X_setopmode(RADIO_OPMODE_RX);
+//	}
 }
 
 

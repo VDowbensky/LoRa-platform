@@ -12,6 +12,7 @@ void bw_settings(void);
 void sf_settings(void);
 void cr_settings(void);
 void ldro_settings(void);
+void sync_settings(void);
 void pkt_fmt_settings(void);
 
 void scanner_settings(void);
@@ -117,6 +118,7 @@ void display_sniffer_menu(void)
 	GUI_ShowString(0,24,"4 SF",8,1);
 	GUI_ShowString(0,32,"5 LDRO",8,1);
 	GUI_ShowString(0,40,"6 Packet format",8,1);
+	GUI_ShowString(0,48,"7 Sync Word",8,1);
 }
 
 void sniffer_settings(void)
@@ -154,6 +156,10 @@ void sniffer_settings(void)
 			
 			case '6':
 			pkt_fmt_settings();
+			break;
+			
+			case '7':
+			sync_settings();
 			break;
 			
 			default:
@@ -253,6 +259,24 @@ void ldro_settings(void)
 	radioconfig.ldropt = value;
 	//uint16_t bw_khz,uint8_t sf,uint8_t cr,uint8_t ldropt)
 	radio_setmodparams(radioconfig.bw,radioconfig.sf,radioconfig.cr,radioconfig.ldropt);
+	//writeconfig();
+	display_sniffer_menu();
+}
+
+void sync_settings(void)
+{
+	int32_t value;
+	SSD1306_Clear(0);
+	GUI_ShowString(0,16,"SYNC WORD",16,1);
+	NumberInput_Start(radioconfig.sync);
+	while(1)
+	{
+		int8_t r = NumberInput_Run(&value);
+		if(r == 1) break;
+		if(r == -1) break; /* canceled */ 
+	}
+	value = check_param(value,0,255); //to be changed
+	radioconfig.sync = value;
 	//writeconfig();
 	display_sniffer_menu();
 }
