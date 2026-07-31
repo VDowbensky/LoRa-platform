@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>CORE_CM4,STM32WLE5xx,USE_FULL_LL_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\app;..\cli;..\mesh;..\periph;..\radiofunc;..\radiohal;..\radioproc;..\..\radiodriver\sx126x;..\..\stm32wle5\lib\Inc;..\..\stm32wle5\lib\Inc\Legacy;..\..\stm32wle5</IncludePath>
+              <IncludePath>..\app;..\cli;..\mesh;..\periph;..\radiofunc;..\radiohal;..\radioproc;..\..\radiodriver\sx126x;..\..\stm32wle5\lib\Inc;..\..\stm32wle5\lib\Inc\Legacy;..\..\stm32wle5;..\SSD1306</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -413,6 +413,11 @@
               <FileName>uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\periph\uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\periph\i2c.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -601,6 +606,31 @@
               <FileName>stm32wlxx_ll_utils.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\stm32wle5\lib\Src\stm32wlxx_ll_utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32wlxx_ll_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\stm32wle5\lib\Src\stm32wlxx_ll_i2c.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>ssd1306</GroupName>
+          <Files>
+            <File>
+              <FileName>gui.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SSD1306\gui.c</FilePath>
+            </File>
+            <File>
+              <FileName>ssd1306.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SSD1306\ssd1306.c</FilePath>
+            </File>
+            <File>
+              <FileName>ssd1306_interface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\SSD1306\ssd1306_interface.c</FilePath>
             </File>
           </Files>
         </Group>

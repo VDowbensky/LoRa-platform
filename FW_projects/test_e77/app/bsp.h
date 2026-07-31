@@ -15,10 +15,12 @@
 #include "stm32wlxx_ll_pwr.h"
 #include "stm32wlxx_ll_tim.h"
 #include "stm32wlxx_ll_utils.h"
+#include "stm32wlxx_ll_i2c.h"
 #include "retarget.h"
 #include "delay.h"
 #include "subghz.h"
 #include "radio_proc.h"
+#include "gui.h"
 
 #define HW_VERSION    1
 #define FW_VERSION		0
@@ -36,10 +38,9 @@
 #define RXD1_PORT						GPIOA
 #define RXD1_PIN						LL_GPIO_PIN_3
 
-//#define SCL0_PORT						GPIOA
-//#define SCL0_PIN						LL_GPIO_PIN_14
-//#define SDA0_PORT						GPIOA
-//#define SDA0_PIN						LL_GPIO_PIN_15
+#define I2C_PORT						GPIOB
+#define SCL_PIN							LL_GPIO_PIN_6
+#define SDA_PIN							LL_GPIO_PIN_7
 
 
 //Keys

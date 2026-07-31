@@ -1,95 +1,59 @@
 #include "i2c.h"
 
-int32_t timeout;
-
-int32_t i2c0_init(void)
+void i2c1_init(void)
 {
-	i2c_config_t config;
+  LL_I2C_InitTypeDef I2C_InitStruct = {0};
+  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+  LL_RCC_SetI2CClockSource(LL_RCC_I2C1_CLKSOURCE_PCLK1);
+  LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
+  GPIO_InitStruct.Pin = SCL_PIN | SDA_PIN;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
+  GPIO_InitStruct.Alternate = LL_GPIO_AF_4;
+  LL_GPIO_Init(I2C_PORT, &GPIO_InitStruct);
 	
-	rcc_enable_peripheral_clk(RCC_PERIPHERAL_I2C0, true);
-	gpio_init(SCL0_PORT, SCL0_PIN,GPIO_MODE_OUTPUT_OD_HIZ);
-	gpio_init(SDA0_PORT, SDA0_PIN,GPIO_MODE_OUTPUT_OD_HIZ);
-	gpio_set_iomux(SCL0_PORT, SCL0_PIN, 3);
-  gpio_set_iomux(SDA0_PORT, SDA0_PIN, 3);
-	i2c_config_init(&config);
-  i2c_init(I2C0, &config);
-  i2c_cmd(I2C0, true);
-	
-	return 0;
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
+  LL_I2C_EnableAutoEndMode(I2C1);
+  LL_I2C_DisableOwnAddress2(I2C1);
+  LL_I2C_DisableGeneralCall(I2C1);
+  LL_I2C_EnableClockStretching(I2C1);
+  I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
+  I2C_InitStruct.Timing = 0x00B07CB4;
+  I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
+  I2C_InitStruct.DigitalFilter = 0;
+  I2C_InitStruct.OwnAddress1 = 0;
+  I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
+  I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
+  LL_I2C_Init(I2C1, &I2C_InitStruct);
+  LL_I2C_SetOwnAddress2(I2C1, 0, LL_I2C_OWNADDRESS2_NOMASK);
+	LL_I2C_Enable(I2C1);
 }
 
-int32_t i2c0_write(uint8_t addr, uint8_t *data, uint16_t len)
+int8_t i2c1_write(uint8_t addr, uint8_t* buf,uint8_t len)
 {
-	int32_t retval = 0;
+	// Send register address + data
+	int32_t timeout;
+	uint8_t i;
 	
-	i2c_master_send_start(I2C0, addr, I2C_WRITE);
-  i2c_clear_flag_status(I2C0, I2C_FLAG_TRANS_EMPTY);
-	//while (i2c_get_flag_status(I2C0, I2C_FLAG_TRANS_EMPTY) != SET);
-	retval = i2c0_waitforflag(I2C_FLAG_TRANS_EMPTY);
-	if(retval != 0) goto stop;
-	// send data
-	for(uint32_t i=0; i < len; i++) 
+	LL_I2C_HandleTransfer(I2C1,addr,LL_I2C_ADDRSLAVE_7BIT,len,LL_I2C_MODE_AUTOEND,LL_I2C_GENERATE_START_WRITE); //2 - ???
+	
+	for(i = 0; i < len; i++)
 	{
-		i2c_send_data(I2C0, data[i]);
-		i2c_clear_flag_status(I2C0, I2C_FLAG_TRANS_EMPTY);
-		//while(i2c_get_flag_status(I2C0, I2C_FLAG_TRANS_EMPTY) != SET);
-		retval = i2c0_waitforflag(I2C_FLAG_TRANS_EMPTY);
-		if(retval != 0) goto stop;
+		timeout = I2C_TIMEOUT;
+		while(!LL_I2C_IsActiveFlag_TXIS(I2C1))
+		{
+			timeout--;
+			if(timeout == 0) return I2C_BUSY_TIMEOUT;
+		}
+		LL_I2C_TransmitData8(I2C1,buf[i]);
 	}
-stop:
-	// stop
-	i2c_master_send_stop(I2C0);
-	return retval;
-}
-
-int32_t i2c0_read(uint8_t addr, uint8_t *data, uint16_t len)
-{
-	uint32_t i;
-	uint32_t retval = 0;
-	// start
-	//i2c_master_send_start(I2C0, addr, I2C_WRITE);
-	//i2c_clear_flag_status(I2C0, I2C_FLAG_TRANS_EMPTY);
-	//while (i2c_get_flag_status(I2C0, I2C_FLAG_TRANS_EMPTY) != SET);
-	// write data
-	//i2c_send_data(I2C0, 0x90);
-	//i2c_clear_flag_status(I2C0, I2C_FLAG_TRANS_EMPTY);
-	//while (i2c_get_flag_status(I2C0, I2C_FLAG_TRANS_EMPTY) != SET);
-  // restart
-	i2c_master_send_start(I2C0, addr, I2C_READ);
-	i2c_clear_flag_status(I2C0, I2C_FLAG_TRANS_EMPTY);
-	//while (i2c_get_flag_status(I2C0, I2C_FLAG_TRANS_EMPTY) != SET);
-	retval = i2c0_waitforflag(I2C_FLAG_TRANS_EMPTY);
-	if(retval != 0) goto stop;
-	//read data
-	for(i = 0; i < (len-1); i++)
+	while(!LL_I2C_IsActiveFlag_STOP(I2C1))
 	{
-		i2c_set_receive_mode(I2C0, I2C_ACK);
-    //while (i2c_get_flag_status(I2C0, I2C_FLAG_RECV_FULL) != SET);
-		retval = i2c0_waitforflag(I2C_FLAG_RECV_FULL);
-	  if(retval != 0) goto stop;
-    i2c_clear_flag_status(I2C0, I2C_FLAG_RECV_FULL);
-    data[i] = i2c_receive_data(I2C0);
+		timeout--;
+		if(timeout == 0) return I2C_BUSY_TIMEOUT;
 	}
-	i++;
-	i2c_set_receive_mode(I2C0, I2C_NAK);
-	//while (i2c_get_flag_status(I2C0, I2C_FLAG_RECV_FULL) != SET);
-	retval = i2c0_waitforflag(I2C_FLAG_RECV_FULL);
-	if(retval != 0) goto stop;
-	i2c_clear_flag_status(I2C0, I2C_FLAG_RECV_FULL);
-	data[i] = i2c_receive_data(I2C0);
-	// stop
-stop:
-	i2c_master_send_stop(I2C0);
-	return retval;
-}
-
-int32_t i2c0_waitforflag(i2c_flag_t flag)
-{
-	timeout = 100000;
-	do
-	{
-		if((i2c_get_flag_status(I2C0, flag) == SET)) return 0;
-	}
-	while(timeout--);
-	return -1;
+	LL_I2C_ClearFlag_STOP(I2C1);
+	return I2C_OK;
 }
