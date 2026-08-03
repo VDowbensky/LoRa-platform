@@ -26,6 +26,8 @@
 #define FW_VERSION		0
 #define FW_REVISION		1
 
+#define OLED_ENABLED	1
+
 #define WORK_UART  		2
 
 #define TXD0_PORT						GPIOA
@@ -125,6 +127,22 @@
 #define UART0_BR						115200
 #define UART1_BR						115200
 
+#define DEBOUNCE_LOCKOUT_MS  	5   // Ignores rapid bounces within 5ms of a valid step
+#define IDLE_TIMEOUT_MS     	100  // Returns to NO_MOVING state after 100ms of inactivity
+
+#define K_NONE							255
+#define K_UP								0
+#define K_DOWN							1
+#define K_ENTER							2
+
+// Enum to represent moving direction events
+typedef enum 
+{
+	ENCODER_NO_MOVING = 0,
+	ENCODER_CLOCKWISE,
+	ENCODER_COUNTERCLOCKWISE
+} Encoder_Direction_t;
+
 void init_power_clk(void);
 void init_peripherals(void);
 void init_radio_specific(void);
@@ -134,7 +152,12 @@ void bsp_reset_proc(void);
 void led_on(void);
 void led_off(void);
 void timing_irq_process(void);
+void tim2_irq_process(void);
+void handle_keys(void);
 
 extern volatile bool RxRestartFlag;
+extern volatile uint8_t Key;
+
+
 
 #endif

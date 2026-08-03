@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>CORE_CM4,STM32WLE5xx,USE_FULL_LL_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\app;..\cli;..\mesh;..\periph;..\radiofunc;..\radiohal;..\radioproc;..\..\radiodriver\sx126x;..\..\stm32wle5\lib\Inc;..\..\stm32wle5\lib\Inc\Legacy;..\..\stm32wle5;..\SSD1306</IncludePath>
+              <IncludePath>..\app;..\cli;..\mesh;..\periph;..\radiofunc;..\radiohal;..\radioproc;..\..\radiodriver\sx126x;..\..\stm32wle5\lib\Inc;..\..\stm32wle5\lib\Inc\Legacy;..\..\stm32wle5;..\SSD1306;..\..\micromenu</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -631,6 +631,16 @@
               <FileName>ssd1306_interface.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\SSD1306\ssd1306_interface.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>micromenu</GroupName>
+          <Files>
+            <File>
+              <FileName>MicroMenu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\micromenu\MicroMenu.c</FilePath>
             </File>
           </Files>
         </Group>
