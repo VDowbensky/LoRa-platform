@@ -1,6 +1,9 @@
 #include "radio_proc.h"
 #include "flash.h"
-//#include "menu.h"
+#include "menu.h"
+
+void display_scan_rssi(uint32_t freq,float rssi);
+void display_jam_freq(uint32_t freq);
 
 
 volatile uint32_t txpacketnumber = 0;
@@ -113,7 +116,7 @@ void radio_proc(void)
 				if(rssi > rssitr)
 				{
 					printf("Freq=%d,RSSI=%.1f dBm\r\n",currfreq,rssi); //temporary; send to buffer instead
-					//display_scan_rssi(currfreq,rssi);
+					if(!menu_mode) display_scan_rssi(currfreq,rssi);
 				}
 				radio_setopmode(RADIO_OPMODE_FS);
 				currfreq += sweepstep;
@@ -134,6 +137,7 @@ void radio_proc(void)
 				//printf("freq:%d,stream:%d\r\n",currfreq,txmode);
 				radio_setopmode(RADIO_OPMODE_FS);
 				radio_set_freq(currfreq);
+				//if(!menu_mode) display_jam_freq(currfreq);
 				radio_stream(txmode);
 			}
 			break;
@@ -331,6 +335,25 @@ int8_t radio_rxscan(uint32_t start,uint32_t stop,uint32_t step,uint32_t interval
 	}
 	radio_rx();
 	return RADIO_OK;
+}
+
+void display_scan_rssi(uint32_t freq,float rssi)
+{
+	char strbuffer[64];
+
+	GUI_ShowString(0,32,"                ",16,1);
+	GUI_ShowString(0,48,"                ",16,1);
+	sprintf(strbuffer,"FREQ: %d kHz",freq);
+	GUI_ShowString(0,32,strbuffer,16,1);
+	sprintf(strbuffer,"RSSI: %.1f dBm",rssi);
+	GUI_ShowString(0,48,strbuffer,16,1);
+}
+
+void display_jam_freq(uint32_t freq)
+{
+	GUI_ShowString(0,32,"                ",16,1);
+	sprintf(strbuffer,"FREQ: %d kHz",freq);
+	GUI_ShowString(0,32,strbuffer,16,1);
 }
 
 

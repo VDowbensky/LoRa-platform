@@ -1,5 +1,5 @@
 #include "test_packet.h"
-
+#include "menu.h"
 
 testpacket_t test_txpacket, test_rxpacket;
 
@@ -51,6 +51,9 @@ void process_test_packet(void)
 	else printf("Bad data\r\n");
 
 	#if OLED_ENABLED
+	
+	if(!menu_mode)
+	{
 	SSD1306_Clear(0);
 	//sprintf(strbuffer,"BATT: %.3fV",Vbatt);
 	//GUI_ShowString(0,0,strbuffer,8,1);
@@ -74,6 +77,7 @@ void process_test_packet(void)
 	{
 		GUI_ShowString(0,16,"Bad data",8,1);
 	}
+}
 #endif
 	if(!master && (test_rxpacket.destination_id == radioconfig.id) && !crc_error) ack_request = true;
 	crc_error = false;

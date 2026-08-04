@@ -1,4 +1,5 @@
 #include "meshtastic.h"
+#include "menu.h"
 
 extern meshtastic_pkt_t rxmessage;
 extern rxpacketstatus_t pktstatus;
@@ -53,6 +54,8 @@ void print_meshtastic_packet(void)
   for(i = 0; i < rxlen-16; i++) printf("0x%02X,",rxmessage.payload[i]);
   printf("\r\n");
 #if OLED_ENABLED
+	if(!menu_mode)
+	{
 	SSD1306_Clear(0);
 	//sprintf(strbuffer,"BATT: %.3fV",Vbatt);
 	//GUI_ShowString(0,0,strbuffer,8,1);
@@ -74,6 +77,7 @@ void print_meshtastic_packet(void)
 	GUI_ShowString(0,48,strbuffer,8,1);
 	sprintf(strbuffer,"Payload: %d",rxlen - 16);
 	GUI_ShowString(0,56,strbuffer,8,1);
+	}
 #endif
 	crc_error = false;
 }

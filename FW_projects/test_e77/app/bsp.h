@@ -44,20 +44,14 @@
 #define SCL_PIN							LL_GPIO_PIN_6
 #define SDA_PIN							LL_GPIO_PIN_7
 
+#define ENCODER_PORT				GPIOA
+#define ENCODER_A_PIN				LL_GPIO_PIN_0
+#define ENCODER_B_PIN				LL_GPIO_PIN_1
+#define ENCODER_PUSH_PORT		GPIOB
+#define ENCODER_PUSH_PIN		LL_GPIO_PIN_8
 
-//Keys
-//#define K_UP_PORT						GPIOB
-//#define K_UP_PIN						LL_GPIO_PIN_2
-//#define K_DOWN_PORT					GPIOB
-//#define K_DOWN_PIN					LL_GPIO_PIN_12
-//#define K_ENTER_PORT				GPIOC
-//#define K_ENTER_PIN					LL_GPIO_PIN_13
+#define KEY_SCAN_CNT				20 //ms
 
-//#define K_NONE							255
-//#define K_UP								0
-//#define K_DOWN							1
-//#define K_ENTER							2
-//#define KEY_COUNT	          3
 
 //BATT measuring switch
 #define VBATT_MEAS_PORT			GPIOA
@@ -111,37 +105,14 @@
 //#define LR112X_MISO_PIN			AUX_MISO_PIN
 
 
-//#define SSD1306_SPI					AUX_SPI	
-//#define SSD1306_RCC_PERIPHERAL RCC_PERIPHERAL_SSP2
-//#define SSD1306_SCK_PORT    AUX_SCK_PORT
-//#define SSD1306_SCK_PIN			AUX_SCK_PIN
-//#define SSD1306_MOSI_PORT		AUX_MOSI_PORT
-//#define SSD1306_MOSI_PIN		AUX_MOSI_PIN
-//#define SSD1306_RST_PORT		GPIOB
-//#define SSD1306_RST_PIN			LL_GPIO_PIN_7
-//#define SSD1306_DC_PORT			GPIOA
-//#define SSD1306_DC_PIN			LL_GPIO_PIN_11
-//#define SSD1306_CS_PORT			GPIOB
-//#define SSD1306_CS_PIN			LL_GPIO_PIN_6
-
 #define UART0_BR						115200
 #define UART1_BR						115200
 
-#define DEBOUNCE_LOCKOUT_MS  	5   // Ignores rapid bounces within 5ms of a valid step
-#define IDLE_TIMEOUT_MS     	100  // Returns to NO_MOVING state after 100ms of inactivity
-
 #define K_NONE							255
-#define K_UP								0
-#define K_DOWN							1
+#define K_LEFT								0
+#define K_RIGHT							1
 #define K_ENTER							2
 
-// Enum to represent moving direction events
-typedef enum 
-{
-	ENCODER_NO_MOVING = 0,
-	ENCODER_CLOCKWISE,
-	ENCODER_COUNTERCLOCKWISE
-} Encoder_Direction_t;
 
 void init_power_clk(void);
 void init_peripherals(void);

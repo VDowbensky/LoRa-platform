@@ -1,6 +1,7 @@
 #include "bsp.h"
 #include "radio_proc.h"
 #include "app_cli.h"
+#include "menu.h"
 
 int main(void)
 {
@@ -23,9 +24,15 @@ int main(void)
 	GUI_ShowString(0,32,"EXT.RADIO:NONE",16,1);
 	while(1)
 	{
-		handle_keys();
+		//handle_keys();
 		radio_proc();
 		cli_proc();
+		if (Key == K_ENTER)
+		{
+			Key = K_NONE;
+			//radio_stopscan();
+			menu_proc();
+		}
 	}
 }
 

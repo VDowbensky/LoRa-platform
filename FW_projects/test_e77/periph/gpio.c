@@ -18,20 +18,13 @@ void mygpio_init(void)
   LL_GPIO_Init(LED_PORT, &gpio_init_structure);
 	LL_GPIO_ResetOutputPin(LED_PORT,LED_PIN);
 	
-	//Keys
-//  gpio_init_structure.Mode  = LL_GPIO_MODE_INPUT;
-//	gpio_init_structure.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
-//  gpio_init_structure.Pull  = LL_GPIO_PULL_UP;
-//  gpio_init_structure.Speed = LL_GPIO_SPEED_FREQ_LOW;
-//	
-//	gpio_init_structure.Pin   = K_UP_PIN;
-//  LL_GPIO_Init(K_UP_PORT, &gpio_init_structure);
-//	
-//	gpio_init_structure.Pin   = K_DOWN_PIN;
-//	LL_GPIO_Init(K_DOWN_PORT, &gpio_init_structure);
-//	
-//	gpio_init_structure.Pin   = K_ENTER_PIN;
-//	LL_GPIO_Init(K_ENTER_PORT, &gpio_init_structure);
+//Key
+  gpio_init_structure.Mode  = LL_GPIO_MODE_INPUT;
+	gpio_init_structure.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+  gpio_init_structure.Pull  = LL_GPIO_PULL_UP;
+  gpio_init_structure.Speed = LL_GPIO_SPEED_FREQ_LOW;
+	gpio_init_structure.Pin   = ENCODER_PUSH_PIN;
+	LL_GPIO_Init(ENCODER_PUSH_PORT, &gpio_init_structure);
 //	
 //	gpio_init_structure.Mode  = LL_GPIO_MODE_OUTPUT;
 //	gpio_init_structure.OutputType = LL_GPIO_OUTPUT_PUSHPULL;

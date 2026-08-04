@@ -419,6 +419,11 @@
               <FileType>1</FileType>
               <FilePath>..\periph\i2c.c</FilePath>
             </File>
+            <File>
+              <FileName>encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\periph\encoder.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -471,6 +476,11 @@
               <FileName>meshtastic.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\mesh\meshtastic.c</FilePath>
+            </File>
+            <File>
+              <FileName>menu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\menu.c</FilePath>
             </File>
           </Files>
         </Group>

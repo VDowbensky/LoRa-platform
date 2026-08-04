@@ -13,6 +13,6 @@ void menu_proc(void);
 void scankeys(void);
 void updatescreen(void);
 
-extern uint8_t Key;
+extern bool menu_mode;
 
 #endif
