@@ -20,8 +20,6 @@
 //volatile uint32_t encoder_debounce_ticks = 0;
 //volatile uint32_t encoder_idle_ticks = 0;
 
-void scankey(void);
-
 volatile uint16_t enc_cnt = ENC_COUNT;
 volatile uint8_t Key = K_NONE;
 volatile int16_t key_cnt = 0;

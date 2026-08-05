@@ -10,7 +10,7 @@ void prepare_test_request(void)
 	test_txpacket.packet_id = txpacketnumber;
 	test_txpacket.rssi_received = -128;
 	test_txpacket.snr_received = -30;
-	//test_txpacket.vbatt = Vbatt;
+	test_txpacket.vbatt = 5.0;
 	txlen = 36;
 	memcpy((void*)radio_txbuffer,(void*)&test_txpacket,txlen);
 	//printf("TX: %d\r\n",txpacketnumber);
@@ -24,7 +24,7 @@ void prepare_test_ack(void)
 	test_txpacket.rssi_received = pktstatus.rssi_pkt;
 	test_txpacket.signal_rssi_received = pktstatus.signal_rssi_pkt;
 	test_txpacket.snr_received = pktstatus.snr_pkt;
-	//test_txpacket.vbatt = Vbatt;
+	test_txpacket.vbatt = 5.0;
 	txlen = 36;
 	memcpy((void*)radio_txbuffer,(void*)&test_txpacket,txlen);
 	//printf("TX: %d\r\n",rxpacketnumber);

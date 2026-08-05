@@ -124,7 +124,7 @@ void led_on(void);
 void led_off(void);
 void timing_irq_process(void);
 void tim2_irq_process(void);
-void handle_keys(void);
+void scankey(void);
 
 extern volatile bool RxRestartFlag;
 extern volatile uint8_t Key;
