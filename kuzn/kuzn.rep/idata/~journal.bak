@@ -1,0 +1,4 @@
+IADD:00000001:/kznc_boot_09_06_2026_1.bin
+IDSET:/kznc_boot_09_06_2026_1.bin:a00bcc67b693507335000
+IADD:00000002:/kznc_app_09_06_2026_1.bin
+IDSET:/kznc_app_09_06_2026_1.bin:a00bcc687748834991200
