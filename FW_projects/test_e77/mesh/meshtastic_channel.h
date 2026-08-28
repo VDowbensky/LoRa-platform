@@ -1,8 +1,7 @@
 #ifndef __MESHTASTIC_CHANNEL_H__
 #define __MESHTASTIC_CHANNEL_H__
 
-#include "meshtastic.h"
-#include "meshtastic_config.h"
+#include "meshtastic_defs.h"
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -61,7 +60,7 @@ uint8_t meshComputeChannelHash(const char *effective_name,const MeshCryptoKey_t 
 
 typedef struct
 {
-    MeshChannel channels[MESH_MAX_CHANNELS];
+    MeshChannel_t channels[MESH_MAX_CHANNELS];
     uint8_t count;
     MeshModemPreset_t preset;
 /*  void init(MeshModemPreset p);
@@ -84,7 +83,7 @@ int MeshChannelTable_addDefaultChannel(void);
 int MeshChannelTable_findByHash(uint8_t wire_hash,MeshCryptoKey_t *out_key);
 int MeshChannelTable_tryDecrypt(const uint8_t *payload,uint16_t payload_len,uint8_t wire_hash,
                                 uint32_t from_node, uint32_t packet_id,uint8_t *out_plaintext,
-                                MeshCryptoKey *out_key,bool (*validate_fn)(const uint8_t *, uint16_t)); 
+                                MeshCryptoKey_t *out_key,bool (*validate_fn)(const uint8_t *, uint16_t)); 
 
 #endif
 

@@ -473,11 +473,6 @@
               <FilePath>..\app\test_packet.c</FilePath>
             </File>
             <File>
-              <FileName>meshtastic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\mesh\meshtastic.c</FilePath>
-            </File>
-            <File>
               <FileName>menu.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\app\menu.c</FilePath>
@@ -651,6 +646,26 @@
               <FileName>MicroMenu.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\micromenu\MicroMenu.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>meshtastic</GroupName>
+          <Files>
+            <File>
+              <FileName>pb_functions.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mesh\pb_functions.c</FilePath>
+            </File>
+            <File>
+              <FileName>meshtastic_pb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mesh\meshtastic_pb.c</FilePath>
+            </File>
+            <File>
+              <FileName>meshtastic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\mesh\meshtastic.c</FilePath>
             </File>
           </Files>
         </Group>

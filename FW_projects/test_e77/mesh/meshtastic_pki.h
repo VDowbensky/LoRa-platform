@@ -1,7 +1,7 @@
 #ifndef _MESHTASTIC_PKI_H_
 #define _MESHTASTIC_PKI_H_
 
-#include "meshtastic.h"
+#include "meshtastic_pb.h"
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -165,6 +165,6 @@ uint16_t meshTryPkiDecrypt(const MeshRxPacket_t *pkt,const MeshPkiIdentity_t *id
 //and store it in the key store. Call this after successful channel-PSK
 //decryption of broadcast packets.
 //Returns true if a key was learned.
-bool meshLearnNodeKey(const MeshRxPacket *pkt,const MeshData_t *data,MeshNodeKeyStore_t *key_store);
+bool meshLearnNodeKey(const MeshRxPacket_t *pkt,const MeshData_t *data,MeshNodeKeyStore_t *key_store);
                                      
 #endif

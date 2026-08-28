@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include <stdbool.h>
 #include <math.h>
+#include "pb_functions.h"
 
 // ─── Port Numbers (portnums.pb.h) ──────────────────────────────────────────────
 
@@ -41,7 +43,7 @@ typedef struct
   uint32_t    bitfield;         // field 9: bit 0 = ok_to_mqtt
 }MeshData_t;
 
-bool meshDecodeData(const uint8_t *buf, uint16_t len, MeshData *out);
+bool meshDecodeData(const uint8_t *buf, uint16_t len, MeshData_t *out);
 bool meshValidateData(const uint8_t *plaintext, uint16_t len);
 // ─── Position ──────────────────────────────────────────────────────────────────
 
@@ -53,11 +55,13 @@ typedef struct
   uint32_t time;            // Unix epoch      (fixed32, field 4)
   uint32_t altitude_hae;    // field 13 in some versions
   uint32_t precision_bits;  // field 12
-  double latitude();
-  double longitude();
+//  double latitude(void);
+//  double longitude(void);
 }MeshPosition_t;
 
-bool meshDecodePosition(const uint8_t *buf, uint16_t len, MeshPosition *out);
+double MeshPosition_latitude(void);
+double MeshPosition_longitude(void);
+bool meshDecodePosition(const uint8_t *buf, uint16_t len, MeshPosition_t *out);
 
 // ─── User / NodeInfo ───────────────────────────────────────────────────────────
 
@@ -88,8 +92,8 @@ typedef struct
 {
   uint32_t          time;      // Unix epoch  (fixed32, field 1)
   bool              has_device_metrics;
-  MeshDeviceMetrics device_metrics;
-}MeshDeviceMetrics_t;
+  MeshDeviceMetrics_t device_metrics;
+}MeshTelemetry_t;
 
 bool meshDecodeDeviceMetrics(const uint8_t *buf, uint16_t len,MeshDeviceMetrics_t *out);
 bool meshDecodeTelemetry(const uint8_t *buf, uint16_t len, MeshTelemetry_t *out);
@@ -99,10 +103,10 @@ bool meshDecodeTelemetry(const uint8_t *buf, uint16_t len, MeshTelemetry_t *out)
  * Returns encoded length, or 0 on failure.
  */
 uint16_t meshEncodeData(uint8_t *buf, uint16_t capacity,
-                                     MeshPortNum portnum,
+                                     MeshPortNum_t portnum,
                                      const uint8_t *payload, uint16_t payload_len,
-                                     bool want_response = false,
-                                     bool ok_to_mqtt = false);
+                                     bool want_response,
+                                     bool ok_to_mqtt);
 
 /**
  * Encode a meshtastic.User protobuf.
@@ -112,8 +116,8 @@ uint16_t meshEncodeData(uint8_t *buf, uint16_t capacity,
 uint16_t meshEncodeUser(uint8_t *buf, uint16_t capacity,
                                      const char *id, const char *long_name,
                                      const char *short_name, uint16_t hw_model,
-                                     const uint8_t *public_key = nullptr,
-                                     uint8_t public_key_len = 0);
+                                     const uint8_t *public_key,
+                                     uint8_t public_key_len);
                                      
                                      
 #endif

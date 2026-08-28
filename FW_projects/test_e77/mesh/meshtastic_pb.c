@@ -1,4 +1,4 @@
-#include "meshtastic.h"
+#include "meshtastic_pb.h"
 
 // ─── Meshtastic Data Envelope ──────────────────────────────────────────────────
 
@@ -246,7 +246,7 @@ bool meshDecodeTelemetry(const uint8_t *buf,uint16_t len,MeshTelemetry_t *out)
     uint32_t field; 
     uint8_t wtype;
     
-    if (!Ppb_readTag(&field, &wtype)) break;
+    if (!pb_readTag(&field, &wtype)) break;
     switch (field) 
     {
       case 1: // time
@@ -275,8 +275,8 @@ bool meshDecodeTelemetry(const uint8_t *buf,uint16_t len,MeshTelemetry_t *out)
 uint16_t meshEncodeData(uint8_t *buf, uint16_t capacity,
                                      MeshPortNum_t portnum,
                                      const uint8_t *payload, uint16_t payload_len,
-                                     bool want_response = false,
-                                     bool ok_to_mqtt = false)
+                                     bool want_response,
+                                     bool ok_to_mqtt)
 {
   if (!pb_writeVarintField(1, (uint64_t)portnum)) return 0;
   if (payload_len > 0)
@@ -302,8 +302,8 @@ uint16_t meshEncodeData(uint8_t *buf, uint16_t capacity,
 uint16_t meshEncodeUser(uint8_t *buf, uint16_t capacity,
                                      const char *id, const char *long_name,
                                      const char *short_name, uint16_t hw_model,
-                                     const uint8_t *public_key = NULL,
-                                     uint8_t public_key_len = 0) 
+                                     const uint8_t *public_key,
+                                     uint8_t public_key_len) 
 {
   if (id && id[0])
   {

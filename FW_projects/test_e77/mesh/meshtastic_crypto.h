@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include <stdbool.h>
 
 // ─── Key Structures ────────────────────────────────────────────────────────────
 
@@ -31,18 +32,18 @@ extern void mesh_aes_block_encrypt(const uint8_t *key,int key_bits,const uint8_t
 /**
  * Software AES-CTR encrypt/decrypt in-place.
  */
-bool meshCryptCtr(const MeshCryptoKey *key,uint8_t nonce[16],uint8_t *data,uint16_t len);
+bool meshCryptCtr(const MeshCryptoKey_t *key,uint8_t nonce[16],uint8_t *data,uint16_t len);
 
 // ─── Convenience Wrappers ──────────────────────────────────────────────────────
 /**
  * Decrypt a Meshtastic payload in-place.
  * `data` points to the encrypted payload (after the 16-byte header).
  */
-bool meshDecrypt(const MeshCryptoKey *key,uint32_t fromNode,uint32_t packetId,uint8_t *data,uint16_t len);
+bool meshDecrypt(const MeshCryptoKey_t *key,uint32_t fromNode,uint32_t packetId,uint8_t *data,uint16_t len);
 /**
  * Encrypt a Meshtastic payload in-place. (CTR is symmetric.)
  */
-bool meshEncrypt(const MeshCryptoKey *key,uint32_t fromNode,uint32_t packetId,uint8_t *data,uint16_t len);
+bool meshEncrypt(const MeshCryptoKey_t *key,uint32_t fromNode,uint32_t packetId,uint8_t *data,uint16_t len);
 
 #endif
 

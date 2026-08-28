@@ -1,7 +1,7 @@
 #ifndef _MESHTASTIC_RADIO_H_
 #define _MESHTASTIC_RADIO_H_
 
-#include "meshtastic.h"
+#include "meshtastic_defs.h"
 
 #include <stdint.h>
 #include <stdlib.h>  // for rand()
@@ -21,19 +21,19 @@ uint32_t meshSlotTimeMs(MeshModemPreset_t preset);
 //Random TX delay for CSMA/CA before sending.
 //From RadioInterface.cpp:571-581.
 //channel_util_pct`: current channel utilization 0-100
-uint32_t meshTxDelayMs(MeshModemPreset preset, float channel_util_pct = 0);
+uint32_t meshTxDelayMs(MeshModemPreset_t preset, float channel_util_pct);
 
 //SNR-weighted rebroadcast delay for flooding.
 //From RadioInterface.cpp:614-633.
 //Lower SNR = shorter delay (farther nodes flood first).
 //ROUTER role: shorter delay (random within 2*CWsize slots).
 //CLIENT/ROUTER_LATE: offset by 2*CWmax*slot + random within CWsize slots.
-uint32_t meshRebroadcastDelayMs(MeshModemPreset preset, MeshRole role, float snr);
+uint32_t meshRebroadcastDelayMs(MeshModemPreset_t preset, MeshRole_t role, float snr);
 
 // ─── Packet Time Calculation ───────────────────────────────────────────────────
 //Estimate airtime in ms for a LoRa packet of `total_bytes` length.
 //Uses the SX1276/SX1262 time-on-air formula from Semtech AN1200.13.
-uint32_t meshPacketAirtimeMs(MeshModemPreset preset, uint16_t total_bytes);
+uint32_t meshPacketAirtimeMs(MeshModemPreset_t preset, uint16_t total_bytes);
 
 // ─── Packet ID Generation ──────────────────────────────────────────────────────
 /**
@@ -71,12 +71,23 @@ uint32_t MeshPacketIdGen_next(void);
 
 typedef struct
 {
-  MeshRxPacket packet;      // parsed header + raw/decrypted payload
-  MeshData     data;        // decoded Data envelope
+  MeshRxPacket_t packet;      // parsed header + raw/decrypted payload
+  MeshData_t     data;        // decoded Data envelope
   int8_t       channel_idx; // which channel matched (-1 if none / PKI)
   bool         decrypted;   // true if decryption succeeded
   bool         is_pki;      // true if decrypted via PKI (not channel)
 }MeshRxResult_t;
+
+typedef struct
+{
+  float    frequency_mhz;
+  float    bandwidth_khz;
+  uint8_t  spreading_factor;
+  uint8_t  coding_rate;       // denominator (5 = 4/5, 8 = 4/8)
+  uint8_t  sync_word;
+  int8_t   tx_power_dbm;
+  uint16_t preamble_length;
+}MeshRadioConfig_t;
 
 typedef struct
 {

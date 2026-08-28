@@ -19,6 +19,7 @@ void decode_meshtastic_packet(void)
   {
     rxmessage.payload[i] = radio_rxbuffer[i+16]; //237 max.
   }
+	//decrypt and decode payload here
 }
 
 void print_meshtastic_packet(void)

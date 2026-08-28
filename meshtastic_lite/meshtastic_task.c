@@ -183,7 +183,7 @@ void build_msg(const MeshRxResult *result, meshy_msg_t *msg)
   {
     case PORT_TEXT_MESSAGE: 
     {
-      size_t tlen = result->data.payload_len;
+      uint16_t tlen = result->data.payload_len;
       if (tlen >= MESHY_MAX_TEXT) tlen = MESHY_MAX_TEXT - 1;
       memcpy(msg->text, result->data.payload, tlen);
       msg->text[tlen] = '\0';
@@ -412,7 +412,7 @@ void meshy_tx_task(void *arg)
       }
       // Build encrypted TX frame
       uint8_t frame[256];
-      size_t frame_len = s_session.buildTextTx(req.channel_idx, req.to, req.text, false, frame);
+      uint16_t frame_len = s_session.buildTextTx(req.channel_idx, req.to, req.text, false, frame);
       if (frame_len == 0) 
       {
         ESP_LOGE(TAG, "Failed to build TX frame");

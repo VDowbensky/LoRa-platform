@@ -22,7 +22,7 @@ uint16_t pb_remaining(void)
 bool pb_readByte(uint8_t *out) 
 {
   if (pb_read_pos >= pb_read_len) return false;
-  *out = buf[pb_read_pos++];
+  *out = pb_read_buf[pb_read_pos++];
   return true;
 }
 
@@ -110,7 +110,7 @@ bool pb_skipField(uint8_t wire_type)
 }
 
 //Read a length-delimited field's length prefix, returning a sub-cursor.
-bool pb_readLengthDelimited(PbCursor *sub) 
+bool pb_readLengthDelimited(PbCursor_t *sub) 
 {
   uint64_t slen;
   if (!pb_readVarint(&slen)) return false;
